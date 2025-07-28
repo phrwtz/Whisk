@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Size Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 60px);
+            gap: 10px;
+            margin: 20px;
+        }
+        .test-cell {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <h1>Size Test</h1>
+    <div class="test-grid">
+        <div class="test-cell fade-0">O</div>
+        <div class="test-cell fade-1">O</div>
+        <div class="test-cell fade-2">O</div>
+        <div class="test-cell fade-3">O</div>
+        <div class="test-cell fade-4">O</div>
+        <div class="test-cell fade-5">O</div>
+        <div class="test-cell fade-6">O</div>
+        <div class="test-cell fade-7">O</div>
+        <div class="test-cell fade-8">O</div>
+        <div class="test-cell fade-9">O</div>
+        <div class="test-cell fade-10">O</div>
+        <div class="test-cell">O</div>
+    </div>
+    
+    <h2>Expected Sizes:</h2>
+    <ul>
+        <li>fade-0: 1.62rem (90% of 1.8rem)</li>
+        <li>fade-5: 1.32rem (73% of 1.8rem)</li>
+        <li>fade-10: 0.9rem (50% of 1.8rem)</li>
+    </ul>
+</body>
+</html> 

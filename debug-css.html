@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Debug</title>
+    <link rel="stylesheet" href="styles.css?v=1">
+    <style>
+        .debug-cell {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <h1>CSS Debug</h1>
+    <div style="margin: 20px;">
+        <div class="debug-cell fade-0">O</div>
+        <div class="debug-cell fade-1">O</div>
+        <div class="debug-cell fade-2">O</div>
+        <div class="debug-cell fade-5">O</div>
+        <div class="debug-cell fade-10">O</div>
+    </div>
+    
+    <h2>Computed Styles:</h2>
+    <div id="results"></div>
+    
+    <h2>CSS Rules:</h2>
+    <div id="css-rules"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cells = document.querySelectorAll('.debug-cell');
+            const results = document.getElementById('results');
+            const cssRules = document.getElementById('css-rules');
+            
+            cells.forEach((cell, index) => {
+                const computedStyle = window.getComputedStyle(cell);
+                const fontSize = computedStyle.fontSize;
+                const fontWeight = computedStyle.fontWeight;
+                const opacity = computedStyle.opacity;
+                
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <strong>Cell ${index + 1} (${cell.className}):</strong><br>
+                    Font Size: ${fontSize}<br>
+                    Font Weight: ${fontWeight}<br>
+                    Opacity: ${opacity}<br>
+                    <hr>
+                `;
+                results.appendChild(div);
+            });
+            
+            // Check what CSS rules are available
+            const styleSheets = document.styleSheets;
+            for (let i = 0; i < styleSheets.length; i++) {
+                try {
+                    const rules = styleSheets[i].cssRules || styleSheets[i].rules;
+                    for (let j = 0; j < rules.length; j++) {
+                        const rule = rules[j];
+                        if (rule.selectorText && rule.selectorText.includes('fade-')) {
+                            const div = document.createElement('div');
+                            div.innerHTML = `
+                                <strong>Rule:</strong> ${rule.selectorText}<br>
+                                <strong>CSS:</strong> ${rule.cssText}<br>
+                                <hr>
+                            `;
+                            cssRules.appendChild(div);
+                        }
+                    }
+                } catch (e) {
+                    console.log('Cannot access stylesheet:', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

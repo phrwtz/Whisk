@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customizable Tic Tac Toe</title>
+    <link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body>
+    <div class="container">
+        <h1>Customizable Tic Tac Toe</h1>
+        
+        <!-- Setup Interface -->
+        <div id="setup">
+            <div class="setup-container">
+                <h2>Game Setup</h2>
+                <div class="setup-form">
+                    <div class="form-group">
+                        <label for="boardSize">Board Size:</label>
+                        <select id="boardSize">
+                            <option value="3">3x3</option>
+                            <option value="4">4x4</option>
+                            <option value="5">5x5</option>
+                            <option value="6">6x6</option>
+                            <option value="7">7x7</option>
+                            <option value="8">8x8</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="winCondition">Win Condition:</label>
+                        <select id="winCondition">
+                            <option value="3">3 in a row</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="persistence">Symbol Persistence:</label>
+                        <select id="persistence">
+                            <option value="3">3 symbols</option>
+                            <option value="4">4 symbols</option>
+                            <option value="5">5 symbols</option>
+                            <option value="6">6 symbols</option>
+                            <option value="7">7 symbols</option>
+                            <option value="8">8 symbols</option>
+                            <option value="9">9 symbols</option>
+                            <option value="10">10 symbols</option>
+                            <option value="15">15 symbols</option>
+                            <option value="20">20 symbols</option>
+                            <option value="25">25 symbols</option>
+                            <option value="30">30 symbols</option>
+                            <option value="40">40 symbols</option>
+                            <option value="50">50 symbols</option>
+                            <option value="64">Unlimited</option>
+                        </select>
+                    </div>
+                    
+                    <button id="startGame" class="start-btn">Start Game</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Interface -->
+        <div id="game" style="display: none;">
+            <div class="game-container">
+                <div class="game-info">
+                    <div class="current-player">
+                        Current Player: <span id="playerSymbol" class="player-symbol">O</span>
+                    </div>
+                    <div id="gameStatus" class="game-status"></div>
+                </div>
+                
+                <div class="board-container">
+                    <div id="gameBoard" class="game-board"></div>
+                </div>
+                
+                <div class="game-controls">
+                    <button id="newGame" class="control-btn">New Game</button>
+                    <button id="resetSetup" class="control-btn">Change Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js?v=2"></script>
+</body>
+</html> 
