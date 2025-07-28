@@ -264,6 +264,40 @@ h2 {
     transform: translateY(-1px);
 }
 
+/* Image Section */
+.image-section {
+    text-align: center;
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.game-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: transform 0.3s ease;
+}
+
+.game-image:hover {
+    transform: scale(1.02);
+}
+
+/* Responsive image sizing */
+@media (max-width: 768px) {
+    .image-section {
+        margin: 15px 0;
+        padding: 15px;
+    }
+    
+    .game-image {
+        max-width: 90%;
+    }
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
