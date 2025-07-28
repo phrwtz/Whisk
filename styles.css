@@ -147,11 +147,23 @@ h2 {
 .game-board {
     display: grid;
     gap: 4px;
-    background: url('board.png') center center;
-    background-size: cover;
+    background: #f8f9fa;
     padding: 8px;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+/* Dynamic grid lines for different board sizes */
+.game-board::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    pointer-events: none;
+    z-index: 1;
 }
 
 .cell {

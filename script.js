@@ -91,6 +91,9 @@ class TicTacToe {
         gameBoard.innerHTML = '';
         gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize}, 1fr)`;
         
+        // Create grid lines dynamically
+        this.createGridLines(gameBoard);
+        
         for (let i = 0; i < this.boardSize; i++) {
             for (let j = 0; j < this.boardSize; j++) {
                 const cell = document.createElement('button');
@@ -101,6 +104,80 @@ class TicTacToe {
                 gameBoard.appendChild(cell);
             }
         }
+    }
+
+    createGridLines(gameBoard) {
+        // Remove existing grid lines
+        const existingLines = gameBoard.querySelectorAll('.grid-line');
+        existingLines.forEach(line => line.remove());
+        
+        const boardRect = gameBoard.getBoundingClientRect();
+        const cellSize = (boardRect.width - 16) / this.boardSize; // Account for padding
+        
+        // Create vertical lines
+        for (let i = 1; i < this.boardSize; i++) {
+            const line = document.createElement('div');
+            line.className = 'grid-line vertical-line';
+            line.style.position = 'absolute';
+            line.style.left = `${8 + i * cellSize + (i - 1) * 4}px`; // 8px padding + cell size + gap
+            line.style.top = '8px';
+            line.style.bottom = '8px';
+            line.style.width = '2px';
+            line.style.backgroundColor = '#cbd5e0';
+            line.style.zIndex = '1';
+            line.style.pointerEvents = 'none';
+            gameBoard.appendChild(line);
+        }
+        
+        // Create horizontal lines
+        for (let i = 1; i < this.boardSize; i++) {
+            const line = document.createElement('div');
+            line.className = 'grid-line horizontal-line';
+            line.style.position = 'absolute';
+            line.style.top = `${8 + i * cellSize + (i - 1) * 4}px`; // 8px padding + cell size + gap
+            line.style.left = '8px';
+            line.style.right = '8px';
+            line.style.height = '2px';
+            line.style.backgroundColor = '#cbd5e0';
+            line.style.zIndex = '1';
+            line.style.pointerEvents = 'none';
+            gameBoard.appendChild(line);
+        }
+        
+        // Add intersection circles for 3x3 board
+        if (this.boardSize === 3) {
+            this.createIntersectionCircles(gameBoard, cellSize);
+        }
+    }
+
+    createIntersectionCircles(gameBoard, cellSize) {
+        // Create intersection circles for 3x3 board
+        const positions = [
+            { top: '8px', left: '8px' },
+            { top: '8px', left: `${8 + cellSize + 4}px` },
+            { top: '8px', left: `${8 + 2 * cellSize + 8}px` },
+            { top: `${8 + cellSize + 4}px`, left: '8px' },
+            { top: `${8 + cellSize + 4}px`, left: `${8 + cellSize + 4}px` },
+            { top: `${8 + cellSize + 4}px`, left: `${8 + 2 * cellSize + 8}px` },
+            { top: `${8 + 2 * cellSize + 8}px`, left: '8px' },
+            { top: `${8 + 2 * cellSize + 8}px`, left: `${8 + cellSize + 4}px` },
+            { top: `${8 + 2 * cellSize + 8}px`, left: `${8 + 2 * cellSize + 8}px` }
+        ];
+        
+        positions.forEach(pos => {
+            const circle = document.createElement('div');
+            circle.className = 'intersection-circle';
+            circle.style.position = 'absolute';
+            circle.style.top = pos.top;
+            circle.style.left = pos.left;
+            circle.style.width = '8px';
+            circle.style.height = '8px';
+            circle.style.backgroundColor = '#4a5568';
+            circle.style.borderRadius = '50%';
+            circle.style.zIndex = '2';
+            circle.style.pointerEvents = 'none';
+            gameBoard.appendChild(circle);
+        });
     }
 
     handleCellClick(row, col) {
@@ -333,6 +410,10 @@ class TicTacToe {
             cell.style.opacity = '';
             cell.style.fontWeight = '';
         });
+        
+        // Recreate grid lines for current board size
+        const gameBoard = document.getElementById('gameBoard');
+        this.createGridLines(gameBoard);
         
         this.updateGameDisplay();
     }
