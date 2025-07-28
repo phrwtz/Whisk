@@ -147,29 +147,21 @@ h2 {
 .game-board {
     display: grid;
     gap: 4px;
-    background: #f8f9fa;
+    background: #48bb78;
     padding: 8px;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    position: relative;
 }
 
-/* Dynamic grid lines for different board sizes */
-.game-board::before {
-    content: '';
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    right: 8px;
-    bottom: 8px;
-    pointer-events: none;
-    z-index: 1;
+/* Board image for 3x3 only - now with green background */
+.game-board.board-3x3 {
+    background: #48bb78;
 }
 
 .cell {
     width: 60px;
     height: 60px;
-    background: rgba(255, 255, 255, 0.9);
+    background: white;
     border: none;
     border-radius: 8px;
     font-size: 1.8rem;
@@ -181,13 +173,11 @@ h2 {
     justify-content: center;
     color: #4a5568;
     opacity: 1;
-    backdrop-filter: blur(2px);
 }
 
 .cell:hover {
-    background: rgba(255, 255, 255, 0.95);
+    background: #f7fafc;
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .cell.x {
@@ -199,10 +189,9 @@ h2 {
 }
 
 .cell.winning {
-    background: linear-gradient(135deg, rgba(72, 187, 120, 0.95) 0%, rgba(56, 161, 105, 0.95) 100%);
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
     color: white;
     animation: pulse 1s infinite;
-    box-shadow: 0 0 20px rgba(72, 187, 120, 0.5);
 }
 
 /* Fading effect classes - only for opacity and font-weight, size handled by inline styles */
