@@ -147,7 +147,8 @@ h2 {
 .game-board {
     display: grid;
     gap: 4px;
-    background: #e2e8f0;
+    background: url('board.jpg') center center;
+    background-size: cover;
     padding: 8px;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
@@ -156,7 +157,7 @@ h2 {
 .cell {
     width: 60px;
     height: 60px;
-    background: white;
+    background: rgba(255, 255, 255, 0.9);
     border: none;
     border-radius: 8px;
     font-size: 1.8rem;
@@ -168,11 +169,13 @@ h2 {
     justify-content: center;
     color: #4a5568;
     opacity: 1;
+    backdrop-filter: blur(2px);
 }
 
 .cell:hover {
-    background: #f7fafc;
+    background: rgba(255, 255, 255, 0.95);
     transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .cell.x {
@@ -184,9 +187,10 @@ h2 {
 }
 
 .cell.winning {
-    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    background: linear-gradient(135deg, rgba(72, 187, 120, 0.95) 0%, rgba(56, 161, 105, 0.95) 100%);
     color: white;
     animation: pulse 1s infinite;
+    box-shadow: 0 0 20px rgba(72, 187, 120, 0.5);
 }
 
 /* Fading effect classes - only for opacity and font-weight, size handled by inline styles */
