@@ -147,7 +147,7 @@ h2 {
 .game-board {
     display: grid;
     gap: 4px;
-    background: url('board.jpg') center center;
+    background: url('board.png') center center;
     background-size: cover;
     padding: 8px;
     border-radius: 15px;
