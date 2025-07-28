@@ -235,7 +235,7 @@ class TicTacToe {
         // Remove existing player classes and add the new one
         cell.classList.remove('o', 'x');
         if (this.board[row][col]) {
-            cell.classList.add(this.board[row][col].toLowerCase());
+        cell.classList.add(this.board[row][col].toLowerCase());
         }
         
         // Preserve any existing inline styles (for fade effects)
@@ -323,11 +323,15 @@ class TicTacToe {
         this.symbolHistory = [];
         this.symbolCounts = { O: 0, X: 0 };
         
-        // Clear all cells
+        // Clear all cells completely
         const cells = document.querySelectorAll('.cell');
         cells.forEach(cell => {
             cell.textContent = '';
             cell.className = 'cell';
+            // Clear all inline styles
+            cell.style.fontSize = '';
+            cell.style.opacity = '';
+            cell.style.fontWeight = '';
         });
         
         this.updateGameDisplay();
