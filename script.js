@@ -1,7 +1,7 @@
 class TicTacToe {
     constructor() {
-        this.boardSize = 3;
-        this.persistence = 3;
+        this.boardSize = 8;
+        this.persistence = 5;
         this.board = [];
         this.currentPlayer = 'O';
         this.gameActive = false;
@@ -11,6 +11,8 @@ class TicTacToe {
         this.scores = { O: 0, X: 0 };
         
         this.initializeEventListeners();
+        // Auto-start the game with 8x8 and 5 symbols
+        this.autoStartGame();
     }
 
     initializeEventListeners() {
@@ -18,6 +20,15 @@ class TicTacToe {
         document.getElementById('startGame').addEventListener('click', () => this.startGame());
         document.getElementById('newGame').addEventListener('click', () => this.newGame());
         document.getElementById('resetSetup').addEventListener('click', () => this.showSetup());
+    }
+
+    autoStartGame() {
+        // Set the UI elements to 8x8 and 5 symbols
+        document.getElementById('boardSize').value = '8';
+        document.getElementById('persistence').value = '5';
+        
+        // Start the game automatically
+        this.startGame();
     }
 
 
@@ -39,6 +50,12 @@ class TicTacToe {
         this.symbolHistory = [];
         this.symbolCounts = { O: 0, X: 0 };
         this.scores = { O: 0, X: 0 };
+        
+        // Clear the scoring textbox
+        const gameStatus = document.getElementById('gameStatus');
+        if (gameStatus) {
+            gameStatus.textContent = '';
+        }
         
         // Show game interface
         document.getElementById('setup').style.display = 'none';
@@ -518,6 +535,12 @@ class TicTacToe {
             cell.style.fontWeight = '';
             cell.style.backgroundColor = '';
         });
+        
+        // Clear the scoring textbox
+        const gameStatus = document.getElementById('gameStatus');
+        if (gameStatus) {
+            gameStatus.textContent = '';
+        }
         
         this.updateGameDisplay();
     }
