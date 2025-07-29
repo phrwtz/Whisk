@@ -114,6 +114,18 @@ h2 {
     gap: 15px;
 }
 
+ .game-status {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2d3748;
+    text-align: center;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+}
+
 .current-player {
     display: flex;
     align-items: center;

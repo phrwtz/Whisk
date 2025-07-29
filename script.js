@@ -87,6 +87,22 @@ class TicTacToe {
             return;
         }
 
+        // Restore any previously flashed cells and clear scoring message
+        if (this.winningCellsToRestore) {
+            this.winningCellsToRestore.cells.forEach((cell, index) => {
+                cell.style.backgroundColor = this.winningCellsToRestore.colors[index];
+                cell.style.setProperty('background-color', this.winningCellsToRestore.colors[index], 'important');
+            });
+            this.winningCellsToRestore = null;
+        }
+        
+        // Clear any previous scoring message
+        const gameStatus = document.getElementById('gameStatus');
+        if (gameStatus) {
+            gameStatus.textContent = '';
+            console.log('Cleared gameStatus text');
+        }
+
         // Place the symbol
         this.board[row][col] = this.currentPlayer;
         this.symbolCounts[this.currentPlayer]++;
@@ -106,13 +122,25 @@ class TicTacToe {
         this.updateAllFadingEffects();
 
         // Check for scoring opportunities
-        const pointsEarned = this.checkScoring(row, col);
+        const scoringResult = this.checkScoring(row, col);
+        const pointsEarned = scoringResult.totalPoints;
+        const scoringCells = scoringResult.scoringCells;
+        
         console.log(`Player ${this.currentPlayer} at (${row}, ${col}) earned ${pointsEarned} points`);
         if (pointsEarned > 0) {
+            console.log(`Player ${this.currentPlayer} scored ${pointsEarned} points on this move!`);
             this.scores[this.currentPlayer] += pointsEarned;
             console.log(`Updated scores: O=${this.scores.O}, X=${this.scores.X}`);
             this.updateScoreDisplay();
-            this.showScoringMessage(pointsEarned);
+            this.showScoringMessage(pointsEarned, this.currentPlayer);
+            
+            // Flash the scoring cells
+            if (scoringCells.length > 0) {
+                const cellElements = scoringCells.map(cell => 
+                    document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`)
+                ).filter(cell => cell !== null);
+                this.flashWinningCells(cellElements);
+            }
         }
 
         // Switch players
@@ -275,28 +303,48 @@ class TicTacToe {
     checkScoring(row, col) {
         const player = this.board[row][col];
         let totalPoints = 0;
+        let scoringCells = [];
         
         // Check horizontal
-        totalPoints += this.checkLineForScoring(row, 0, 0, 1, player);
+        const horizontalResult = this.checkLineForScoring(row, 0, 0, 1, player);
+        if (horizontalResult.points > 0) {
+            totalPoints += horizontalResult.points;
+            scoringCells = scoringCells.concat(horizontalResult.winningCells);
+        }
         
         // Check vertical
-        totalPoints += this.checkLineForScoring(0, col, 1, 0, player);
+        const verticalResult = this.checkLineForScoring(0, col, 1, 0, player);
+        if (verticalResult.points > 0) {
+            totalPoints += verticalResult.points;
+            scoringCells = scoringCells.concat(verticalResult.winningCells);
+        }
         
-        // Check diagonal (top-left to bottom-right)
-        totalPoints += this.checkLineForScoring(0, 0, 1, 1, player);
+        // Check diagonal (top-left to bottom-right) - only check the diagonal that passes through the clicked cell
+        const diagonal1Result = this.checkDiagonalThroughCell(row, col, 1, 1, player);
+        if (diagonal1Result.points > 0) {
+            totalPoints += diagonal1Result.points;
+            scoringCells = scoringCells.concat(diagonal1Result.winningCells);
+        }
         
-        // Check diagonal (top-right to bottom-left)
-        totalPoints += this.checkLineForScoring(0, this.boardSize - 1, 1, -1, player);
+        // Check diagonal (top-right to bottom-left) - only check the diagonal that passes through the clicked cell
+        const diagonal2Result = this.checkDiagonalThroughCell(row, col, 1, -1, player);
+        if (diagonal2Result.points > 0) {
+            totalPoints += diagonal2Result.points;
+            scoringCells = scoringCells.concat(diagonal2Result.winningCells);
+        }
         
-        return totalPoints;
+        return { totalPoints, scoringCells };
     }
 
     checkLineForScoring(startRow, startCol, deltaRow, deltaCol, player) {
         let maxCount = 0;
+        let winningCells = [];
         
         // Check the entire line for the longest consecutive sequence
         for (let start = 0; start < this.boardSize; start++) {
             let count = 0;
+            let currentCells = [];
+            
             for (let i = 0; i < this.boardSize; i++) {
                 const row = startRow + (start + i) * deltaRow;
                 const col = startCol + (start + i) * deltaCol;
@@ -304,26 +352,90 @@ class TicTacToe {
                 if (row >= 0 && row < this.boardSize && col >= 0 && col < this.boardSize) {
                     if (this.board[row][col] === player) {
                         count++;
-                        maxCount = Math.max(maxCount, count);
+                        currentCells.push({row, col});
+                        if (count > maxCount) {
+                            maxCount = count;
+                            winningCells = [...currentCells];
+                        }
                     } else {
                         count = 0;
+                        currentCells = [];
                     }
                 }
             }
         }
         
         // Award points based on the longest consecutive line
-        if (maxCount >= 5) return 7;
-        if (maxCount === 4) return 4;
-        if (maxCount === 3) return 1;
-        return 0;
+        let points = 0;
+        if (maxCount >= 5) points = 7;
+        else if (maxCount === 4) points = 4;
+        else if (maxCount === 3) points = 1;
+        
+        return { points, winningCells };
+    }
+
+    checkDiagonalThroughCell(row, col, deltaRow, deltaCol, player) {
+        console.log(`Checking diagonal through cell (${row}, ${col}) with delta (${deltaRow}, ${deltaCol}) for player ${player}`);
+        
+        let maxCount = 0;
+        let winningCells = [];
+        
+        // Find the start of the diagonal that passes through the clicked cell
+        let startRow = row;
+        let startCol = col;
+        
+        // Move backwards to find the start of the diagonal
+        while (startRow >= 0 && startCol >= 0 && startRow < this.boardSize && startCol < this.boardSize) {
+            startRow -= deltaRow;
+            startCol -= deltaCol;
+        }
+        startRow += deltaRow;
+        startCol += deltaCol;
+        
+        console.log(`Diagonal starts at (${startRow}, ${startCol})`);
+        
+        // Check the diagonal from start to end
+        let count = 0;
+        let currentCells = [];
+        
+        for (let i = 0; i < this.boardSize; i++) {
+            const currentRow = startRow + i * deltaRow;
+            const currentCol = startCol + i * deltaCol;
+            
+            if (currentRow >= 0 && currentRow < this.boardSize && currentCol >= 0 && currentCol < this.boardSize) {
+                console.log(`Checking cell (${currentRow}, ${currentCol}): ${this.board[currentRow][currentCol]}`);
+                
+                if (this.board[currentRow][currentCol] === player) {
+                    count++;
+                    currentCells.push({row: currentRow, col: currentCol});
+                    if (count > maxCount) {
+                        maxCount = count;
+                        winningCells = [...currentCells];
+                    }
+                } else {
+                    count = 0;
+                    currentCells = [];
+                }
+            }
+        }
+        
+        console.log(`Diagonal result: maxCount = ${maxCount}, winningCells =`, winningCells);
+        
+        // Award points based on the consecutive line
+        let points = 0;
+        if (maxCount >= 5) points = 7;
+        else if (maxCount === 4) points = 4;
+        else if (maxCount === 3) points = 1;
+        
+        return { points, winningCells };
     }
 
 
 
     updateGameDisplay() {
         document.getElementById('playerSymbol').textContent = this.currentPlayer;
-        document.getElementById('gameStatus').textContent = '';
+        // Don't clear the scoring message here - let it stay until next move
+        // Only update the score display, don't touch the gameStatus
         this.updateScoreDisplay();
     }
 
@@ -332,20 +444,48 @@ class TicTacToe {
         document.getElementById('scoreX').textContent = this.scores.X;
     }
 
-    showScoringMessage(points) {
-        const messages = {
-            1: `${this.currentPlayer} scored 1 point for 3 in a row!`,
-            4: `${this.currentPlayer} scored 4 points for 4 in a row!`,
-            7: `${this.currentPlayer} scored 7 points for 5+ in a row!`
-        };
+    showScoringMessage(points, player) {
+        const gameStatus = document.getElementById('gameStatus');
+        console.log('showScoringMessage called with:', points, player);
+        console.log('gameStatus element:', gameStatus);
         
-        const message = messages[points] || `${this.currentPlayer} scored ${points} points!`;
-        document.getElementById('gameStatus').textContent = message;
+        if (gameStatus) {
+            const message = `${player} scores ${points} points!`;
+            gameStatus.textContent = message;
+            gameStatus.style.color = '#48bb78';
+            gameStatus.style.backgroundColor = '#f0f0f0'; // Add background to make it visible
+            gameStatus.style.padding = '10px';
+            gameStatus.style.borderRadius = '5px';
+            gameStatus.style.fontSize = '1.2rem';
+            gameStatus.style.fontWeight = 'bold';
+            gameStatus.style.border = '2px solid #48bb78';
+            gameStatus.style.display = 'block'; // Ensure it's visible
+            gameStatus.style.visibility = 'visible'; // Ensure it's visible
+            console.log('Set gameStatus text to:', message);
+            console.log('gameStatus element after setting:', gameStatus);
+            console.log('gameStatus parent element:', gameStatus.parentElement);
+        } else {
+            console.error('gameStatus element not found!');
+        }
         
-        // Clear message after 3 seconds
-        setTimeout(() => {
-            document.getElementById('gameStatus').textContent = '';
-        }, 3000);
+        // Keep the message until next turn (don't auto-clear)
+    }
+
+    flashWinningCells(winningCells) {
+        // Store original colors
+        const originalColors = [];
+        winningCells.forEach(cell => {
+            originalColors.push(cell.style.backgroundColor);
+        });
+        
+        // Set to yellow and keep until next move
+        winningCells.forEach(cell => {
+            cell.style.backgroundColor = 'yellow';
+            cell.style.setProperty('background-color', 'yellow', 'important');
+        });
+        
+        // Store the original colors to restore later
+        this.winningCellsToRestore = { cells: winningCells, colors: originalColors };
     }
 
     newGame() {
