@@ -10,10 +10,7 @@
     <div class="container">
         <h1>Customizable Tic Tac Toe</h1>
         
-        <!-- Image Section -->
-        <div class="image-section">
-            <img src="Screenshot 2025-07-28 at 4.59.38 PM.png" alt="Game Screenshot" class="game-image">
-        </div>
+
         
         <!-- Setup Interface -->
         <div id="setup">
@@ -32,12 +29,7 @@
                         </select>
                     </div>
                     
-                    <div class="form-group">
-                        <label for="winCondition">Win Condition:</label>
-                        <select id="winCondition">
-                            <option value="3">3 in a row</option>
-                        </select>
-                    </div>
+
                     
                     <div class="form-group">
                         <label for="persistence">Symbol Persistence:</label>
@@ -75,6 +67,29 @@
                     <div id="gameStatus" class="game-status"></div>
                 </div>
                 
+                <div class="rules-box">
+                    <h3>Game Rules</h3>
+                    <ul>
+                        <li><strong>Scoring:</strong> Get points for consecutive symbols in a row, column, or diagonal</li>
+                        <li><strong>3 in a row:</strong> 1 point</li>
+                        <li><strong>4 in a row:</strong> 4 points</li>
+                        <li><strong>5+ in a row:</strong> 7 points</li>
+                        <li><strong>Symbol Persistence:</strong> Only the newest symbols stay on the board (older ones fade and disappear)</li>
+                        <li><strong>Strategy:</strong> Plan ahead as your older symbols will be removed when you place new ones!</li>
+                    </ul>
+                </div>
+                
+                <div class="score-display">
+                    <div class="score-item">
+                        <span class="player-label">Player O:</span>
+                        <span id="scoreO" class="score-value">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="player-label">Player X:</span>
+                        <span id="scoreX" class="score-value">0</span>
+                    </div>
+                </div>
+                
                 <div class="board-container">
                     <div id="gameBoard" class="game-board"></div>
                 </div>
@@ -87,6 +102,6 @@
         </div>
     </div>
     
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=6"></script>
 </body>
 </html> 

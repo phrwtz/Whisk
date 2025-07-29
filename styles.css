@@ -138,6 +138,76 @@ h2 {
     color: #2d3748;
 }
 
+.rules-box {
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left;
+    max-width: 100%;
+}
+
+.rules-box h3 {
+    color: #2d3748;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.rules-box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.rules-box li {
+    margin-bottom: 8px;
+    padding: 5px 0;
+    color: #4a5568;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.rules-box li:last-child {
+    margin-bottom: 0;
+}
+
+.rules-box strong {
+    color: #2d3748;
+    font-weight: 600;
+}
+
+.score-display {
+    display: flex;
+    gap: 20px;
+    margin: 10px 0;
+}
+
+.score-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.player-label {
+    font-weight: 600;
+    color: #4a5568;
+}
+
+.score-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #2d3748;
+    min-width: 30px;
+    text-align: center;
+}
+
 .board-container {
     display: flex;
     justify-content: center;
@@ -175,6 +245,21 @@ h2 {
     opacity: 1;
 }
 
+/* Disable hover effects for cells with fade classes to preserve background colors */
+.cell.fade-0:hover,
+.cell.fade-1:hover,
+.cell.fade-2:hover,
+.cell.fade-3:hover,
+.cell.fade-4:hover,
+.cell.fade-5:hover,
+.cell.fade-6:hover,
+.cell.fade-7:hover,
+.cell.fade-8:hover,
+.cell.fade-9:hover,
+.cell.fade-10:hover {
+    transform: none !important;
+}
+
 .cell:hover {
     background: #f7fafc;
     transform: scale(1.05);
@@ -194,49 +279,38 @@ h2 {
     animation: pulse 1s infinite;
 }
 
-/* Fading effect classes - only for opacity and font-weight, size handled by inline styles */
+/* Fading effect classes - only font-weight, background handled by JavaScript */
 .cell.fade-0 { 
-    opacity: 1 !important; 
     font-weight: 900 !important; 
 }
 .cell.fade-1 { 
-    opacity: 0.85 !important; 
     font-weight: 800 !important; 
 }
 .cell.fade-2 { 
-    opacity: 0.7 !important; 
     font-weight: 700 !important; 
 }
 .cell.fade-3 { 
-    opacity: 0.55 !important; 
     font-weight: 600 !important; 
 }
 .cell.fade-4 { 
-    opacity: 0.4 !important; 
     font-weight: 500 !important; 
 }
 .cell.fade-5 { 
-    opacity: 0.25 !important; 
     font-weight: 400 !important; 
 }
 .cell.fade-6 { 
-    opacity: 0.15 !important; 
     font-weight: 300 !important; 
 }
 .cell.fade-7 { 
-    opacity: 0.1 !important; 
     font-weight: 200 !important; 
 }
 .cell.fade-8 { 
-    opacity: 0.06 !important; 
     font-weight: 100 !important; 
 }
 .cell.fade-9 { 
-    opacity: 0.03 !important; 
     font-weight: 100 !important; 
 }
 .cell.fade-10 { 
-    opacity: 0.01 !important; 
     font-weight: 100 !important; 
 }
 

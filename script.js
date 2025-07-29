@@ -1,7 +1,6 @@
 class TicTacToe {
     constructor() {
         this.boardSize = 3;
-        this.winCondition = 3;
         this.persistence = 3;
         this.board = [];
         this.currentPlayer = 'O';
@@ -9,9 +8,9 @@ class TicTacToe {
         this.winningCells = [];
         this.symbolHistory = []; // Track symbols in order of placement
         this.symbolCounts = { O: 0, X: 0 };
+        this.scores = { O: 0, X: 0 };
         
         this.initializeEventListeners();
-        this.updateWinConditionOptions();
     }
 
     initializeEventListeners() {
@@ -19,40 +18,13 @@ class TicTacToe {
         document.getElementById('startGame').addEventListener('click', () => this.startGame());
         document.getElementById('newGame').addEventListener('click', () => this.newGame());
         document.getElementById('resetSetup').addEventListener('click', () => this.showSetup());
-        
-        // Update win condition options when board size changes
-        document.getElementById('boardSize').addEventListener('change', () => this.updateWinConditionOptions());
     }
 
-    updateWinConditionOptions() {
-        const boardSize = parseInt(document.getElementById('boardSize').value);
-        const winConditionSelect = document.getElementById('winCondition');
-        
-        // Clear existing options
-        winConditionSelect.innerHTML = '';
-        
-        // Add options from 3 to board size
-        for (let i = 3; i <= boardSize; i++) {
-            const option = document.createElement('option');
-            option.value = i;
-            option.textContent = i;
-            winConditionSelect.appendChild(option);
-        }
-        
-        // Set default to 3 or board size if board size is less than 3
-        winConditionSelect.value = Math.min(3, boardSize);
-    }
+
 
     startGame() {
         this.boardSize = parseInt(document.getElementById('boardSize').value);
-        this.winCondition = parseInt(document.getElementById('winCondition').value);
         this.persistence = parseInt(document.getElementById('persistence').value);
-        
-        // Validate win condition
-        if (this.winCondition > this.boardSize) {
-            alert('Win condition cannot be greater than board size!');
-            return;
-        }
         
         // Validate persistence
         const maxPossibleSymbols = this.boardSize * this.boardSize;
@@ -66,6 +38,7 @@ class TicTacToe {
         this.currentPlayer = 'O';
         this.symbolHistory = [];
         this.symbolCounts = { O: 0, X: 0 };
+        this.scores = { O: 0, X: 0 };
         
         // Show game interface
         document.getElementById('setup').style.display = 'none';
@@ -91,8 +64,11 @@ class TicTacToe {
         gameBoard.innerHTML = '';
         gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize}, 1fr)`;
         
-        // Create grid lines dynamically
-        this.createGridLines(gameBoard);
+        // Add board size class for styling
+        gameBoard.className = 'game-board';
+        if (this.boardSize === 3) {
+            gameBoard.classList.add('board-3x3');
+        }
         
         for (let i = 0; i < this.boardSize; i++) {
             for (let j = 0; j < this.boardSize; j++) {
@@ -104,80 +80,6 @@ class TicTacToe {
                 gameBoard.appendChild(cell);
             }
         }
-    }
-
-    createGridLines(gameBoard) {
-        // Remove existing grid lines
-        const existingLines = gameBoard.querySelectorAll('.grid-line');
-        existingLines.forEach(line => line.remove());
-        
-        const boardRect = gameBoard.getBoundingClientRect();
-        const cellSize = (boardRect.width - 16) / this.boardSize; // Account for padding
-        
-        // Create vertical lines
-        for (let i = 1; i < this.boardSize; i++) {
-            const line = document.createElement('div');
-            line.className = 'grid-line vertical-line';
-            line.style.position = 'absolute';
-            line.style.left = `${8 + i * cellSize + (i - 1) * 4}px`; // 8px padding + cell size + gap
-            line.style.top = '8px';
-            line.style.bottom = '8px';
-            line.style.width = '2px';
-            line.style.backgroundColor = '#cbd5e0';
-            line.style.zIndex = '1';
-            line.style.pointerEvents = 'none';
-            gameBoard.appendChild(line);
-        }
-        
-        // Create horizontal lines
-        for (let i = 1; i < this.boardSize; i++) {
-            const line = document.createElement('div');
-            line.className = 'grid-line horizontal-line';
-            line.style.position = 'absolute';
-            line.style.top = `${8 + i * cellSize + (i - 1) * 4}px`; // 8px padding + cell size + gap
-            line.style.left = '8px';
-            line.style.right = '8px';
-            line.style.height = '2px';
-            line.style.backgroundColor = '#cbd5e0';
-            line.style.zIndex = '1';
-            line.style.pointerEvents = 'none';
-            gameBoard.appendChild(line);
-        }
-        
-        // Add intersection circles for 3x3 board
-        if (this.boardSize === 3) {
-            this.createIntersectionCircles(gameBoard, cellSize);
-        }
-    }
-
-    createIntersectionCircles(gameBoard, cellSize) {
-        // Create intersection circles for 3x3 board
-        const positions = [
-            { top: '8px', left: '8px' },
-            { top: '8px', left: `${8 + cellSize + 4}px` },
-            { top: '8px', left: `${8 + 2 * cellSize + 8}px` },
-            { top: `${8 + cellSize + 4}px`, left: '8px' },
-            { top: `${8 + cellSize + 4}px`, left: `${8 + cellSize + 4}px` },
-            { top: `${8 + cellSize + 4}px`, left: `${8 + 2 * cellSize + 8}px` },
-            { top: `${8 + 2 * cellSize + 8}px`, left: '8px' },
-            { top: `${8 + 2 * cellSize + 8}px`, left: `${8 + cellSize + 4}px` },
-            { top: `${8 + 2 * cellSize + 8}px`, left: `${8 + 2 * cellSize + 8}px` }
-        ];
-        
-        positions.forEach(pos => {
-            const circle = document.createElement('div');
-            circle.className = 'intersection-circle';
-            circle.style.position = 'absolute';
-            circle.style.top = pos.top;
-            circle.style.left = pos.left;
-            circle.style.width = '8px';
-            circle.style.height = '8px';
-            circle.style.backgroundColor = '#4a5568';
-            circle.style.borderRadius = '50%';
-            circle.style.zIndex = '2';
-            circle.style.pointerEvents = 'none';
-            gameBoard.appendChild(circle);
-        });
     }
 
     handleCellClick(row, col) {
@@ -203,15 +105,19 @@ class TicTacToe {
         this.updateCellDisplay(row, col);
         this.updateAllFadingEffects();
 
-        if (this.checkWin(row, col)) {
-            this.endGame(`${this.currentPlayer} wins!`);
-            this.highlightWinningCells();
-        } else if (this.checkDraw()) {
-            this.endGame("It's a draw!");
-        } else {
-            this.currentPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
-            this.updateGameDisplay();
+        // Check for scoring opportunities
+        const pointsEarned = this.checkScoring(row, col);
+        console.log(`Player ${this.currentPlayer} at (${row}, ${col}) earned ${pointsEarned} points`);
+        if (pointsEarned > 0) {
+            this.scores[this.currentPlayer] += pointsEarned;
+            console.log(`Updated scores: O=${this.scores.O}, X=${this.scores.X}`);
+            this.updateScoreDisplay();
+            this.showScoringMessage(pointsEarned);
         }
+
+        // Switch players
+        this.currentPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
+        this.updateGameDisplay();
     }
 
     managePersistence() {
@@ -246,14 +152,38 @@ class TicTacToe {
         }
     }
 
+    setCellFillColor(row, col, symbolAge) {
+        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+        if (!cell) return;
+        
+        if (symbolAge === 0) {
+            // Empty cell - set to white
+            cell.style.backgroundColor = 'white';
+            cell.style.setProperty('background-color', 'white', 'important');
+            console.log(`Cell (${row}, ${col}) - empty: background = white`);
+        } else {
+            // Calculate HSL color based on age
+            const hue = 120; // Green hue
+            const saturation = Math.max(0, 100 - (symbolAge - 1) * 10); // Decrease saturation linearly
+            const lightness = 85; // Keep lightness constant for good visibility
+            
+            const hslColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            cell.style.backgroundColor = hslColor;
+            cell.style.setProperty('background-color', hslColor, 'important');
+            
+            console.log(`Cell (${row}, ${col}) - age ${symbolAge}: background = ${hslColor}`);
+        }
+    }
+
     updateAllFadingEffects() {
         if (this.persistence === 64) return; // No fading in unlimited mode
         
-        // Clear all fading classes first
+        // Clear all fading classes first, but preserve background colors
         const cells = document.querySelectorAll('.cell');
         cells.forEach(cell => {
             // Remove only fade classes, preserve other classes
             cell.className = cell.className.replace(/fade-\d+/g, '');
+            // Don't clear background color here - let it be set by the fade classes
         });
 
         // Apply fading effects based on symbol age per player
@@ -276,8 +206,8 @@ class TicTacToe {
             sortedSymbols.forEach((symbolData, sortedIndex) => {
                 const cell = document.querySelector(`[data-row="${symbolData.row}"][data-col="${symbolData.col}"]`);
                 if (cell && cell.textContent === symbolData.symbol) {
-                    // Calculate fade level: oldest symbol (first in sorted array) gets highest fade
-                    // Newest symbol (last in sorted array) gets fade-0
+                    // Calculate fade level: newest symbol (last in sorted array) gets fade-0 (darkest)
+                    // Oldest symbol (first in sorted array) gets highest fade (lightest)
                     const ageFromNewest = sortedSymbols.length - 1 - sortedIndex;
                     const fadeLevel = Math.min(ageFromNewest, 10); // Max 10 fade levels
                     cell.classList.add(`fade-${fadeLevel}`);
@@ -293,16 +223,35 @@ class TicTacToe {
                     // Newest: 99% of square size, Oldest: 25% of square size
                     const fadePercentages = [0.99, 0.89, 0.79, 0.69, 0.59, 0.49, 0.39, 0.34, 0.29, 0.265, 0.25];
                     const fadeSizes = fadePercentages.map(p => baseFontSize * p);
-                    // Newest: fully opaque, Oldest: very faint
-                    const fadeOpacities = [1, 0.85, 0.7, 0.55, 0.4, 0.25, 0.15, 0.1, 0.06, 0.03, 0.01];
                     
                     cell.style.fontSize = `${fadeSizes[fadeLevel]}px`;
-                    cell.style.opacity = fadeOpacities[fadeLevel];
                     cell.style.fontWeight = Math.max(100, 900 - fadeLevel * 80);
-
+                    
+                    // Use the new function to set fill color based on age
+                    const symbolAge = fadeLevel + 1; // Age 1 for newest, age 11 for oldest
+                    this.setCellFillColor(symbolData.row, symbolData.col, symbolAge);
                 }
             });
         });
+        
+        // Set all empty cells to white
+        for (let row = 0; row < this.boardSize; row++) {
+            for (let col = 0; col < this.boardSize; col++) {
+                if (!this.board[row][col]) {
+                    this.setCellFillColor(row, col, 0);
+                }
+            }
+        }
+        
+        // Log all filled cells and their background colors after fading update
+        console.log('=== ALL FILLED CELLS AFTER FADING UPDATE ===');
+        this.symbolHistory.forEach((symbolData, index) => {
+            const cell = document.querySelector(`[data-row="${symbolData.row}"][data-col="${symbolData.col}"]`);
+            if (cell && cell.textContent === symbolData.symbol) {
+                console.log(`Cell (${symbolData.row}, ${symbolData.col}) with symbol '${symbolData.symbol}': background = ${cell.style.backgroundColor}`);
+            }
+        });
+        console.log('=== END FILLED CELLS LOG ===');
     }
 
     updateCellDisplay(row, col) {
@@ -315,81 +264,88 @@ class TicTacToe {
         cell.classList.add(this.board[row][col].toLowerCase());
         }
         
-        // Preserve any existing inline styles (for fade effects)
-        // The fade effects will be reapplied in updateAllFadingEffects
+        // Log the initial cell state
+        console.log(`Cell (${row}, ${col}) updated with symbol: ${this.board[row][col]}`);
+        console.log(`Cell background after update:`, cell.style.backgroundColor);
+        
+        // Don't clear any existing styles - let updateAllFadingEffects handle the background
+        // But ensure we don't clear the background color that was just set
     }
 
-    checkWin(row, col) {
+    checkScoring(row, col) {
         const player = this.board[row][col];
+        let totalPoints = 0;
         
         // Check horizontal
-        if (this.checkLine(row, 0, 0, 1, player)) return true;
+        totalPoints += this.checkLineForScoring(row, 0, 0, 1, player);
         
         // Check vertical
-        if (this.checkLine(0, col, 1, 0, player)) return true;
+        totalPoints += this.checkLineForScoring(0, col, 1, 0, player);
         
         // Check diagonal (top-left to bottom-right)
-        if (row === col && this.checkLine(0, 0, 1, 1, player)) return true;
+        totalPoints += this.checkLineForScoring(0, 0, 1, 1, player);
         
         // Check diagonal (top-right to bottom-left)
-        if (row + col === this.boardSize - 1 && this.checkLine(0, this.boardSize - 1, 1, -1, player)) return true;
+        totalPoints += this.checkLineForScoring(0, this.boardSize - 1, 1, -1, player);
         
-        return false;
+        return totalPoints;
     }
 
-    checkLine(startRow, startCol, deltaRow, deltaCol, player) {
-        let count = 0;
-        let cells = [];
+    checkLineForScoring(startRow, startCol, deltaRow, deltaCol, player) {
+        let maxCount = 0;
         
-        for (let i = 0; i < this.boardSize; i++) {
-            const row = startRow + i * deltaRow;
-            const col = startCol + i * deltaCol;
-            
-            if (row >= 0 && row < this.boardSize && col >= 0 && col < this.boardSize) {
-                if (this.board[row][col] === player) {
-                    count++;
-                    cells.push({row, col});
-                } else {
-                    count = 0;
-                    cells = [];
-                }
+        // Check the entire line for the longest consecutive sequence
+        for (let start = 0; start < this.boardSize; start++) {
+            let count = 0;
+            for (let i = 0; i < this.boardSize; i++) {
+                const row = startRow + (start + i) * deltaRow;
+                const col = startCol + (start + i) * deltaCol;
                 
-                if (count >= this.winCondition) {
-                    this.winningCells = cells.slice(-this.winCondition);
-                    return true;
+                if (row >= 0 && row < this.boardSize && col >= 0 && col < this.boardSize) {
+                    if (this.board[row][col] === player) {
+                        count++;
+                        maxCount = Math.max(maxCount, count);
+                    } else {
+                        count = 0;
+                    }
                 }
             }
         }
         
-        return false;
+        // Award points based on the longest consecutive line
+        if (maxCount >= 5) return 7;
+        if (maxCount === 4) return 4;
+        if (maxCount === 3) return 1;
+        return 0;
     }
 
-    checkDraw() {
-        for (let i = 0; i < this.boardSize; i++) {
-            for (let j = 0; j < this.boardSize; j++) {
-                if (this.board[i][j] === '') {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 
-    highlightWinningCells() {
-        this.winningCells.forEach(({row, col}) => {
-            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-            cell.classList.add('winning');
-        });
-    }
-
-    endGame(message) {
-        this.gameActive = false;
-        document.getElementById('gameStatus').textContent = message;
-    }
 
     updateGameDisplay() {
         document.getElementById('playerSymbol').textContent = this.currentPlayer;
         document.getElementById('gameStatus').textContent = '';
+        this.updateScoreDisplay();
+    }
+
+    updateScoreDisplay() {
+        document.getElementById('scoreO').textContent = this.scores.O;
+        document.getElementById('scoreX').textContent = this.scores.X;
+    }
+
+    showScoringMessage(points) {
+        const messages = {
+            1: `${this.currentPlayer} scored 1 point for 3 in a row!`,
+            4: `${this.currentPlayer} scored 4 points for 4 in a row!`,
+            7: `${this.currentPlayer} scored 7 points for 5+ in a row!`
+        };
+        
+        const message = messages[points] || `${this.currentPlayer} scored ${points} points!`;
+        document.getElementById('gameStatus').textContent = message;
+        
+        // Clear message after 3 seconds
+        setTimeout(() => {
+            document.getElementById('gameStatus').textContent = '';
+        }, 3000);
     }
 
     newGame() {
@@ -399,21 +355,19 @@ class TicTacToe {
         this.winningCells = [];
         this.symbolHistory = [];
         this.symbolCounts = { O: 0, X: 0 };
+        this.scores = { O: 0, X: 0 };
         
         // Clear all cells completely
         const cells = document.querySelectorAll('.cell');
         cells.forEach(cell => {
             cell.textContent = '';
             cell.className = 'cell';
-            // Clear all inline styles
+            // Clear all inline styles including background color
             cell.style.fontSize = '';
             cell.style.opacity = '';
             cell.style.fontWeight = '';
+            cell.style.backgroundColor = '';
         });
-        
-        // Recreate grid lines for current board size
-        const gameBoard = document.getElementById('gameBoard');
-        this.createGridLines(gameBoard);
         
         this.updateGameDisplay();
     }
