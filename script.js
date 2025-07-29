@@ -450,15 +450,25 @@ class TicTacToe {
         console.log('gameStatus element:', gameStatus);
         
         if (gameStatus) {
-            const message = `${player} scores ${points} points!`;
+            let message;
+            let textColor = '#48bb78';
+            
+            // Check if this player has won (100+ points)
+            if (this.scores[player] >= 100) {
+                message = `${player} wins!`;
+                textColor = '#e53e3e'; // Red color for win message
+            } else {
+                message = points === 1 ? `${player} scores 1 point!` : `${player} scores ${points} points!`;
+            }
+            
             gameStatus.textContent = message;
-            gameStatus.style.color = '#48bb78';
+            gameStatus.style.color = textColor;
             gameStatus.style.backgroundColor = '#f0f0f0'; // Add background to make it visible
             gameStatus.style.padding = '10px';
             gameStatus.style.borderRadius = '5px';
             gameStatus.style.fontSize = '1.2rem';
             gameStatus.style.fontWeight = 'bold';
-            gameStatus.style.border = '2px solid #48bb78';
+            gameStatus.style.border = `2px solid ${textColor}`;
             gameStatus.style.display = 'block'; // Ensure it's visible
             gameStatus.style.visibility = 'visible'; // Ensure it's visible
             console.log('Set gameStatus text to:', message);
