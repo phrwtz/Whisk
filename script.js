@@ -10,9 +10,19 @@ class TicTacToe {
         this.symbolCounts = { O: 0, X: 0 };
         this.scores = { O: 0, X: 0 };
         
+        // Multiplayer properties
+        this.peer = null;
+        this.connection = null;
+        this.isHost = false;
+        this.isMultiplayer = false;
+        this.myPlayerSymbol = 'O'; // Host is always O
+        this.opponentPlayerSymbol = 'X'; // Guest is always X
+        this.gameId = null;
+        
         this.initializeEventListeners();
-        // Auto-start the game with 8x8 and 5 symbols
-        this.autoStartGame();
+        this.initializeMultiplayerEventListeners();
+        // Don't auto-start - show multiplayer menu first
+        this.showMultiplayerMenu();
     }
 
     initializeEventListeners() {
@@ -20,6 +30,207 @@ class TicTacToe {
         document.getElementById('startGame').addEventListener('click', () => this.startGame());
         document.getElementById('newGame').addEventListener('click', () => this.newGame());
         document.getElementById('resetSetup').addEventListener('click', () => this.showSetup());
+    }
+
+    initializeMultiplayerEventListeners() {
+        // Multiplayer setup event listeners
+        document.getElementById('hostGame').addEventListener('click', () => this.hostGame());
+        document.getElementById('joinGame').addEventListener('click', () => this.showJoinInterface());
+        document.getElementById('playLocal').addEventListener('click', () => this.playLocal());
+        document.getElementById('copyGameId').addEventListener('click', () => this.copyGameId());
+        document.getElementById('connectToGame').addEventListener('click', () => this.joinGame());
+        document.getElementById('backToMultiplayer').addEventListener('click', () => this.showMultiplayerMenu());
+    }
+
+    showMultiplayerMenu() {
+        document.getElementById('multiplayerSetup').classList.remove('hidden');
+        document.getElementById('setup').classList.add('hidden');
+        document.getElementById('game').classList.add('hidden');
+        document.getElementById('hostInterface').classList.add('hidden');
+        document.getElementById('joinInterface').classList.add('hidden');
+    }
+
+    hostGame() {
+        this.isHost = true;
+        this.isMultiplayer = true;
+        this.myPlayerSymbol = 'O';
+        this.opponentPlayerSymbol = 'X';
+        
+        // Initialize PeerJS
+        this.peer = new Peer();
+        
+        this.peer.on('open', (id) => {
+            this.gameId = id;
+            document.getElementById('hostGameId').value = id;
+            document.getElementById('hostInterface').classList.remove('hidden');
+            document.getElementById('connectionStatus').textContent = 'Waiting for player to join...';
+            document.getElementById('connectionStatus').className = 'text-sm font-semibold mb-4 text-blue-600';
+        });
+        
+        this.peer.on('connection', (conn) => {
+            this.connection = conn;
+            this.setupConnection();
+            document.getElementById('connectionStatus').textContent = 'Player connected! Starting game...';
+            document.getElementById('connectionStatus').className = 'text-sm font-semibold mb-4 text-green-600';
+            
+            // Start the game after a short delay
+            setTimeout(() => {
+                this.showSetup();
+            }, 1000);
+        });
+        
+        this.peer.on('error', (err) => {
+            console.error('PeerJS error:', err);
+            document.getElementById('connectionStatus').textContent = 'Connection error: ' + err.type;
+            document.getElementById('connectionStatus').className = 'text-sm font-semibold mb-4 text-red-600';
+        });
+    }
+
+    showJoinInterface() {
+        document.getElementById('joinInterface').classList.remove('hidden');
+        document.getElementById('hostInterface').classList.add('hidden');
+    }
+
+    joinGame() {
+        const gameId = document.getElementById('joinGameId').value.trim();
+        if (!gameId) {
+            document.getElementById('joinStatus').textContent = 'Please enter a game ID';
+            document.getElementById('joinStatus').className = 'text-sm font-semibold mb-4 text-red-600';
+            return;
+        }
+        
+        this.isHost = false;
+        this.isMultiplayer = true;
+        this.myPlayerSymbol = 'X';
+        this.opponentPlayerSymbol = 'O';
+        this.gameId = gameId;
+        
+        // Initialize PeerJS
+        this.peer = new Peer();
+        
+        this.peer.on('open', (id) => {
+            document.getElementById('joinStatus').textContent = 'Connecting to game...';
+            document.getElementById('joinStatus').className = 'text-sm font-semibold mb-4 text-blue-600';
+            
+            // Connect to the host
+            this.connection = this.peer.connect(gameId);
+            this.setupConnection();
+        });
+        
+        this.peer.on('error', (err) => {
+            console.error('PeerJS error:', err);
+            document.getElementById('joinStatus').textContent = 'Connection error: ' + err.type;
+            document.getElementById('joinStatus').className = 'text-sm font-semibold mb-4 text-red-600';
+        });
+    }
+
+    setupConnection() {
+        this.connection.on('open', () => {
+            document.getElementById('joinStatus').textContent = 'Connected! Starting game...';
+            document.getElementById('joinStatus').className = 'text-sm font-semibold mb-4 text-green-600';
+            
+            // Start the game after a short delay
+            setTimeout(() => {
+                this.showSetup();
+            }, 1000);
+        });
+        
+        this.connection.on('data', (data) => {
+            this.handleMultiplayerData(data);
+        });
+        
+        this.connection.on('close', () => {
+            console.log('Connection closed');
+            this.handleDisconnection();
+        });
+    }
+
+    handleMultiplayerData(data) {
+        switch (data.type) {
+            case 'gameStart':
+                this.boardSize = data.boardSize;
+                this.persistence = data.persistence;
+                this.startGame();
+                break;
+            case 'move':
+                this.handleOpponentMove(data.row, data.col);
+                break;
+            case 'newGame':
+                this.newGame();
+                break;
+        }
+    }
+
+    handleOpponentMove(row, col) {
+        if (this.currentPlayer === this.myPlayerSymbol) {
+            // It's not my turn, ignore
+            return;
+        }
+        
+        // Make the opponent's move
+        this.board[row][col] = this.opponentPlayerSymbol;
+        this.symbolCounts[this.opponentPlayerSymbol]++;
+        
+        // Add to history
+        this.symbolHistory.push({
+            symbol: this.opponentPlayerSymbol,
+            row: row,
+            col: col,
+            timestamp: Date.now()
+        });
+        
+        // Manage persistence
+        this.managePersistence();
+        
+        this.updateCellDisplay(row, col);
+        this.updateAllFadingEffects();
+        
+        // Check for scoring
+        const scoringResult = this.checkScoring(row, col);
+        const pointsEarned = scoringResult.totalPoints;
+        const scoringCells = scoringResult.scoringCells;
+        
+        if (pointsEarned > 0) {
+            this.scores[this.opponentPlayerSymbol] += pointsEarned;
+            this.updateScoreDisplay();
+            this.showScoringMessage(pointsEarned, this.opponentPlayerSymbol);
+            
+            if (scoringCells.length > 0) {
+                const cellElements = scoringCells.map(cell => 
+                    document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`)
+                ).filter(cell => cell !== null);
+                this.flashWinningCells(cellElements);
+            }
+        }
+        
+        // Switch to my turn
+        this.currentPlayer = this.myPlayerSymbol;
+        this.updateGameDisplay();
+    }
+
+    handleDisconnection() {
+        if (this.isMultiplayer) {
+            this.showScoringMessage('Opponent disconnected', '');
+            this.gameActive = false;
+        }
+    }
+
+    copyGameId() {
+        const gameIdInput = document.getElementById('hostGameId');
+        gameIdInput.select();
+        document.execCommand('copy');
+        
+        const copyButton = document.getElementById('copyGameId');
+        const originalText = copyButton.textContent;
+        copyButton.textContent = 'Copied!';
+        setTimeout(() => {
+            copyButton.textContent = originalText;
+        }, 2000);
+    }
+
+    playLocal() {
+        this.isMultiplayer = false;
+        this.showSetup();
     }
 
     autoStartGame() {
@@ -59,8 +270,26 @@ class TicTacToe {
         document.getElementById('setup').style.display = 'none';
         document.getElementById('game').classList.remove('hidden');
         
+        // Show multiplayer info if in multiplayer mode
+        if (this.isMultiplayer) {
+            document.getElementById('multiplayerInfo').classList.remove('hidden');
+            document.getElementById('playerRole').textContent = this.isHost ? 'Host' : 'Guest';
+            document.getElementById('connectionInfo').textContent = 'Connected';
+        } else {
+            document.getElementById('multiplayerInfo').classList.add('hidden');
+        }
+        
         this.updateGameDisplay();
         this.createBoard();
+        
+        // Send game start data to opponent if multiplayer
+        if (this.isMultiplayer && this.connection && this.isHost) {
+            this.connection.send({
+                type: 'gameStart',
+                boardSize: this.boardSize,
+                persistence: this.persistence
+            });
+        }
     }
 
     initializeBoard() {
@@ -101,6 +330,11 @@ class TicTacToe {
 
     handleCellClick(row, col) {
         if (!this.gameActive || this.board[row][col] !== '') {
+            return;
+        }
+
+        // In multiplayer mode, only allow moves on your turn
+        if (this.isMultiplayer && this.currentPlayer !== this.myPlayerSymbol) {
             return;
         }
 
@@ -158,6 +392,15 @@ class TicTacToe {
                 ).filter(cell => cell !== null);
                 this.flashWinningCells(cellElements);
             }
+        }
+
+        // Send move to opponent if in multiplayer mode
+        if (this.isMultiplayer && this.connection) {
+            this.connection.send({
+                type: 'move',
+                row: row,
+                col: col
+            });
         }
 
         // Switch players
@@ -546,12 +789,20 @@ class TicTacToe {
             gameStatus.textContent = '';
         }
         
+        // Send new game signal to opponent if in multiplayer mode
+        if (this.isMultiplayer && this.connection) {
+            this.connection.send({
+                type: 'newGame'
+            });
+        }
+        
         this.updateGameDisplay();
     }
 
     showSetup() {
         document.getElementById('game').classList.add('hidden');
         document.getElementById('setup').style.display = 'block';
+        document.getElementById('multiplayerSetup').classList.add('hidden');
     }
 }
 
