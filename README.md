@@ -9,7 +9,7 @@ A modern, interactive tic tac toe game with customizable board size, win conditi
 - **Symbol Persistence**: Limit the maximum number of symbols allowed on the board
 - **Visual Fading Effect**: Symbols gradually fade as new ones are placed, with the oldest symbols becoming very faint
 - **Two-Player Game**: Players take turns placing O's and X's
-- **Modern UI**: Beautiful, responsive design with smooth animations
+- **Modern UI**: Beautiful, responsive design with smooth animations using Tailwind CSS
 - **Win Detection**: Automatically detects wins in all directions (horizontal, vertical, diagonal)
 - **Visual Feedback**: Winning combinations are highlighted with animation
 
@@ -63,9 +63,9 @@ The visual fading system provides clear feedback:
 
 ## Technical Details
 
-- Built with vanilla HTML, CSS, and JavaScript
+- Built with vanilla HTML, JavaScript, and Tailwind CSS
 - Responsive design that works on desktop and mobile devices
-- No external dependencies required
+- Uses Tailwind CSS CDN for styling (no build process required)
 - Modern CSS Grid for dynamic board layout
 - Smooth animations and hover effects
 - Advanced symbol tracking and management system
@@ -73,10 +73,10 @@ The visual fading system provides clear feedback:
 ## File Structure
 
 ```
-├── index.html      # Main HTML structure
-├── styles.css      # CSS styling and animations
-├── script.js       # Game logic and functionality
-└── README.md       # This file
+├── index.html          # Main HTML structure with Tailwind CSS
+├── script.js           # Game logic and functionality
+├── test-tailwind.html  # Test file to verify Tailwind CSS
+└── README.md           # This file
 ```
 
 ## Getting Started
@@ -92,8 +92,17 @@ The visual fading system provides clear feedback:
 This game works in all modern browsers that support:
 - CSS Grid
 - ES6 Classes
-- CSS Custom Properties
+- Tailwind CSS
 - Flexbox
 - CSS Transitions and Animations
 
-Tested on Chrome, Firefox, Safari, and Edge. 
+Tested on Chrome, Firefox, Safari, and Edge.
+
+## Tailwind CSS
+
+This project uses Tailwind CSS for styling, which provides:
+- Utility-first CSS framework
+- Responsive design out of the box
+- Consistent spacing and typography
+- Modern design patterns
+- No custom CSS required 

@@ -4,22 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customizable Tic Tac Toe</title>
-    <link rel="stylesheet" href="styles.css?v=2">
-</head>
-<body>
-    <div class="container">
-        <h1>Customizable Tic Tac Toe</h1>
+    <!-- Production-ready Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'pulse': 'pulse 1s infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
         
-
+        /* Custom fade classes for symbol aging */
+        .fade-0 { font-weight: 900 !important; }
+        .fade-1 { font-weight: 800 !important; }
+        .fade-2 { font-weight: 700 !important; }
+        .fade-3 { font-weight: 600 !important; }
+        .fade-4 { font-weight: 500 !important; }
+        .fade-5 { font-weight: 400 !important; }
+        .fade-6 { font-weight: 300 !important; }
+        .fade-7 { font-weight: 200 !important; }
+        .fade-8 { font-weight: 100 !important; }
+        .fade-9 { font-weight: 100 !important; }
+        .fade-10 { font-weight: 100 !important; }
+        
+        /* Disable hover effects for cells with fade classes */
+        .cell.fade-0:hover,
+        .cell.fade-1:hover,
+        .cell.fade-2:hover,
+        .cell.fade-3:hover,
+        .cell.fade-4:hover,
+        .cell.fade-5:hover,
+        .cell.fade-6:hover,
+        .cell.fade-7:hover,
+        .cell.fade-8:hover,
+        .cell.fade-9:hover,
+        .cell.fade-10:hover {
+            transform: none !important;
+        }
+        
+        /* Custom cell sizing for different board sizes */
+        .cell-3x3 { width: 80px; height: 80px; }
+        .cell-4x4 { width: 70px; height: 70px; }
+        .cell-5x5 { width: 60px; height: 60px; }
+        .cell-6x6 { width: 50px; height: 50px; }
+        .cell-7x7 { width: 45px; height: 45px; }
+        .cell-8x8 { width: 40px; height: 40px; }
+    </style>
+</head>
+<body class="font-sans bg-gradient-to-br from-blue-400 to-purple-600 min-h-screen flex justify-center items-center text-gray-800">
+    <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-2xl w-11/12 text-center">
+        <h1 class="text-gray-700 mb-8 text-4xl font-bold">Customizable Tic Tac Toe</h1>
         
         <!-- Setup Interface -->
         <div id="setup">
-            <div class="setup-container">
-                <h2>Game Setup</h2>
-                <div class="setup-form">
-                    <div class="form-group">
-                        <label for="boardSize">Board Size:</label>
-                        <select id="boardSize">
+            <div class="mb-5">
+                <h2 class="text-gray-800 mb-5 text-2xl font-bold">Game Setup</h2>
+                <div class="flex flex-col gap-5 items-center">
+                    <div class="flex flex-col items-center gap-2 w-full max-w-xs">
+                        <label for="boardSize" class="font-semibold text-gray-700 text-lg">Board Size:</label>
+                        <select id="boardSize" class="p-3 border-2 border-gray-200 rounded-lg text-base bg-white text-gray-700 cursor-pointer transition-all duration-300 w-full focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100">
                             <option value="3">3x3</option>
                             <option value="4">4x4</option>
                             <option value="5">5x5</option>
@@ -29,11 +81,9 @@
                         </select>
                     </div>
                     
-
-                    
-                    <div class="form-group">
-                        <label for="persistence">Symbol Persistence:</label>
-                        <select id="persistence">
+                    <div class="flex flex-col items-center gap-2 w-full max-w-xs">
+                        <label for="persistence" class="font-semibold text-gray-700 text-lg">Symbol Persistence:</label>
+                        <select id="persistence" class="p-3 border-2 border-gray-200 rounded-lg text-base bg-white text-gray-700 cursor-pointer transition-all duration-300 w-full focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100">
                             <option value="3">3 symbols</option>
                             <option value="4">4 symbols</option>
                             <option value="5" selected>5 symbols</option>
@@ -52,57 +102,57 @@
                         </select>
                     </div>
                     
-                    <button id="startGame" class="start-btn">Start Game</button>
+                    <button id="startGame" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-none py-4 px-8 rounded-lg text-lg font-semibold cursor-pointer transition-all duration-300 mt-3 hover:-translate-y-1 hover:shadow-xl">Start Game</button>
                 </div>
             </div>
         </div>
         
         <!-- Game Interface -->
-        <div id="game" style="display: none;">
-            <div class="game-container">
-                <div class="game-info">
-                    <div class="current-player">
-                        Current Player: <span id="playerSymbol" class="player-symbol">O</span>
+        <div id="game" class="hidden">
+            <div class="w-full">
+                <div class="mb-8 flex justify-between items-center flex-wrap gap-4">
+                    <div class="flex items-center gap-3 text-xl font-semibold text-gray-700">
+                        Current Player: <span id="playerSymbol" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full font-bold text-xl">O</span>
                     </div>
                 </div>
                 
-                <div class="rules-box">
-                    <h3>Game Rules</h3>
-                    <ul>
-                        <li><strong>Scoring:</strong> Get points for consecutive symbols in a row, column, or diagonal</li>
-                        <li><strong>3 in a row:</strong> 1 point</li>
-                        <li><strong>4 in a row:</strong> 4 points</li>
-                        <li><strong>5+ in a row:</strong> 7 points</li>
-                        <li><strong>Symbol Persistence:</strong> Only the newest symbols stay on the board (older ones fade and disappear)</li>
-                        <li><strong>Strategy:</strong> Plan ahead as your older symbols will be removed when you place new ones!</li>
+                <div class="bg-gray-50 border-2 border-gray-200 rounded-xl p-5 mb-5 text-left max-w-full">
+                    <h3 class="text-gray-800 mb-4 text-xl font-bold text-center">Game Rules</h3>
+                    <ul class="list-none p-0 m-0">
+                        <li class="mb-2 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">Scoring:</strong> Get points for consecutive symbols in a row, column, or diagonal</li>
+                        <li class="mb-2 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">3 in a row:</strong> 1 point</li>
+                        <li class="mb-2 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">4 in a row:</strong> 4 points</li>
+                        <li class="mb-2 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">5+ in a row:</strong> 7 points</li>
+                        <li class="mb-2 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">Symbol Persistence:</strong> Only the newest symbols stay on the board (older ones fade and disappear)</li>
+                        <li class="mb-0 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">Strategy:</strong> Plan ahead as your older symbols will be removed when you place new ones!</li>
                     </ul>
                 </div>
                 
-                <div id="gameStatus" class="game-status"></div>
+                <div id="gameStatus" class="text-lg font-semibold text-gray-800 text-center my-3 p-3 rounded-lg bg-gray-50 border-2 border-gray-200"></div>
                 
-                <div class="score-display">
-                    <div class="score-item">
-                        <span class="player-label">Player O:</span>
-                        <span id="scoreO" class="score-value">0</span>
+                <div class="flex gap-5 my-3">
+                    <div class="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-90 rounded-lg shadow-md">
+                        <span class="font-semibold text-gray-700">Player O:</span>
+                        <span id="scoreO" class="text-xl font-bold text-gray-800 min-w-8 text-center">0</span>
                     </div>
-                    <div class="score-item">
-                        <span class="player-label">Player X:</span>
-                        <span id="scoreX" class="score-value">0</span>
+                    <div class="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-90 rounded-lg shadow-md">
+                        <span class="font-semibold text-gray-700">Player X:</span>
+                        <span id="scoreX" class="text-xl font-bold text-gray-800 min-w-8 text-center">0</span>
                     </div>
                 </div>
                 
-                <div class="board-container">
-                    <div id="gameBoard" class="game-board"></div>
+                <div class="flex justify-center mb-8">
+                    <div id="gameBoard" class="grid gap-1 bg-green-500 p-2 rounded-2xl shadow-2xl"></div>
                 </div>
                 
-                <div class="game-controls">
-                    <button id="newGame" class="control-btn">New Game</button>
-                    <button id="resetSetup" class="control-btn">Change Settings</button>
+                <div class="flex gap-4 justify-center flex-wrap">
+                    <button id="newGame" class="bg-gray-200 text-gray-700 border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:bg-gray-300 hover:-translate-y-1">New Game</button>
+                    <button id="resetSetup" class="bg-gray-200 text-gray-700 border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:bg-gray-300 hover:-translate-y-1">Change Settings</button>
                 </div>
             </div>
         </div>
     </div>
     
-    <script src="script.js?v=18"></script>
+    <script src="script.js?v=20"></script>
 </body>
 </html> 

@@ -31,8 +31,6 @@ class TicTacToe {
         this.startGame();
     }
 
-
-
     startGame() {
         this.boardSize = parseInt(document.getElementById('boardSize').value);
         this.persistence = parseInt(document.getElementById('persistence').value);
@@ -59,7 +57,7 @@ class TicTacToe {
         
         // Show game interface
         document.getElementById('setup').style.display = 'none';
-        document.getElementById('game').style.display = 'block';
+        document.getElementById('game').classList.remove('hidden');
         
         this.updateGameDisplay();
         this.createBoard();
@@ -82,7 +80,7 @@ class TicTacToe {
         gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize}, 1fr)`;
         
         // Add board size class for styling
-        gameBoard.className = 'game-board';
+        gameBoard.className = 'grid gap-1 bg-green-500 p-2 rounded-2xl shadow-2xl';
         if (this.boardSize === 3) {
             gameBoard.classList.add('board-3x3');
         }
@@ -90,7 +88,9 @@ class TicTacToe {
         for (let i = 0; i < this.boardSize; i++) {
             for (let j = 0; j < this.boardSize; j++) {
                 const cell = document.createElement('button');
-                cell.className = 'cell';
+                // Use responsive cell sizing based on board size
+                const cellSizeClass = `cell-${this.boardSize}x${this.boardSize}`;
+                cell.className = `${cellSizeClass} bg-white border-none rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
                 cell.dataset.row = i;
                 cell.dataset.col = j;
                 cell.addEventListener('click', () => this.handleCellClick(i, j));
@@ -185,14 +185,15 @@ class TicTacToe {
                 this.board[oldestSymbol.row][oldestSymbol.col] = '';
                 this.symbolCounts[this.currentPlayer]--;
                 
-                // Clear the cell display
-                const cell = document.querySelector(`[data-row="${oldestSymbol.row}"][data-col="${oldestSymbol.col}"]`);
-                if (cell) {
-                    cell.textContent = '';
-                    cell.className = 'cell';
-                    // Remove any fade classes that might be left
-                    cell.className = cell.className.replace(/fade-\d+/g, '');
-                }
+                        // Clear the cell display
+        const cell = document.querySelector(`[data-row="${oldestSymbol.row}"][data-col="${oldestSymbol.col}"]`);
+        if (cell) {
+            cell.textContent = '';
+            const cellSizeClass = `cell-${this.boardSize}x${this.boardSize}`;
+            cell.className = `${cellSizeClass} bg-white border-none rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
+            // Remove any fade classes that might be left
+            cell.className = cell.className.replace(/fade-\d+/g, '');
+        }
             }
         }
     }
@@ -224,7 +225,7 @@ class TicTacToe {
         if (this.persistence === 64) return; // No fading in unlimited mode
         
         // Clear all fading classes first, but preserve background colors
-        const cells = document.querySelectorAll('.cell');
+        const cells = document.querySelectorAll('.cell, button[data-row]');
         cells.forEach(cell => {
             // Remove only fade classes, preserve other classes
             cell.className = cell.className.replace(/fade-\d+/g, '');
@@ -304,9 +305,13 @@ class TicTacToe {
         cell.textContent = this.board[row][col];
         
         // Remove existing player classes and add the new one
-        cell.classList.remove('o', 'x');
+        cell.classList.remove('text-red-600', 'text-blue-600');
         if (this.board[row][col]) {
-        cell.classList.add(this.board[row][col].toLowerCase());
+            if (this.board[row][col] === 'X') {
+                cell.classList.add('text-red-600');
+            } else if (this.board[row][col] === 'O') {
+                cell.classList.add('text-blue-600');
+            }
         }
         
         // Log the initial cell state
@@ -447,8 +452,6 @@ class TicTacToe {
         return { points, winningCells };
     }
 
-
-
     updateGameDisplay() {
         document.getElementById('playerSymbol').textContent = this.currentPlayer;
         // Don't clear the scoring message here - let it stay until next move
@@ -471,7 +474,7 @@ class TicTacToe {
             let textColor = '#48bb78';
             
             // Check if this player has won (100+ points)
-            if (this.scores[player] >= 100) {
+            if (this.scores[player] >= 50) {
                 message = `${player} wins!`;
                 textColor = '#e53e3e'; // Red color for win message
             } else {
@@ -525,10 +528,11 @@ class TicTacToe {
         this.scores = { O: 0, X: 0 };
         
         // Clear all cells completely
-        const cells = document.querySelectorAll('.cell');
+        const cells = document.querySelectorAll('.cell, button[data-row]');
         cells.forEach(cell => {
             cell.textContent = '';
-            cell.className = 'cell';
+            const cellSizeClass = `cell-${this.boardSize}x${this.boardSize}`;
+            cell.className = `${cellSizeClass} bg-white border-none rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
             // Clear all inline styles including background color
             cell.style.fontSize = '';
             cell.style.opacity = '';
@@ -546,7 +550,7 @@ class TicTacToe {
     }
 
     showSetup() {
-        document.getElementById('game').style.display = 'none';
+        document.getElementById('game').classList.add('hidden');
         document.getElementById('setup').style.display = 'block';
     }
 }
