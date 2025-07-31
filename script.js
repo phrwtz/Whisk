@@ -308,6 +308,8 @@ class UIManager {
     async checkIfGameAvailable() {
         return new Promise((resolve) => {
             try {
+                console.log('Checking if game is available...');
+                
                 // Try to connect to the fixed game ID to see if a game is hosted
                 const testPeer = new Peer({
                     debug: 0,
@@ -319,29 +321,34 @@ class UIManager {
                 });
 
                 testPeer.on('open', () => {
+                    console.log('Test peer opened, attempting connection to whisk-game...');
                     const testConnection = testPeer.connect('whisk-game');
                     
                     testConnection.on('open', () => {
                         // Connection successful - game is available
+                        console.log('Connection successful - game is available');
                         testConnection.close();
                         testPeer.destroy();
                         resolve(true);
                     });
                     
-                    testConnection.on('error', () => {
+                    testConnection.on('error', (error) => {
                         // Connection failed - no game available
+                        console.log('Connection failed - no game available:', error);
                         testPeer.destroy();
                         resolve(false);
                     });
                     
-                    // Timeout after 3 seconds
+                    // Timeout after 5 seconds (increased from 3)
                     setTimeout(() => {
+                        console.log('Connection timeout - no game available');
                         testPeer.destroy();
                         resolve(false);
-                    }, 3000);
+                    }, 5000);
                 });
 
-                testPeer.on('error', () => {
+                testPeer.on('error', (error) => {
+                    console.log('Test peer error:', error);
                     resolve(false);
                 });
 
@@ -651,6 +658,7 @@ class MultiplayerManager {
 
     async hostGame() {
         try {
+            console.log('Creating host game with ID: whisk-game');
             this.peer = new Peer('whisk-game', {
                 debug: 2,
                 config: {
@@ -670,7 +678,7 @@ class MultiplayerManager {
                 this.myPlayerSymbol = 'O';
                 this.opponentPlayerSymbol = 'X';
                 
-                console.log('Game hosted with ID:', id);
+                console.log('Host peer opened with ID:', id);
                 
                 // Update the connection status message
                 const connectionStatus = document.getElementById('connectionStatus');
@@ -678,7 +686,7 @@ class MultiplayerManager {
                     connectionStatus.textContent = 'Waiting for player to join...';
                 }
                 
-                console.log('Host game created with ID:', id);
+                console.log('Host game created and ready for connections');
             });
 
             this.peer.on('connection', (conn) => {
