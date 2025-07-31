@@ -215,6 +215,15 @@ class UIManager {
     showMainMenu() {
         this.hideAllInterfaces();
         document.getElementById('mainMenu').style.display = 'block';
+        
+        // Show all buttons by default (first player scenario)
+        const hostGameBtn = document.getElementById('hostGameBtn');
+        const joinGameBtn = document.getElementById('joinGameBtn');
+        const playLocalBtn = document.getElementById('playLocalBtn');
+        
+        if (hostGameBtn) hostGameBtn.style.display = 'block';
+        if (joinGameBtn) joinGameBtn.style.display = 'none';
+        if (playLocalBtn) playLocalBtn.style.display = 'block';
     }
 
     showHostInterface() {
@@ -225,6 +234,15 @@ class UIManager {
     showJoinInterface() {
         this.hideAllInterfaces();
         document.getElementById('joinInterface').style.display = 'block';
+        
+        // Show join button, hide host and local buttons (second player scenario)
+        const hostGameBtn = document.getElementById('hostGameBtn');
+        const joinGameBtn = document.getElementById('joinGameBtn');
+        const playLocalBtn = document.getElementById('playLocalBtn');
+        
+        if (hostGameBtn) hostGameBtn.style.display = 'none';
+        if (joinGameBtn) joinGameBtn.style.display = 'block';
+        if (playLocalBtn) playLocalBtn.style.display = 'none';
     }
 
     showGameInterface() {
@@ -431,9 +449,10 @@ class MultiplayerManager {
                 this.myPlayerSymbol = 'O';
                 this.opponentPlayerSymbol = 'X';
                 
-                const gameIdElement = document.getElementById('gameId');
-                if (gameIdElement) {
-                    gameIdElement.textContent = id;
+                // Update the connection status message
+                const connectionStatus = document.getElementById('connectionStatus');
+                if (connectionStatus) {
+                    connectionStatus.textContent = 'Waiting for player to join...';
                 }
                 
                 console.log('Host game created with ID:', id);
@@ -442,6 +461,12 @@ class MultiplayerManager {
             this.peer.on('connection', (conn) => {
                 this.connection = conn;
                 this.setupConnection();
+                
+                // Update status when someone joins
+                const connectionStatus = document.getElementById('connectionStatus');
+                if (connectionStatus) {
+                    connectionStatus.textContent = 'Player joined! Starting game...';
+                }
             });
 
         } catch (error) {
