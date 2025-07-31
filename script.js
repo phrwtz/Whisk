@@ -440,7 +440,7 @@ class TicTacToe {
         cells.forEach(cell => {
             cell.textContent = '';
             const cellSizeClass = `cell-${this.boardSize}x${this.boardSize}`;
-            cell.className = `${cellSizeClass} bg-white border-none rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
+            cell.className = `${cellSizeClass} bg-white border border-green-600 rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
             // Clear all inline styles including background color
             cell.style.fontSize = '';
             cell.style.opacity = '';
@@ -893,7 +893,7 @@ class TicTacToe {
         if (cell) {
             cell.textContent = '';
             const cellSizeClass = `cell-${this.boardSize}x${this.boardSize}`;
-            cell.className = `${cellSizeClass} bg-white border-none rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
+            cell.className = `${cellSizeClass} bg-white border border-green-600 rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
             // Remove any fade classes that might be left
             cell.className = cell.className.replace(/fade-\d+/g, '');
         }
@@ -1314,7 +1314,7 @@ class TicTacToe {
         cells.forEach(cell => {
             cell.textContent = '';
             const cellSizeClass = `cell-${this.boardSize}x${this.boardSize}`;
-            cell.className = `${cellSizeClass} bg-white border-none rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
+            cell.className = `${cellSizeClass} bg-white border border-green-600 rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
             // Clear all inline styles including background color
             cell.style.fontSize = '';
             cell.style.opacity = '';
