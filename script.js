@@ -809,11 +809,16 @@ class TicTacToe {
         const scoringCells = scoringResult.scoringCells;
         
         console.log(`Player ${this.currentPlayer} at (${row}, ${col}) earned ${pointsEarned} points`);
+        console.log('Scoring result:', scoringResult);
+        console.log('Points earned:', pointsEarned);
+        console.log('Scoring cells:', scoringCells);
+        
         if (pointsEarned > 0) {
             console.log(`Player ${this.currentPlayer} scored ${pointsEarned} points on this move!`);
             this.scores[this.currentPlayer] += pointsEarned;
             console.log(`Updated scores: O=${this.scores.O}, X=${this.scores.X}`);
             this.updateScoreDisplay();
+            console.log('About to call showScoringMessage with:', pointsEarned, this.currentPlayer);
             this.showScoringMessage(pointsEarned, this.currentPlayer);
             
             // Flash the scoring cells
@@ -824,6 +829,7 @@ class TicTacToe {
                 this.flashWinningCells(cellElements);
             }
         } else {
+            console.log('No points earned, updating turn message');
             // No points scored, update turn message
             this.updateTurnMessages();
         }
@@ -1192,9 +1198,11 @@ class TicTacToe {
 
     showScoringMessage(points, player) {
         const gameStatus = document.getElementById('gameStatus');
-        console.log('showScoringMessage called with:', points, player);
+        console.log('=== showScoringMessage called ===');
+        console.log('Points:', points, 'Player:', player);
         console.log('gameStatus element:', gameStatus);
         console.log('isMultiplayer:', this.isMultiplayer, 'myPlayerSymbol:', this.myPlayerSymbol, 'opponentPlayerSymbol:', this.opponentPlayerSymbol);
+        console.log('Current gameStatus text before setting:', gameStatus ? gameStatus.textContent : 'null');
         
         if (gameStatus) {
             let message;
@@ -1204,6 +1212,7 @@ class TicTacToe {
             if (this.scores[player] >= 50) {
                 message = `${player} wins!`;
                 textColor = '#e53e3e'; // Red color for win message
+                console.log('Setting win message:', message);
             } else {
                 if (this.isMultiplayer) {
                     // For multiplayer, check if the scoring player is the current player
@@ -1211,17 +1220,17 @@ class TicTacToe {
                         // I scored points
                         message = `You scored ${points} point${points !== 1 ? 's' : ''}! It is your opponent's turn.`;
                         textColor = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e'; // Blue for O, Red for X
-                        console.log('Setting message for player who scored:', message);
+                        console.log('Setting multiplayer message for player who scored:', message);
                     } else if (player === this.opponentPlayerSymbol) {
                         // My opponent scored points
                         message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! It is your turn.`;
                         textColor = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e'; // Blue for O, Red for X
-                        console.log('Setting message for player who didn\'t score:', message);
+                        console.log('Setting multiplayer message for player who didn\'t score:', message);
                     } else {
                         // Fallback for unexpected player symbol
                         message = `${player} scored ${points} point${points !== 1 ? 's' : ''}!`;
                         textColor = '#3182ce'; // Default blue
-                        console.log('Setting fallback message:', message);
+                        console.log('Setting fallback multiplayer message:', message);
                     }
                 } else {
                     // Local game - include turn information
@@ -1234,6 +1243,9 @@ class TicTacToe {
                 }
             }
             
+            console.log('About to set gameStatus text to:', message);
+            console.log('About to set textColor to:', textColor);
+            
             gameStatus.textContent = message;
             gameStatus.style.color = textColor;
             gameStatus.style.backgroundColor = '#f0f0f0';
@@ -1244,9 +1256,20 @@ class TicTacToe {
             gameStatus.style.border = `2px solid ${textColor}`;
             gameStatus.style.display = 'block';
             gameStatus.style.visibility = 'visible';
-            console.log('Set gameStatus text to:', message);
-            console.log('gameStatus element after setting:', gameStatus);
-            console.log('gameStatus parent element:', gameStatus.parentElement);
+            
+            console.log('gameStatus text after setting:', gameStatus.textContent);
+            console.log('gameStatus styles after setting:', {
+                color: gameStatus.style.color,
+                backgroundColor: gameStatus.style.backgroundColor,
+                padding: gameStatus.style.padding,
+                borderRadius: gameStatus.style.borderRadius,
+                fontSize: gameStatus.style.fontSize,
+                fontWeight: gameStatus.style.fontWeight,
+                border: gameStatus.style.border,
+                display: gameStatus.style.display,
+                visibility: gameStatus.style.visibility
+            });
+            console.log('=== showScoringMessage completed ===');
         } else {
             console.error('gameStatus element not found!');
         }
