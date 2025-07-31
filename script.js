@@ -421,7 +421,7 @@ class UIManager {
             for (let col = 0; col < this.boardSize; col++) {
                 const cell = document.createElement('button');
                 
-                cell.className = `border border-black font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
+                cell.className = `border-2 border-black font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
                 cell.setAttribute('data-row', row);
                 cell.setAttribute('data-col', col);
                 
