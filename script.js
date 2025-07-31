@@ -46,23 +46,23 @@ class TicTacToe {
             copyGameIdBtn.addEventListener('click', () => this.copyGameId());
         }
         
-        // Add event listeners for multiplayer buttons
-        const hostGameBtn = document.getElementById('hostGame');
+        // Add event listeners for multiplayer buttons - updated for new interface
+        const hostGameBtn = document.getElementById('hostGameBtn');
         if (hostGameBtn) {
             hostGameBtn.addEventListener('click', () => this.hostGame());
         }
         
-        const joinGameBtn = document.getElementById('joinGame');
+        const joinGameBtn = document.getElementById('joinGameBtn');
         if (joinGameBtn) {
             joinGameBtn.addEventListener('click', () => this.showJoinInterface());
         }
         
-        const playLocalBtn = document.getElementById('playLocal');
+        const playLocalBtn = document.getElementById('playLocalBtn');
         if (playLocalBtn) {
             playLocalBtn.addEventListener('click', () => this.playLocal());
         }
         
-        const connectToGameBtn = document.getElementById('connectToGame');
+        const connectToGameBtn = document.getElementById('joinGame');
         if (connectToGameBtn) {
             connectToGameBtn.addEventListener('click', () => this.joinGame());
         }
@@ -91,25 +91,22 @@ class TicTacToe {
 
     showMultiplayerMenu() {
         console.log('showMultiplayerMenu called');
-        const multiplayerSetup = document.getElementById('multiplayerSetup');
-        const setup = document.getElementById('setup');
-        const game = document.getElementById('game');
+        const mainMenu = document.getElementById('mainMenu');
         const hostInterface = document.getElementById('hostInterface');
         const joinInterface = document.getElementById('joinInterface');
+        const gameInterface = document.getElementById('gameInterface');
         
         console.log('Elements found:', {
-            multiplayerSetup: !!multiplayerSetup,
-            setup: !!setup,
-            game: !!game,
+            mainMenu: !!mainMenu,
             hostInterface: !!hostInterface,
-            joinInterface: !!joinInterface
+            joinInterface: !!joinInterface,
+            gameInterface: !!gameInterface
         });
         
-        if (multiplayerSetup) multiplayerSetup.classList.remove('hidden');
-        if (setup) setup.classList.add('hidden');
-        if (game) game.classList.add('hidden');
+        if (mainMenu) mainMenu.classList.remove('hidden');
         if (hostInterface) hostInterface.classList.add('hidden');
         if (joinInterface) joinInterface.classList.add('hidden');
+        if (gameInterface) gameInterface.classList.add('hidden');
         console.log('showMultiplayerMenu completed');
     }
 
@@ -121,7 +118,7 @@ class TicTacToe {
         this.opponentPlayerSymbol = 'X';
         
         // Show loading state
-        const hostGameBtn = document.getElementById('hostGame');
+        const hostGameBtn = document.getElementById('hostGameBtn');
         const connectionStatus = document.getElementById('connectionStatus');
         if (hostGameBtn) {
             hostGameBtn.disabled = true;
@@ -209,11 +206,15 @@ class TicTacToe {
     }
 
     showJoinInterface() {
-        const joinInterface = document.getElementById('joinInterface');
+        const mainMenu = document.getElementById('mainMenu');
         const hostInterface = document.getElementById('hostInterface');
+        const joinInterface = document.getElementById('joinInterface');
+        const gameInterface = document.getElementById('gameInterface');
         
-        if (joinInterface) joinInterface.classList.remove('hidden');
+        if (mainMenu) mainMenu.classList.add('hidden');
         if (hostInterface) hostInterface.classList.add('hidden');
+        if (joinInterface) joinInterface.classList.remove('hidden');
+        if (gameInterface) gameInterface.classList.add('hidden');
     }
 
     joinGame() {
@@ -523,7 +524,27 @@ class TicTacToe {
 
     playLocal() {
         this.isMultiplayer = false;
-        this.showSetup();
+        
+        // Show game interface
+        const mainMenu = document.getElementById('mainMenu');
+        const hostInterface = document.getElementById('hostInterface');
+        const joinInterface = document.getElementById('joinInterface');
+        const gameInterface = document.getElementById('gameInterface');
+        
+        if (mainMenu) mainMenu.classList.add('hidden');
+        if (hostInterface) hostInterface.classList.add('hidden');
+        if (joinInterface) joinInterface.classList.add('hidden');
+        if (gameInterface) gameInterface.classList.remove('hidden');
+        
+        // Expand container for game interface
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) {
+            mainContainer.classList.remove('max-w-md');
+            mainContainer.classList.add('max-w-7xl', 'w-full');
+        }
+        
+        // Start the game directly
+        this.startGameWithDefaults();
     }
 
     autoStartGame() {
@@ -576,23 +597,37 @@ class TicTacToe {
         }
         
         // Show game interface
-        const setup = document.getElementById('setup');
-        const game = document.getElementById('game');
-        const multiplayerInfo = document.getElementById('multiplayerInfo');
-        const playerRole = document.getElementById('playerRole');
-        const connectionInfo = document.getElementById('connectionInfo');
+        const mainMenu = document.getElementById('mainMenu');
+        const hostInterface = document.getElementById('hostInterface');
+        const joinInterface = document.getElementById('joinInterface');
+        const gameInterface = document.getElementById('gameInterface');
         
-        if (setup) setup.style.display = 'none';
-        if (game) game.classList.remove('hidden');
+        if (mainMenu) mainMenu.classList.add('hidden');
+        if (hostInterface) hostInterface.classList.add('hidden');
+        if (joinInterface) joinInterface.classList.add('hidden');
+        if (gameInterface) gameInterface.classList.remove('hidden');
+        
+        // Expand container for game interface
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) {
+            mainContainer.classList.remove('max-w-md');
+            mainContainer.classList.add('max-w-7xl', 'w-full');
+        }
         
         // Show multiplayer info if in multiplayer mode
         if (this.isMultiplayer) {
-            if (multiplayerInfo) multiplayerInfo.classList.remove('hidden');
-            if (playerRole) playerRole.textContent = this.isHost ? 'Host' : 'Guest';
-            if (connectionInfo) connectionInfo.textContent = 'Connected';
+            const userInfo = document.getElementById('userInfo');
+            const userSymbol = document.getElementById('userSymbol');
+            if (userInfo && userSymbol) {
+                userSymbol.textContent = this.myPlayerSymbol;
+                userInfo.textContent = `You are ${this.isHost ? 'hosting' : 'joining'} as ${this.myPlayerSymbol}`;
+            }
             console.log('Multiplayer game - Host:', this.isHost, 'My symbol:', this.myPlayerSymbol);
         } else {
-            if (multiplayerInfo) multiplayerInfo.classList.add('hidden');
+            const userInfo = document.getElementById('userInfo');
+            if (userInfo) {
+                userInfo.textContent = 'Local Game';
+            }
         }
         
         this.updateGameDisplay();
