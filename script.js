@@ -470,6 +470,9 @@ class TicTacToe {
                 ).filter(cell => cell !== null);
                 this.flashWinningCells(cellElements);
             }
+        } else {
+            // No points scored, just update turn message
+            this.updateTurnMessages();
         }
         
         // Switch to my turn
@@ -477,7 +480,7 @@ class TicTacToe {
         console.log('Opponent move completed, switched to my turn:', this.currentPlayer);
         this.updateGameDisplay();
         
-        // Update turn message
+        // Update turn message and clear any scoring messages
         if (this.isMultiplayer) {
             this.updateTurnMessages();
         }
@@ -782,6 +785,11 @@ class TicTacToe {
                     document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`)
                 ).filter(cell => cell !== null);
                 this.flashWinningCells(cellElements);
+            }
+        } else {
+            // No points scored, update turn message
+            if (this.isMultiplayer) {
+                this.updateTurnMessages();
             }
         }
 
@@ -1154,12 +1162,23 @@ class TicTacToe {
             let message;
             let textColor = '#48bb78';
             
-            // Check if this player has won (100+ points)
+            // Check if this player has won (50+ points)
             if (this.scores[player] >= 50) {
                 message = `${player} wins!`;
                 textColor = '#e53e3e'; // Red color for win message
             } else {
-                message = points === 1 ? `${player} scores 1 point!` : `${player} scores ${points} points!`;
+                if (this.isMultiplayer && player === this.myPlayerSymbol) {
+                    // Multiplayer scoring message for the player who scored
+                    message = `You scored ${points} point${points !== 1 ? 's' : ''}! Now it is your opponent's turn.`;
+                    textColor = '#48bb78'; // Green
+                } else if (this.isMultiplayer && player === this.opponentPlayerSymbol) {
+                    // Multiplayer scoring message for the player who didn't score
+                    message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! Now it is your turn.`;
+                    textColor = '#e53e3e'; // Red
+                } else {
+                    // Local game or fallback
+                    message = points === 1 ? `${player} scores 1 point!` : `${player} scores ${points} points!`;
+                }
             }
             
             gameStatus.textContent = message;
