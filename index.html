@@ -3,226 +3,613 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Customizable Tic Tac Toe - Multiplayer</title>
-    <!-- Production-ready Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
-    <!-- PeerJS for WebRTC multiplayer -->
+    <title>Tic Tac Toe - Game Launcher</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    animation: {
-                        'pulse': 'pulse 1s infinite',
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        .hidden { display: none; }
+        .fade-0 { opacity: 1; }
+        .fade-1 { opacity: 0.9; }
+        .fade-2 { opacity: 0.8; }
+        .fade-3 { opacity: 0.7; }
+        .fade-4 { opacity: 0.6; }
+        .fade-5 { opacity: 0.5; }
+        .fade-6 { opacity: 0.4; }
+        .fade-7 { opacity: 0.3; }
+        .fade-8 { opacity: 0.2; }
+        .fade-9 { opacity: 0.1; }
+        .fade-10 { opacity: 0.05; }
+        
+        .board-3x3 {
+            grid-template-columns: repeat(3, 1fr);
         }
         
-        /* Custom fade classes for symbol aging */
-        .fade-0 { font-weight: 900 !important; }
-        .fade-1 { font-weight: 800 !important; }
-        .fade-2 { font-weight: 700 !important; }
-        .fade-3 { font-weight: 600 !important; }
-        .fade-4 { font-weight: 500 !important; }
-        .fade-5 { font-weight: 400 !important; }
-        .fade-6 { font-weight: 300 !important; }
-        .fade-7 { font-weight: 200 !important; }
-        .fade-8 { font-weight: 100 !important; }
-        .fade-9 { font-weight: 100 !important; }
-        .fade-10 { font-weight: 100 !important; }
-        
-        /* Disable hover effects for cells with fade classes */
-        .cell.fade-0:hover,
-        .cell.fade-1:hover,
-        .cell.fade-2:hover,
-        .cell.fade-3:hover,
-        .cell.fade-4:hover,
-        .cell.fade-5:hover,
-        .cell.fade-6:hover,
-        .cell.fade-7:hover,
-        .cell.fade-8:hover,
-        .cell.fade-9:hover,
-        .cell.fade-10:hover {
-            transform: none !important;
-        }
-        
-        /* Custom cell sizing for different board sizes */
-        .cell-3x3 { width: 80px; height: 80px; }
-        .cell-4x4 { width: 70px; height: 70px; }
-        .cell-5x5 { width: 60px; height: 60px; }
-        .cell-6x6 { width: 50px; height: 50px; }
-        .cell-7x7 { width: 45px; height: 45px; }
-        .cell-8x8 { width: 40px; height: 40px; }
+        .cell-3x3 { width: 80px; height: 80px; font-size: 2rem; }
+        .cell-4x4 { width: 70px; height: 70px; font-size: 1.8rem; }
+        .cell-5x5 { width: 60px; height: 60px; font-size: 1.5rem; }
+        .cell-6x6 { width: 50px; height: 50px; font-size: 1.3rem; }
+        .cell-7x7 { width: 45px; height: 45px; font-size: 1.1rem; }
+        .cell-8x8 { width: 40px; height: 40px; font-size: 1rem; }
     </style>
 </head>
-<body class="font-sans bg-gradient-to-br from-blue-400 to-purple-600 min-h-screen flex justify-center items-center text-gray-800">
-    <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-2xl w-11/12 text-center">
-        <h1 class="text-gray-700 mb-8 text-4xl font-bold">Customizable Tic Tac Toe - Multiplayer</h1>
-        
-        <!-- Multiplayer Setup -->
-        <div id="multiplayerSetup" class="mb-8">
-            <h2 class="text-gray-800 mb-5 text-2xl font-bold">Multiplayer Setup</h2>
-            
-            <!-- Instructions -->
-            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 mb-6">
-                <h3 class="text-yellow-800 font-bold mb-2">How to Play Multiplayer:</h3>
-                <div class="text-sm text-yellow-700 space-y-1">
-                    <p><strong>First Player (Host):</strong> Click "Host Game" to create a game and get a Game ID</p>
-                    <p><strong>Second Player (Guest):</strong> Click "Join Game" and enter the Game ID from the host</p>
-                    <p><strong>Local Play:</strong> Click "Play Local" to practice alone</p>
-                </div>
-            </div>
-            
-            <div class="flex flex-col gap-4 items-center">
-                <div class="flex gap-4 flex-wrap justify-center">
-                    <button id="hostGame" class="bg-gradient-to-r from-green-500 to-green-600 text-white border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">Host Game</button>
-                    <button id="joinGame" class="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">Join Game</button>
-                    <button id="playLocal" class="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">Play Local</button>
-                </div>
-                
-                <!-- Host Game Interface -->
-                <div id="hostInterface" class="hidden w-full max-w-md">
-                    <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 mb-4">
-                        <h3 class="text-blue-800 font-bold mb-2">Your Game ID:</h3>
-                        <div class="flex items-center gap-2">
-                            <input id="hostGameId" type="text" readonly class="flex-1 p-2 border border-blue-300 rounded bg-white text-blue-800 font-mono text-sm" />
-                            <button id="copyGameId" class="bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600">Copy</button>
-                        </div>
-                        <p class="text-blue-600 text-sm mt-2">Share this ID with your friend to join the game</p>
-                    </div>
-                    <div id="connectionStatus" class="text-sm font-semibold mb-4"></div>
-                    <div class="text-xs text-gray-500 text-center">
-                        <p>💡 Tip: Make sure both players have a stable internet connection</p>
-                        <p>If connection fails, try refreshing the page and trying again</p>
-                    </div>
-                    <div class="mt-4 text-center">
-                        <button id="backToMenu" class="bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600">Back to Menu</button>
-                    </div>
-                </div>
-                
-                <!-- Join Game Interface -->
-                <div id="joinInterface" class="hidden w-full max-w-md">
-                    <div class="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-4">
-                        <h3 class="text-green-800 font-bold mb-2">Enter Game ID:</h3>
-                        <div class="flex items-center gap-2">
-                            <input id="joinGameId" type="text" placeholder="Enter game ID" class="flex-1 p-2 border border-green-300 rounded text-green-800" />
-                            <button id="connectToGame" class="bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600">Join</button>
-                        </div>
-                    </div>
-                    <div id="joinStatus" class="text-sm font-semibold mb-4"></div>
-                    <div class="text-xs text-gray-500 text-center">
-                        <p>💡 Tip: Make sure both players have a stable internet connection</p>
-                        <p>If connection fails, try refreshing the page and trying again</p>
-                    </div>
-                    <div class="mt-4 text-center">
-                        <button id="backToMenuFromJoin" class="bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600">Back to Menu</button>
-                    </div>
-                </div>
+<body class="bg-gradient-to-br from-green-400 to-blue-500 min-h-screen flex items-center justify-center p-4">
+    <div id="mainContainer" class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+        <!-- Main Menu -->
+        <div id="mainMenu" class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Tic Tac Toe</h1>
+            <div class="space-y-4">
+                <button id="hostGameBtn" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                    Host Game
+                </button>
+                <button id="joinGameBtn" class="w-full bg-purple-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                    Join Game
+                </button>
+                <button id="playLocalBtn" class="w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors">
+                    Play Local
+                </button>
             </div>
         </div>
-        
-        <!-- Setup Interface -->
-        <div id="setup" class="hidden">
-            <div class="mb-5">
-                <h2 class="text-gray-800 mb-5 text-2xl font-bold">Game Setup</h2>
-                <div class="flex flex-col gap-5 items-center">
-                    <div class="flex flex-col items-center gap-2 w-full max-w-xs">
-                        <label for="boardSize" class="font-semibold text-gray-700 text-lg">Board Size:</label>
-                        <select id="boardSize" class="p-3 border-2 border-gray-200 rounded-lg text-base bg-white text-gray-700 cursor-pointer transition-all duration-300 w-full focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100">
-                            <option value="3">3x3</option>
-                            <option value="4">4x4</option>
-                            <option value="5">5x5</option>
-                            <option value="6">6x6</option>
-                            <option value="7">7x7</option>
-                            <option value="8" selected>8x8</option>
-                        </select>
-                    </div>
-                    
-                    <div class="flex flex-col items-center gap-2 w-full max-w-xs">
-                        <label for="persistence" class="font-semibold text-gray-700 text-lg">Symbol Persistence:</label>
-                        <select id="persistence" class="p-3 border-2 border-gray-200 rounded-lg text-base bg-white text-gray-700 cursor-pointer transition-all duration-300 w-full focus:outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100">
-                            <option value="3">3 symbols</option>
-                            <option value="4">4 symbols</option>
-                            <option value="5" selected>5 symbols</option>
-                            <option value="6">6 symbols</option>
-                            <option value="7">7 symbols</option>
-                            <option value="8">8 symbols</option>
-                            <option value="9">9 symbols</option>
-                            <option value="10">10 symbols</option>
-                            <option value="15">15 symbols</option>
-                            <option value="20">20 symbols</option>
-                            <option value="25">25 symbols</option>
-                            <option value="30">30 symbols</option>
-                            <option value="40">40 symbols</option>
-                            <option value="50">50 symbols</option>
-                            <option value="64">Unlimited</option>
-                        </select>
-                    </div>
-                    
-                    <button id="startGame" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-none py-4 px-8 rounded-lg text-lg font-semibold cursor-pointer transition-all duration-300 mt-3 hover:-translate-y-1 hover:shadow-xl">Start Game</button>
-                </div>
+
+        <!-- Host Interface -->
+        <div id="hostInterface" class="hidden text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Hosting Game</h2>
+            <div class="bg-gray-100 p-4 rounded-lg mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Game ID:</label>
+                <input type="text" id="hostGameId" readonly class="w-full p-2 border rounded bg-white font-mono text-sm">
+            </div>
+            <button id="copyGameId" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors">
+                Copy Game ID
+            </button>
+            <div id="connectionStatus" class="mt-4 text-sm font-semibold text-blue-600">
+                Waiting for player to join...
             </div>
         </div>
-        
+
+        <!-- Join Interface -->
+        <div id="joinInterface" class="hidden text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Join Game</h2>
+            <div class="bg-gray-100 p-4 rounded-lg mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Game ID:</label>
+                <input type="text" id="joinGameId" class="w-full p-2 border rounded font-mono text-sm">
+            </div>
+            <button id="joinGame" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors">
+                Join Game
+            </button>
+            <button id="tryAgainBtn" class="hidden bg-orange-600 text-white py-2 px-4 rounded hover:bg-orange-700 transition-colors ml-2">
+                Try Again
+            </button>
+            <div id="joinStatus" class="mt-4 text-sm font-semibold"></div>
+        </div>
+
         <!-- Game Interface -->
-        <div id="game" class="hidden">
-            <div class="w-full">
-                <div class="mb-8 flex justify-between items-center flex-wrap gap-4">
-                    <div class="flex items-center gap-3 text-xl font-semibold text-gray-700">
-                        Current Player: <span id="playerSymbol" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-full font-bold text-xl">O</span>
-                    </div>
-                    <div id="multiplayerInfo" class="hidden">
-                        <div class="text-sm text-gray-600">
-                            <span id="playerRole"></span> • <span id="connectionInfo"></span>
+        <div id="gameInterface" class="hidden w-full max-w-none">
+            <!-- Title Section -->
+            <div class="text-center mb-6">
+                <h1 class="text-4xl font-bold text-gray-800 mb-2">Whisk</h1>
+                <div id="userInfo" class="text-lg text-gray-600">
+                    You are user <span id="userSymbol" class="font-bold">O</span>
+                </div>
+            </div>
+            
+            <!-- Main Game Layout -->
+            <div class="flex w-full">
+                <!-- Game Board Container -->
+                <div class="w-2/5 flex-shrink-0">
+                    <div id="gameBoard" class="grid gap-1 bg-green-500 p-2 rounded-2xl shadow-2xl w-full"></div>
+                </div>
+                
+                <!-- Controls Container -->
+                <div class="w-1/3 ml-8 space-y-4">
+                <!-- Instructions Button -->
+                <button id="instructionsBtn" class="w-full bg-purple-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-purple-700 transition-colors">
+                    Instructions
+                </button>
+                
+                <!-- Scores -->
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-800 mb-2 text-center">Scores</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-center items-center">
+                            <span class="font-medium">Player O:</span>
+                            <span class="ml-1"></span>
+                            <span id="scoreO" class="font-bold">0</span>
+                        </div>
+                        <div class="flex justify-center items-center">
+                            <span class="font-medium">Player X:</span>
+                            <span class="ml-1"></span>
+                            <span id="scoreX" class="font-bold">0</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-gray-50 border-2 border-gray-200 rounded-xl p-5 mb-5 text-left max-w-full">
-                    <h3 class="text-gray-800 mb-4 text-xl font-bold text-center">Game Rules</h3>
-                    <ul class="list-none p-0 m-0">
-                        <li class="mb-2 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">Scoring:</strong> Get points for consecutive symbols in a row, column, or diagonal</li>
-                        <li class="mb-2 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">3 in a row:</strong> 1 point</li>
-                        <li class="mb-2 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">4 in a row:</strong> 4 points</li>
-                        <li class="mb-2 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">5+ in a row:</strong> 7 points</li>
-                        <li class="mb-2 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">Symbol Persistence:</strong> Only the newest symbols stay on the board (older ones fade and disappear)</li>
-                        <li class="mb-0 py-1 text-gray-700 text-sm leading-relaxed"><strong class="text-gray-800 font-semibold">Strategy:</strong> Plan ahead as your older symbols will be removed when you place new ones!</li>
+                <!-- Communication Box -->
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-semibold text-gray-800 mb-2 text-center">Messages</h3>
+                    <div id="gameStatus" class="text-sm text-gray-700 min-h-[60px]"></div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex gap-2 justify-center">
+                    <button id="newGame" class="bg-orange-600 text-white py-2 px-3 rounded-lg font-semibold hover:bg-orange-700 transition-colors text-sm whitespace-nowrap">
+                        New Game
+                    </button>
+                    <button id="backToMenu" class="bg-gray-600 text-white py-2 px-3 rounded-lg font-semibold hover:bg-gray-700 transition-colors text-sm whitespace-nowrap">
+                        Back to Menu
+                    </button>
+                </div>
+            </div>
+            
+
+        </div>
+
+        <!-- Instructions Modal -->
+        <div id="instructionsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 max-w-md mx-4 max-h-96 overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Game Rules</h3>
+                    <button id="closeInstructions" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                </div>
+                <div class="text-gray-700 space-y-3">
+                    <p><strong>Objective:</strong> Score points by creating lines of 3 or more consecutive symbols.</p>
+                    <p><strong>Scoring:</strong></p>
+                    <ul class="list-disc list-inside ml-4">
+                        <li>3 in a row: 1 point</li>
+                        <li>4 in a row: 4 points</li>
+                        <li>5+ in a row: 7 points</li>
                     </ul>
-                </div>
-                
-                <div id="gameStatus" class="text-lg font-semibold text-gray-800 text-center my-3 p-3 rounded-lg bg-gray-50 border-2 border-gray-200"></div>
-                
-                <div class="flex gap-5 my-3">
-                    <div class="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-90 rounded-lg shadow-md">
-                        <span class="font-semibold text-gray-700">Player O:</span>
-                        <span id="scoreO" class="text-xl font-bold text-gray-800 min-w-8 text-center">0</span>
-                    </div>
-                    <div class="flex items-center gap-2 px-4 py-2 bg-white bg-opacity-90 rounded-lg shadow-md">
-                        <span class="font-semibold text-gray-700">Player X:</span>
-                        <span id="scoreX" class="text-xl font-bold text-gray-800 min-w-8 text-center">0</span>
-                    </div>
-                </div>
-                
-                <div class="flex justify-center mb-8">
-                    <div id="gameBoard" class="grid gap-1 bg-green-500 p-2 rounded-2xl shadow-2xl"></div>
-                </div>
-                
-                <div class="flex gap-4 justify-center flex-wrap">
-                    <button id="newGame" class="bg-gray-200 text-gray-700 border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:bg-gray-300 hover:-translate-y-1">New Game</button>
-                    <button id="resetSetup" class="bg-gray-200 text-gray-700 border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:bg-gray-300 hover:-translate-y-1">Change Settings</button>
-                    <button id="backToMultiplayer" class="bg-gray-200 text-gray-700 border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:bg-gray-300 hover:-translate-y-1">Back to Menu</button>
+                    <p><strong>Symbol Persistence:</strong> Older symbols fade and disappear when you exceed the persistence limit.</p>
+                    <p><strong>Multiplayer:</strong> Take turns placing symbols. Host plays as O (blue), Guest plays as X (red).</p>
+                    <p><strong>Winning:</strong> First player to reach 50 points wins!</p>
                 </div>
             </div>
         </div>
     </div>
-    
-    <script src="script.js?v=26"></script>
+
+    <script src="script.js?v=35"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mainMenu = document.getElementById('mainMenu');
+            const hostInterface = document.getElementById('hostInterface');
+            const joinInterface = document.getElementById('joinInterface');
+            const gameInterface = document.getElementById('gameInterface');
+            const instructionsModal = document.getElementById('instructionsModal');
+            
+            const hostGameBtn = document.getElementById('hostGameBtn');
+            const joinGameBtn = document.getElementById('joinGameBtn');
+            const playLocalBtn = document.getElementById('playLocalBtn');
+            const instructionsBtn = document.getElementById('instructionsBtn');
+            const closeInstructions = document.getElementById('closeInstructions');
+            const backToMenu = document.getElementById('backToMenu');
+            const tryAgainBtn = document.getElementById('tryAgainBtn');
+            
+            // Check if someone is already hosting
+            let game = null;
+            let isGameHosted = false;
+            
+            // Check for existing game on page load
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameId = urlParams.get('gameId');
+            const isJoining = urlParams.get('join') === 'true';
+            
+            // Check if there's an active game (stored in localStorage)
+            const activeGameId = localStorage.getItem('activeGameId');
+            const activeGameHost = localStorage.getItem('activeGameHost');
+            const gameCreatedTime = localStorage.getItem('gameCreatedTime');
+            
+            // Clear old game data (older than 1 hour)
+            if (gameCreatedTime && (Date.now() - parseInt(gameCreatedTime)) > 3600000) {
+                clearGameData();
+            }
+            
+            // Check if there's a valid active game
+            if (activeGameId && activeGameHost) {
+                // There's an active game, show join interface
+                isGameHosted = true;
+                showJoinInterface();
+                document.getElementById('joinGameId').value = activeGameId;
+            } else if (gameId && isJoining) {
+                // Auto-join existing game from URL params
+                showJoinInterface();
+                document.getElementById('joinGameId').value = gameId;
+                if (game) {
+                    game.joinGame();
+                }
+            } else {
+                // No active game, clear any stale data and show main menu
+                clearGameData();
+                showMainMenu();
+            }
+            
+            function showMainMenu() {
+                mainMenu.classList.remove('hidden');
+                hostInterface.classList.add('hidden');
+                joinInterface.classList.add('hidden');
+                gameInterface.classList.add('hidden');
+                
+                // Show/hide buttons based on game status
+                if (isGameHosted) {
+                    // Game is hosted, show only join button
+                    hostGameBtn.classList.add('hidden');
+                    joinGameBtn.classList.remove('hidden');
+                    playLocalBtn.classList.add('hidden');
+                } else {
+                    // No game hosted, show host and local buttons
+                    hostGameBtn.classList.remove('hidden');
+                    joinGameBtn.classList.add('hidden');
+                    playLocalBtn.classList.remove('hidden');
+                }
+            }
+            
+            function showHostInterface() {
+                mainMenu.classList.add('hidden');
+                hostInterface.classList.remove('hidden');
+                joinInterface.classList.add('hidden');
+                gameInterface.classList.add('hidden');
+            }
+            
+            function showJoinInterface() {
+                mainMenu.classList.add('hidden');
+                hostInterface.classList.add('hidden');
+                joinInterface.classList.remove('hidden');
+                gameInterface.classList.add('hidden');
+            }
+            
+            function showGameInterface() {
+                mainMenu.classList.add('hidden');
+                hostInterface.classList.add('hidden');
+                joinInterface.classList.add('hidden');
+                gameInterface.classList.remove('hidden');
+                
+                // Expand container for game interface
+                const mainContainer = document.getElementById('mainContainer');
+                mainContainer.classList.remove('max-w-md');
+                mainContainer.classList.add('max-w-7xl', 'w-full');
+                
+                // Debug logging
+                console.log('Game interface shown');
+                console.log('Main container classes:', mainContainer.className);
+                console.log('Game interface classes:', gameInterface.className);
+                
+                // Log the layout containers
+                const gameBoardContainer = document.querySelector('#gameBoard').parentElement;
+                const controlsContainer = document.querySelector('#instructionsBtn').parentElement;
+                console.log('Game board container classes:', gameBoardContainer.className);
+                console.log('Controls container classes:', controlsContainer.className);
+                console.log('Game board container width:', gameBoardContainer.offsetWidth);
+                console.log('Controls container width:', controlsContainer.offsetWidth);
+                console.log('Controls container left position:', controlsContainer.offsetLeft);
+                
+                // Check computed styles
+                const gameBoardStyle = window.getComputedStyle(gameBoardContainer);
+                const controlsStyle = window.getComputedStyle(controlsContainer);
+                console.log('Game board computed width:', gameBoardStyle.width);
+                console.log('Controls computed width:', controlsStyle.width);
+                console.log('Controls computed left padding:', controlsStyle.paddingLeft);
+                
+                // Check if there are any conflicting CSS rules
+                console.log('Game board container classList:', Array.from(gameBoardContainer.classList));
+                console.log('Controls container classList:', Array.from(controlsContainer.classList));
+            }
+            
+            function showInstructions() {
+                instructionsModal.classList.remove('hidden');
+            }
+            
+            function hideInstructions() {
+                instructionsModal.classList.add('hidden');
+            }
+            
+            function showJoinButton() {
+                joinGameBtn.classList.remove('hidden');
+            }
+            
+            function hideJoinButton() {
+                joinGameBtn.classList.add('hidden');
+            }
+            
+            function clearGameData() {
+                localStorage.removeItem('activeGameId');
+                localStorage.removeItem('activeGameHost');
+                localStorage.removeItem('gameCreatedTime');
+                isGameHosted = false;
+            }
+            
+            // Event listeners
+            hostGameBtn.addEventListener('click', () => {
+                showHostInterface();
+                if (!game) {
+                    game = new TicTacToe();
+                }
+                game.hostGame();
+                
+                // Store game info when hosting
+                game.peer.on('open', (id) => {
+                    localStorage.setItem('activeGameId', id);
+                    localStorage.setItem('activeGameHost', window.location.href);
+                    localStorage.setItem('gameCreatedTime', Date.now().toString());
+                    isGameHosted = true;
+                });
+            });
+            
+            joinGameBtn.addEventListener('click', () => {
+                showJoinInterface();
+                if (!game) {
+                    game = new TicTacToe();
+                }
+            });
+            
+            playLocalBtn.addEventListener('click', () => {
+                showGameInterface();
+                if (!game) {
+                    game = new TicTacToe();
+                }
+                // Skip setup and start local game directly
+                game.isMultiplayer = false;
+                game.startGameWithDefaults();
+            });
+            
+            document.getElementById('joinGame').addEventListener('click', () => {
+                if (!game) {
+                    game = new TicTacToe();
+                }
+                game.joinGame();
+                
+                // Clear game data when joining (game is now active)
+                clearGameData();
+            });
+            
+            tryAgainBtn.addEventListener('click', () => {
+                if (!game) {
+                    game = new TicTacToe();
+                }
+                game.joinGame();
+                
+                // Clear game data when joining (game is now active)
+                clearGameData();
+            });
+            
+            document.getElementById('copyGameId').addEventListener('click', () => {
+                if (game) {
+                    game.copyGameId();
+                }
+            });
+            
+            instructionsBtn.addEventListener('click', showInstructions);
+            closeInstructions.addEventListener('click', hideInstructions);
+            
+            backToMenu.addEventListener('click', () => {
+                if (game) {
+                    game = null;
+                }
+                clearGameData();
+                
+                // Restore container size
+                const mainContainer = document.getElementById('mainContainer');
+                mainContainer.classList.remove('max-w-7xl', 'w-full');
+                mainContainer.classList.add('max-w-md');
+                
+                showMainMenu();
+            });
+            
+            // Close modal when clicking outside
+            instructionsModal.addEventListener('click', (e) => {
+                if (e.target === instructionsModal) {
+                    hideInstructions();
+                }
+            });
+            
+            // Override game methods to work with our interface
+            if (typeof TicTacToe !== 'undefined') {
+                const originalTicTacToe = TicTacToe;
+                TicTacToe = function() {
+                    // Create a proper instance
+                    const instance = new originalTicTacToe();
+                    
+                    // Override the showMultiplayerMenu method to do nothing
+                    instance.showMultiplayerMenu = () => {
+                        // Do nothing - don't show the multiplayer menu
+                    };
+                    
+                    // Override other methods to work with our interface
+                    instance.showSetup = () => {
+                        showGameInterface();
+                    };
+                    
+                    // Override newGame to clear localStorage data
+                    const originalNewGame = instance.newGame;
+                    instance.newGame = function() {
+                        // Clear localStorage data when starting a new game
+                        clearGameData();
+                        return originalNewGame.call(this);
+                    };
+                    
+                    instance.startGame = function() {
+                        showGameInterface();
+                        
+                        // Prevent multiple game starts
+                        if (this.gameActive) {
+                            console.log('Game already active, skipping start');
+                            return;
+                        }
+                        
+                        console.log('Starting game with boardSize:', this.boardSize, 'persistence:', this.persistence);
+                        
+                        // Validate persistence
+                        const maxPossibleSymbols = this.boardSize * this.boardSize;
+                        if (this.persistence > maxPossibleSymbols) {
+                            alert(`Persistence cannot be greater than the total board size (${maxPossibleSymbols})!`);
+                            return;
+                        }
+                        
+                        this.initializeBoard();
+                        this.gameActive = true;
+                        this.currentPlayer = 'O';
+                        this.symbolHistory = [];
+                        this.symbolCounts = { O: 0, X: 0 };
+                        this.scores = { O: 0, X: 0 };
+                        
+                        console.log('Game initialized - gameActive:', this.gameActive, 'currentPlayer:', this.currentPlayer);
+                        
+                        // Clear the scoring textbox and set initial communication message
+                        const gameStatus = document.getElementById('gameStatus');
+                        if (gameStatus) {
+                            gameStatus.textContent = '';
+                            
+                            if (this.isMultiplayer) {
+                                // In multiplayer, show turn-based message
+                                gameStatus.textContent = this.currentPlayer === this.myPlayerSymbol ? 
+                                    "It is your turn" : "It is your opponent's turn";
+                            } else {
+                                // In local play, show current player
+                                gameStatus.textContent = `Current player: ${this.currentPlayer}`;
+                            }
+                        }
+                        
+                        console.log('Game started - Multiplayer:', this.isMultiplayer, 'My symbol:', this.myPlayerSymbol);
+                        
+                        this.updateGameDisplay();
+                        this.createBoard();
+                        
+                        // Update user symbol display
+                        const userSymbol = document.getElementById('userSymbol');
+                        if (userSymbol) {
+                            userSymbol.textContent = this.isMultiplayer ? this.myPlayerSymbol : 'O';
+                        }
+                        
+                        // Send game start data to opponent if multiplayer (only host sends it)
+                        if (this.isMultiplayer && this.connection && this.isHost) {
+                            this.connection.send({
+                                type: 'gameStart',
+                                boardSize: this.boardSize,
+                                persistence: this.persistence
+                            });
+                        }
+                    };
+                    
+                    instance.hostGame = function() {
+                        showHostInterface();
+                        return originalTicTacToe.prototype.hostGame.call(this);
+                    };
+                    
+                    instance.showJoinInterface = function() {
+                        showJoinInterface();
+                        return originalTicTacToe.prototype.showJoinInterface.call(this);
+                    };
+                    
+                    // Override updateGameDisplay to work with new layout
+                    instance.updateGameDisplay = function() {
+                        // Don't update playerSymbol since we removed it
+                        // Just update the score display
+                        this.updateScoreDisplay();
+                    };
+                    
+                    // Override showScoringMessage for new communication system
+                    instance.showScoringMessage = function(points, player) {
+                        const gameStatus = document.getElementById('gameStatus');
+                        if (gameStatus) {
+                            if (this.isMultiplayer) {
+                                // In multiplayer, show personalized messages
+                                if (this.scores[player] >= 50) {
+                                    // Game won
+                                    gameStatus.textContent = player === this.myPlayerSymbol ? "You win!" : "Your opponent wins!";
+                                    gameStatus.style.color = '#e53e3e'; // Red for win
+                                    // Clear localStorage data when game ends
+                                    clearGameData();
+                                } else {
+                                    // Points scored
+                                    if (player === this.myPlayerSymbol) {
+                                        gameStatus.textContent = `You scored ${points} points!`;
+                                    } else {
+                                        gameStatus.textContent = `Your opponent scored ${points} points!`;
+                                    }
+                                    gameStatus.style.color = '#48bb78'; // Green for scoring
+                                }
+                            } else {
+                                // In local play, show generic message
+                                if (this.scores[player] >= 50) {
+                                    gameStatus.textContent = `${player} wins!`;
+                                    gameStatus.style.color = '#e53e3e';
+                                    // Clear localStorage data when game ends
+                                    clearGameData();
+                                } else {
+                                    gameStatus.textContent = `${player} scores ${points} points!`;
+                                    gameStatus.style.color = '#48bb78';
+                                }
+                            }
+                            
+                            // Reset styling
+                            gameStatus.style.backgroundColor = '#f0f0f0';
+                            gameStatus.style.padding = '10px';
+                            gameStatus.style.borderRadius = '5px';
+                            gameStatus.style.fontSize = '1.2rem';
+                            gameStatus.style.fontWeight = 'bold';
+                            gameStatus.style.border = `2px solid ${gameStatus.style.color}`;
+                        }
+                    };
+                    
+                    // Override handleCellClick to update turn messages
+                    const originalHandleCellClick = instance.handleCellClick;
+                    instance.handleCellClick = function(row, col) {
+                        const result = originalHandleCellClick.call(this, row, col);
+                        
+                        // Update turn message after move
+                        if (this.isMultiplayer && this.gameActive) {
+                            const gameStatus = document.getElementById('gameStatus');
+                            if (gameStatus && !gameStatus.textContent.includes('scored') && !gameStatus.textContent.includes('wins')) {
+                                // Only update if not showing scoring message
+                                gameStatus.textContent = this.currentPlayer === this.myPlayerSymbol ? 
+                                    "It is your turn" : "It is your opponent's turn";
+                                gameStatus.style.color = '#333333'; // Reset to normal color
+                                gameStatus.style.backgroundColor = '';
+                                gameStatus.style.border = '';
+                                gameStatus.style.padding = '';
+                                gameStatus.style.borderRadius = '';
+                                gameStatus.style.fontSize = '';
+                                gameStatus.style.fontWeight = '';
+                            }
+                        }
+                        
+                        return result;
+                    };
+                    
+                    // Override handleOpponentMove to update turn messages
+                    const originalHandleOpponentMove = instance.handleOpponentMove;
+                    instance.handleOpponentMove = function(row, col) {
+                        const result = originalHandleOpponentMove.call(this, row, col);
+                        
+                        // Update turn message after opponent move
+                        if (this.isMultiplayer && this.gameActive) {
+                            const gameStatus = document.getElementById('gameStatus');
+                            if (gameStatus && !gameStatus.textContent.includes('scored') && !gameStatus.textContent.includes('wins')) {
+                                // Only update if not showing scoring message
+                                gameStatus.textContent = this.currentPlayer === this.myPlayerSymbol ? 
+                                    "It is your turn" : "It is your opponent's turn";
+                                gameStatus.style.color = '#333333'; // Reset to normal color
+                                gameStatus.style.backgroundColor = '';
+                                gameStatus.style.border = '';
+                                gameStatus.style.padding = '';
+                                gameStatus.style.borderRadius = '';
+                                gameStatus.style.fontSize = '';
+                                gameStatus.style.fontWeight = '';
+                            }
+                        }
+                        
+                        return result;
+                    };
+                    
+                    // Override handleDisconnection to clear localStorage
+                    const originalHandleDisconnection = instance.handleDisconnection;
+                    instance.handleDisconnection = function() {
+                        const result = originalHandleDisconnection.call(this);
+                        // Clear localStorage data when opponent disconnects
+                        clearGameData();
+                        return result;
+                    };
+                    
+                    return instance;
+                };
+            }
+        });
+    </script>
 </body>
 </html> 
