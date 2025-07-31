@@ -159,18 +159,17 @@ class GameLogic {
         
         console.log('Player O symbols:', playerHistory.O.length, 'Player X symbols:', playerHistory.X.length);
         
-        // Remove oldest symbols for each player if they exceed persistence limit
+        // Remove oldest symbols from board for each player if they exceed persistence limit
         Object.keys(playerHistory).forEach(player => {
             while (playerHistory[player].length > this.persistence) {
                 const oldestSymbol = playerHistory[player].shift();
                 this.board[oldestSymbol.row][oldestSymbol.col] = '';
                 this.symbolCounts[oldestSymbol.symbol]--;
-                console.log('Removed symbol:', oldestSymbol.symbol, 'at', oldestSymbol.row, oldestSymbol.col);
+                console.log('Removed symbol from board:', oldestSymbol.symbol, 'at', oldestSymbol.row, oldestSymbol.col);
             }
         });
         
-        // Update symbolHistory to reflect the remaining symbols
-        this.symbolHistory = [...playerHistory.O, ...playerHistory.X];
+        // Don't modify symbolHistory - keep it for fading calculations
         
         console.log('After persistence management - O symbols:', playerHistory.O.length, 'X symbols:', playerHistory.X.length);
     }
@@ -358,12 +357,28 @@ class UIManager {
     }
 
     updateCellStyle(cell, symbol) {
+        // Clear any existing fade classes
+        cell.classList.remove('fade-0', 'fade-1', 'fade-2', 'fade-3', 'fade-4', 'fade-5', 'fade-6', 'fade-7', 'fade-8', 'fade-9', 'fade-10');
+        
         if (symbol === 'X') {
             cell.classList.add('text-red-600');
             cell.style.color = '#dc2626';
         } else if (symbol === 'O') {
             cell.classList.add('text-blue-600');
             cell.style.color = '#2563eb';
+        }
+        
+        // Apply fading based on symbol age
+        if (symbol) {
+            const row = parseInt(cell.getAttribute('data-row'));
+            const col = parseInt(cell.getAttribute('data-col'));
+            const symbolIndex = this.gameLogic.symbolHistory.findIndex(s => s.row === row && s.col === col && s.symbol === symbol);
+            
+            if (symbolIndex !== -1) {
+                const age = this.gameLogic.symbolHistory.length - symbolIndex - 1;
+                const fadeClass = Math.min(age, 10);
+                cell.classList.add(`fade-${fadeClass}`);
+            }
         }
     }
 
