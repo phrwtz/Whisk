@@ -90,6 +90,10 @@ class TicTacToe {
 
     showMultiplayerMenu() {
         console.log('showMultiplayerMenu called');
+        
+        // Clear any existing game data when returning to main menu
+        this.clearGameData();
+        
         const mainMenu = document.getElementById('mainMenu');
         const hostInterface = document.getElementById('hostInterface');
         const joinInterface = document.getElementById('joinInterface');
@@ -499,6 +503,9 @@ class TicTacToe {
         if (this.isMultiplayer) {
             this.showScoringMessage('Opponent disconnected', '');
             this.gameActive = false;
+            
+            // Clear game data when game ends
+            this.clearGameData();
             
             // Show reconnection option
             const gameStatus = document.getElementById('gameStatus');
@@ -1242,12 +1249,20 @@ class TicTacToe {
         }
         
         // Check if there's a valid active game
-        if (activeGameId && activeGameHost) {
-            // There's an active game, show join interface
-            this.showJoinInterface();
-            const joinGameId = document.getElementById('joinGameId');
-            if (joinGameId) {
-                joinGameId.value = activeGameId;
+        if (activeGameId && activeGameHost && gameCreatedTime) {
+            // Verify the game is still recent (less than 1 hour old)
+            const gameAge = Date.now() - parseInt(gameCreatedTime);
+            if (gameAge < 3600000) {
+                // There's a valid active game, show join interface
+                this.showJoinInterface();
+                const joinGameId = document.getElementById('joinGameId');
+                if (joinGameId) {
+                    joinGameId.value = activeGameId;
+                }
+                return;
+            } else {
+                // Game is too old, clear it
+                this.clearGameData();
             }
         } else if (gameId && isJoining) {
             // Auto-join existing game from URL params
