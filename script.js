@@ -346,12 +346,19 @@ class UIManager {
                         resolve(false);
                     });
                     
-                    // Timeout after 5 seconds (increased from 3)
+                    testConnection.on('close', () => {
+                        // Connection closed - this is expected after successful connection
+                        console.log('Test connection closed');
+                        testPeer.destroy();
+                        resolve(true);
+                    });
+                    
+                    // Timeout after 3 seconds (reduced from 5)
                     setTimeout(() => {
                         console.log('Connection timeout - no game available');
                         testPeer.destroy();
                         resolve(false);
-                    }, 5000);
+                    }, 3000);
                 });
 
                 testPeer.on('error', (error) => {
@@ -666,6 +673,10 @@ class MultiplayerManager {
     async hostGame() {
         try {
             console.log('Creating host game with ID: whisk-game');
+            
+            // Show the host interface first
+            this.uiManager.showHostInterface();
+            
             this.peer = new Peer('whisk-game', {
                 debug: 2,
                 config: {
