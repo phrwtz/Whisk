@@ -109,12 +109,12 @@ class GameLogic {
         }
 
         // Calculate points based on line length
-        if (cells.length >= 3 && cells.length <= 4) {
+        if (cells.length === 3) {
             points = 1;
-        } else if (cells.length >= 5 && cells.length <= 6) {
-            points = 4;
-        } else if (cells.length >= 7) {
-            points = 7;
+        } else if (cells.length === 4) {
+            points = 3;
+        } else if (cells.length >= 5) {
+            points = 5;
         }
 
         return { points, cells };
@@ -391,7 +391,7 @@ class UIManager {
             for (let col = 0; col < this.boardSize; col++) {
                 const cell = document.createElement('button');
                 
-                cell.className = `rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
+                cell.className = `border border-gray-300 font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
                 cell.setAttribute('data-row', row);
                 cell.setAttribute('data-col', col);
                 
