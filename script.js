@@ -245,14 +245,14 @@ class UIManager {
         if (!gameBoard) return;
 
         gameBoard.innerHTML = '';
-        gameBoard.className = 'grid gap-0 bg-green-500 p-2 rounded-2xl shadow-2xl';
+        gameBoard.className = 'grid gap-1 bg-green-500 p-2 rounded-2xl shadow-2xl';
 
         for (let row = 0; row < this.boardSize; row++) {
             for (let col = 0; col < this.boardSize; col++) {
                 const cell = document.createElement('button');
                 const cellSizeClass = `cell-${this.boardSize}x${this.boardSize}`;
                 
-                cell.className = `${cellSizeClass} bg-white border border-green-600 rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
+                cell.className = `${cellSizeClass} bg-white rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
                 cell.setAttribute('data-row', row);
                 cell.setAttribute('data-col', col);
                 
