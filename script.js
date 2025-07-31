@@ -61,18 +61,14 @@ class GameLogic {
         let scoringCells = [];
 
         // Check horizontal lines
-        for (let startCol = Math.max(0, col - 4); startCol <= Math.min(this.boardSize - 5, col); startCol++) {
-            const result = this.checkLineForScoring(row, startCol, 0, 1, player);
-            totalPoints += result.points;
-            scoringCells.push(...result.cells);
-        }
+        const horizontalResult = this.checkLineForScoring(row, 0, 0, 1, player);
+        totalPoints += horizontalResult.points;
+        scoringCells.push(...horizontalResult.cells);
 
         // Check vertical lines
-        for (let startRow = Math.max(0, row - 4); startRow <= Math.min(this.boardSize - 5, row); startRow++) {
-            const result = this.checkLineForScoring(startRow, col, 1, 0, player);
-            totalPoints += result.points;
-            scoringCells.push(...result.cells);
-        }
+        const verticalResult = this.checkLineForScoring(0, col, 1, 0, player);
+        totalPoints += verticalResult.points;
+        scoringCells.push(...verticalResult.cells);
 
         // Check diagonals
         const diagonalResults = this.checkDiagonalThroughCell(row, col, player);
@@ -151,10 +147,13 @@ class GameLogic {
     managePersistence() {
         if (this.persistence === 64) return; // No persistence in unlimited mode
 
+        console.log('Managing persistence - current length:', this.symbolHistory.length, 'persistence:', this.persistence);
+        
         while (this.symbolHistory.length > this.persistence) {
             const oldestSymbol = this.symbolHistory.shift();
             this.board[oldestSymbol.row][oldestSymbol.col] = '';
             this.symbolCounts[oldestSymbol.symbol]--;
+            console.log('Removed symbol:', oldestSymbol.symbol, 'at', oldestSymbol.row, oldestSymbol.col);
         }
     }
 
