@@ -728,7 +728,7 @@ class TicTacToe {
         gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize}, 1fr)`;
         
         // Add board size class for styling
-        gameBoard.className = 'grid gap-1 bg-green-500 p-2 rounded-2xl shadow-2xl';
+        gameBoard.className = 'grid gap-0.5 bg-green-500 p-2 rounded-2xl shadow-2xl';
         if (this.boardSize === 3) {
             gameBoard.classList.add('board-3x3');
         }
