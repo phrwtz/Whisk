@@ -830,9 +830,7 @@ class TicTacToe {
             }
         } else {
             // No points scored, update turn message
-            if (this.isMultiplayer) {
-                this.updateTurnMessages();
-            }
+            this.updateTurnMessages();
         }
 
         // Send move to opponent if in multiplayer mode
@@ -859,6 +857,7 @@ class TicTacToe {
             // Switch players for local game
             this.currentPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
             console.log('Switched to player:', this.currentPlayer);
+            this.updateTurnMessages();
         }
         
         this.updateGameDisplay();
@@ -1342,8 +1341,9 @@ class TicTacToe {
                 console.log('Set turn message: It is your opponent\'s turn');
             }
         } else {
-            message = `It is ${this.currentPlayer}'s turn`;
-            textColor = '#3182ce'; // Default blue for local games
+            // Local play mode
+            message = `Current player: ${this.currentPlayer}`;
+            textColor = this.currentPlayer === 'O' ? '#3182ce' : '#e53e3e'; // Blue for O, Red for X
             console.log('Set turn message for local game:', message);
         }
         
