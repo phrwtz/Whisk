@@ -416,16 +416,50 @@ class TicTacToe {
                 break;
             case 'newGame':
                 console.log('Received newGame signal from opponent');
-                this.newGame();
-                // Ensure turn messages are updated for the guest
-                if (this.isMultiplayer) {
-                    this.updateTurnMessages();
-                }
+                this.handleNewGameFromOpponent();
                 break;
             case 'boardSync':
                 this.syncBoard(data.board, data.scores, data.currentPlayer, data.symbolHistory);
                 break;
         }
+    }
+
+    handleNewGameFromOpponent() {
+        console.log('Handling new game from opponent');
+        
+        this.initializeBoard();
+        this.gameActive = true;
+        this.currentPlayer = 'O';
+        this.winningCells = [];
+        this.symbolHistory = [];
+        this.symbolCounts = { O: 0, X: 0 };
+        this.scores = { O: 0, X: 0 };
+        
+        // Clear all cells completely
+        const cells = document.querySelectorAll('.cell, button[data-row]');
+        cells.forEach(cell => {
+            cell.textContent = '';
+            const cellSizeClass = `cell-${this.boardSize}x${this.boardSize}`;
+            cell.className = `${cellSizeClass} bg-white border-none rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
+            // Clear all inline styles including background color
+            cell.style.fontSize = '';
+            cell.style.opacity = '';
+            cell.style.fontWeight = '';
+            cell.style.backgroundColor = '';
+        });
+        
+        // Clear the scoring textbox
+        const gameStatus = document.getElementById('gameStatus');
+        if (gameStatus) {
+            gameStatus.textContent = '';
+        }
+        
+        // Update turn messages for multiplayer
+        if (this.isMultiplayer) {
+            this.updateTurnMessages();
+        }
+        
+        this.updateGameDisplay();
     }
 
     handleOpponentMove(row, col) {
@@ -1166,6 +1200,7 @@ class TicTacToe {
         const gameStatus = document.getElementById('gameStatus');
         console.log('showScoringMessage called with:', points, player);
         console.log('gameStatus element:', gameStatus);
+        console.log('isMultiplayer:', this.isMultiplayer, 'myPlayerSymbol:', this.myPlayerSymbol, 'opponentPlayerSymbol:', this.opponentPlayerSymbol);
         
         if (gameStatus) {
             let message;
@@ -1180,13 +1215,16 @@ class TicTacToe {
                     // Multiplayer scoring message for the player who scored
                     message = `You scored ${points} point${points !== 1 ? 's' : ''}! It is your opponent's turn.`;
                     textColor = '#48bb78'; // Green
+                    console.log('Setting message for player who scored:', message);
                 } else if (this.isMultiplayer && player === this.opponentPlayerSymbol) {
                     // Multiplayer scoring message for the player who didn't score
                     message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! It is your turn.`;
                     textColor = '#e53e3e'; // Red
+                    console.log('Setting message for player who didn\'t score:', message);
                 } else {
                     // Local game or fallback
                     message = points === 1 ? `${player} scores 1 point!` : `${player} scores ${points} points!`;
+                    console.log('Setting fallback message:', message);
                 }
             }
             
