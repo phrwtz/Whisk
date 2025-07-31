@@ -249,34 +249,23 @@ class UIManager {
             mainContainer.className = 'w-full bg-white rounded-2xl shadow-2xl p-8 max-w-md';
         }
         
-        // Check if someone is already hosting (for regular mode)
-        const isGameHosted = localStorage.getItem('gameHosted') === 'true';
-        console.log('showMainMenu - isGameHosted:', isGameHosted);
-        
+        // Always show all buttons - let users choose what they want to do
         const hostGameBtn = document.getElementById('hostGameBtn');
         const joinGameBtn = document.getElementById('joinGameBtn');
         const playLocalBtn = document.getElementById('playLocalBtn');
         
-        if (isGameHosted) {
-            // Second player scenario - show only join button
-            console.log('Showing join interface (second player)');
-            if (hostGameBtn) hostGameBtn.style.display = 'none';
-            if (joinGameBtn) joinGameBtn.style.display = 'block';
-            if (playLocalBtn) playLocalBtn.style.display = 'none';
-        } else {
-            // First player scenario - show host and local buttons
-            console.log('Showing host interface (first player)');
-            if (hostGameBtn) hostGameBtn.style.display = 'block';
-            if (joinGameBtn) joinGameBtn.style.display = 'none';
-            if (playLocalBtn) playLocalBtn.style.display = 'block';
-        }
+        if (hostGameBtn) hostGameBtn.style.display = 'block';
+        if (joinGameBtn) joinGameBtn.style.display = 'block';
+        if (playLocalBtn) playLocalBtn.style.display = 'block';
+        
+        console.log('Showing all menu options - Host Game, Join Game, and Play Local');
     }
 
 
 
 
     clearGameData() {
-        localStorage.removeItem('gameHosted');
+        // No longer using localStorage for game hosting detection
     }
 
     showHostInterface() {
@@ -540,9 +529,7 @@ class MultiplayerManager {
                 this.myPlayerSymbol = 'O';
                 this.opponentPlayerSymbol = 'X';
                 
-                // Mark that a game is being hosted
-                localStorage.setItem('gameHosted', 'true');
-                console.log('Game hosted - localStorage set to true');
+                console.log('Game hosted with ID:', id);
                 
                 // Update the connection status message
                 const connectionStatus = document.getElementById('connectionStatus');
