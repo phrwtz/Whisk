@@ -308,9 +308,11 @@ class UIManager {
         if (!gameBoard) return;
 
         gameBoard.innerHTML = '';
-        gameBoard.className = 'grid gap-1 bg-green-500 p-2 rounded-2xl shadow-2xl';
+        gameBoard.className = 'grid gap-1 bg-green-500 p-2 rounded-2xl shadow-2xl w-full';
         gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize}, 1fr)`;
         gameBoard.style.gridTemplateRows = `repeat(${this.boardSize}, 1fr)`;
+        gameBoard.style.aspectRatio = '1 / 1';
+        gameBoard.style.maxHeight = '80vh';
 
         for (let row = 0; row < this.boardSize; row++) {
             for (let col = 0; col < this.boardSize; col++) {
