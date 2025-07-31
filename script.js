@@ -4,7 +4,7 @@ class GameLogic {
     constructor(boardSize = 8, persistence = 5) {
         this.boardSize = boardSize;
         this.persistence = persistence;
-        console.log('GameLogic created with persistence:', this.persistence);
+        console.log('GameLogic created with persistence:', this.persistence, 'boardSize:', this.boardSize);
         this.reset();
     }
 
@@ -149,12 +149,26 @@ class GameLogic {
 
         console.log('Managing persistence - current length:', this.symbolHistory.length, 'persistence:', this.persistence);
         
-        while (this.symbolHistory.length > this.persistence) {
-            const oldestSymbol = this.symbolHistory.shift();
-            this.board[oldestSymbol.row][oldestSymbol.col] = '';
-            this.symbolCounts[oldestSymbol.symbol]--;
-            console.log('Removed symbol:', oldestSymbol.symbol, 'at', oldestSymbol.row, oldestSymbol.col);
-        }
+        // Manage persistence per player
+        const playerHistory = { O: [], X: [] };
+        
+        // Separate history by player
+        this.symbolHistory.forEach(symbol => {
+            playerHistory[symbol.symbol].push(symbol);
+        });
+        
+        // Remove oldest symbols for each player if they exceed persistence limit
+        Object.keys(playerHistory).forEach(player => {
+            while (playerHistory[player].length > this.persistence) {
+                const oldestSymbol = playerHistory[player].shift();
+                this.board[oldestSymbol.row][oldestSymbol.col] = '';
+                this.symbolCounts[oldestSymbol.symbol]--;
+                console.log('Removed symbol:', oldestSymbol.symbol, 'at', oldestSymbol.row, oldestSymbol.col);
+            }
+        });
+        
+        // Update symbolHistory to reflect the remaining symbols
+        this.symbolHistory = [...playerHistory.O, ...playerHistory.X];
     }
 
     getGameState() {
