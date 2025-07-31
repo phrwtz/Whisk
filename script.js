@@ -217,6 +217,12 @@ class UIManager {
         this.hideAllInterfaces();
         document.getElementById('mainMenu').style.display = 'block';
         
+        // Restore compact size for menu
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) {
+            mainContainer.className = 'w-full bg-white rounded-2xl shadow-2xl p-8 max-w-md';
+        }
+        
         // Check if someone is already hosting (for regular mode)
         const isGameHosted = localStorage.getItem('gameHosted') === 'true';
         console.log('showMainMenu - isGameHosted:', isGameHosted);
@@ -250,11 +256,23 @@ class UIManager {
     showHostInterface() {
         this.hideAllInterfaces();
         document.getElementById('hostInterface').style.display = 'block';
+        
+        // Restore compact size for menu
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) {
+            mainContainer.className = 'w-full bg-white rounded-2xl shadow-2xl p-8 max-w-md';
+        }
     }
 
     showJoinInterface() {
         this.hideAllInterfaces();
         document.getElementById('joinInterface').style.display = 'block';
+        
+        // Restore compact size for menu
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) {
+            mainContainer.className = 'w-full bg-white rounded-2xl shadow-2xl p-8 max-w-md';
+        }
         
         // Show join button, hide host and local buttons (second player scenario)
         const hostGameBtn = document.getElementById('hostGameBtn');
@@ -269,6 +287,12 @@ class UIManager {
     showGameInterface() {
         this.hideAllInterfaces();
         document.getElementById('gameInterface').style.display = 'block';
+        
+        // Expand the container to full width for the game
+        const mainContainer = document.getElementById('mainContainer');
+        if (mainContainer) {
+            mainContainer.className = 'w-full bg-white rounded-2xl shadow-2xl p-8 max-w-none';
+        }
     }
 
     hideAllInterfaces() {
