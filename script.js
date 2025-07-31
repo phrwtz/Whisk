@@ -701,6 +701,8 @@ class TicTacToe {
             if (userInfo) {
                 userInfo.textContent = 'Local Game';
             }
+            // Set initial turn message for local play
+            this.updateTurnMessages();
         }
         
         this.updateGameDisplay();
@@ -1178,7 +1180,7 @@ class TicTacToe {
         
         // Only update turn messages if there's no scoring message currently displayed
         const gameStatus = document.getElementById('gameStatus');
-        if (this.isMultiplayer && gameStatus && !gameStatus.textContent.includes('scored')) {
+        if (gameStatus && !gameStatus.textContent.includes('scored')) {
             this.updateTurnMessages();
         }
         
