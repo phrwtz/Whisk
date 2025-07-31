@@ -19,6 +19,9 @@ class TicTacToe {
         this.opponentPlayerSymbol = 'X'; // Guest is always X
         this.gameId = null;
         this.connected = false;
+        this.connectionAttempts = 0;
+        this.maxConnectionAttempts = 3;
+        this.connectionTimeout = null;
         
         this.initializeEventListeners();
         this.initializeMultiplayerEventListeners();
@@ -106,8 +109,31 @@ class TicTacToe {
         this.myPlayerSymbol = 'O';
         this.opponentPlayerSymbol = 'X';
         
-        // Initialize PeerJS
-        this.peer = new Peer();
+        // Show loading state
+        const hostGameBtn = document.getElementById('hostGame');
+        const connectionStatus = document.getElementById('connectionStatus');
+        if (hostGameBtn) {
+            hostGameBtn.disabled = true;
+            hostGameBtn.textContent = 'Creating Game...';
+        }
+        if (connectionStatus) {
+            connectionStatus.textContent = 'Initializing game server...';
+            connectionStatus.className = 'text-sm font-semibold mb-4 text-blue-600';
+        }
+        
+        // Initialize PeerJS with better error handling
+        this.peer = new Peer({
+            debug: 2, // Enable debug logging
+            config: {
+                'iceServers': [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' }
+                ]
+            }
+        });
         
         this.peer.on('open', (id) => {
             this.gameId = id;
@@ -118,9 +144,16 @@ class TicTacToe {
             if (hostGameId) hostGameId.value = id;
             if (hostInterface) hostInterface.classList.remove('hidden');
             if (connectionStatus) {
-                connectionStatus.textContent = 'Waiting for player to join...';
-                connectionStatus.className = 'text-sm font-semibold mb-4 text-blue-600';
+                connectionStatus.textContent = 'Game created! Share your Game ID with a friend to start playing.';
+                connectionStatus.className = 'text-sm font-semibold mb-4 text-green-600';
             }
+            
+            // Re-enable host button
+            if (hostGameBtn) {
+                hostGameBtn.disabled = false;
+                hostGameBtn.textContent = 'Host Game';
+            }
+            
             console.log('Host game created with ID:', id);
         });
         
@@ -144,8 +177,22 @@ class TicTacToe {
             console.error('PeerJS error:', err);
             const connectionStatus = document.getElementById('connectionStatus');
             if (connectionStatus) {
-                connectionStatus.textContent = 'Connection error: ' + err.type;
+                let errorMessage = 'Connection error: ';
+                if (err.type === 'peer-unavailable') {
+                    errorMessage += 'Unable to create game. Please try again.';
+                } else if (err.type === 'network') {
+                    errorMessage += 'Network error. Please check your internet connection.';
+                } else {
+                    errorMessage += err.type || 'Unknown error';
+                }
+                connectionStatus.textContent = errorMessage;
                 connectionStatus.className = 'text-sm font-semibold mb-4 text-red-600';
+            }
+            
+            // Re-enable host button on error
+            if (hostGameBtn) {
+                hostGameBtn.disabled = false;
+                hostGameBtn.textContent = 'Host Game';
             }
         });
     }
@@ -161,6 +208,7 @@ class TicTacToe {
     joinGame() {
         const joinGameId = document.getElementById('joinGameId');
         const joinStatus = document.getElementById('joinStatus');
+        const connectToGameBtn = document.getElementById('connectToGame');
         
         const gameId = joinGameId ? joinGameId.value.trim() : '';
         if (!gameId) {
@@ -171,6 +219,16 @@ class TicTacToe {
             return;
         }
         
+        // Show loading state
+        if (connectToGameBtn) {
+            connectToGameBtn.disabled = true;
+            connectToGameBtn.textContent = 'Connecting...';
+        }
+        if (joinStatus) {
+            joinStatus.textContent = 'Initializing connection...';
+            joinStatus.className = 'text-sm font-semibold mb-4 text-blue-600';
+        }
+        
         console.log('Joining game:', gameId);
         this.isHost = false;
         this.isMultiplayer = true;
@@ -178,49 +236,54 @@ class TicTacToe {
         this.opponentPlayerSymbol = 'O';
         this.gameId = gameId;
         
-        // Initialize PeerJS
-        this.peer = new Peer();
+        // Initialize PeerJS with better configuration
+        this.peer = new Peer({
+            debug: 2,
+            config: {
+                'iceServers': [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' }
+                ]
+            }
+        });
         
         this.peer.on('open', (id) => {
-            const joinStatus = document.getElementById('joinStatus');
-            const tryAgainBtn = document.getElementById('tryAgainBtn');
             if (joinStatus) {
                 joinStatus.textContent = 'Connecting to game...';
                 joinStatus.className = 'text-sm font-semibold mb-4 text-blue-600';
             }
             
-            // Hide try again button when starting new connection
-            if (tryAgainBtn) {
-                tryAgainBtn.classList.add('hidden');
-            }
-            
             console.log('Connecting to game:', gameId);
             
             // Connect to the host
-            this.connection = this.peer.connect(gameId);
+            this.connection = this.peer.connect(gameId, {
+                reliable: true,
+                serialization: 'json'
+            });
             this.setupConnection();
             
             // Add timeout for connection
-            setTimeout(() => {
+            this.connectionTimeout = setTimeout(() => {
                 if (!this.connected) {
                     console.log('Connection timeout');
-                    const joinStatus = document.getElementById('joinStatus');
-                    const tryAgainBtn = document.getElementById('tryAgainBtn');
                     if (joinStatus) {
                         joinStatus.textContent = 'Connection timeout. Please check the Game ID and try again.';
                         joinStatus.className = 'text-sm font-semibold mb-4 text-red-600';
                     }
-                    if (tryAgainBtn) {
-                        tryAgainBtn.classList.remove('hidden');
+                    if (connectToGameBtn) {
+                        connectToGameBtn.disabled = false;
+                        connectToGameBtn.textContent = 'Join';
                     }
+                    this.cleanupConnection();
                 }
-            }, 10000); // 10 second timeout
+            }, 15000); // 15 second timeout
         });
         
         this.peer.on('error', (err) => {
             console.error('PeerJS error:', err);
-            const joinStatus = document.getElementById('joinStatus');
-            const tryAgainBtn = document.getElementById('tryAgainBtn');
             if (joinStatus) {
                 let errorMessage = 'Connection error: ';
                 if (err.type === 'peer-unavailable') {
@@ -234,27 +297,38 @@ class TicTacToe {
                 joinStatus.className = 'text-sm font-semibold mb-4 text-red-600';
             }
             
-            // Show try again button
-            if (tryAgainBtn) {
-                tryAgainBtn.classList.remove('hidden');
+            if (connectToGameBtn) {
+                connectToGameBtn.disabled = false;
+                connectToGameBtn.textContent = 'Join';
             }
             
-            // Clean up the peer connection on error
-            if (this.peer) {
-                this.peer.destroy();
-                this.peer = null;
-            }
+            this.cleanupConnection();
         });
     }
 
     setupConnection() {
         this.connection.on('open', () => {
             this.connected = true;
+            this.connectionAttempts = 0;
+            
+            // Clear timeout
+            if (this.connectionTimeout) {
+                clearTimeout(this.connectionTimeout);
+                this.connectionTimeout = null;
+            }
+            
             const joinStatus = document.getElementById('joinStatus');
+            const connectToGameBtn = document.getElementById('connectToGame');
+            
             if (joinStatus) {
                 joinStatus.textContent = 'Connected! Starting game...';
                 joinStatus.className = 'text-sm font-semibold mb-4 text-green-600';
             }
+            if (connectToGameBtn) {
+                connectToGameBtn.disabled = false;
+                connectToGameBtn.textContent = 'Join';
+            }
+            
             console.log('Connection established successfully!');
             
             // Start the game automatically with default settings
@@ -280,6 +354,7 @@ class TicTacToe {
                 joinStatus.textContent = 'Failed to connect to host. Please check the Game ID and try again.';
                 joinStatus.className = 'text-sm font-semibold mb-4 text-red-600';
             }
+            this.cleanupConnection();
         });
     }
 
@@ -408,6 +483,17 @@ class TicTacToe {
         if (this.isMultiplayer) {
             this.showScoringMessage('Opponent disconnected', '');
             this.gameActive = false;
+            
+            // Show reconnection option
+            const gameStatus = document.getElementById('gameStatus');
+            if (gameStatus) {
+                gameStatus.innerHTML = `
+                    <div class="text-red-600 font-bold mb-2">Opponent disconnected</div>
+                    <button onclick="location.reload()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Return to Menu
+                    </button>
+                `;
+            }
         }
     }
 
