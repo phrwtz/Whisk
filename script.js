@@ -240,6 +240,9 @@ class UIManager {
         }
     }
 
+
+
+
     clearGameData() {
         localStorage.removeItem('gameHosted');
     }
@@ -288,9 +291,8 @@ class UIManager {
         for (let row = 0; row < this.boardSize; row++) {
             for (let col = 0; col < this.boardSize; col++) {
                 const cell = document.createElement('button');
-                const cellSizeClass = `cell-${this.boardSize}x${this.boardSize}`;
                 
-                cell.className = `${cellSizeClass} bg-white rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
+                cell.className = `bg-white rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px]`;
                 cell.setAttribute('data-row', row);
                 cell.setAttribute('data-col', col);
                 
@@ -686,9 +688,13 @@ class MultiplayerManager {
 // Main Game Controller - Orchestrates everything
 class TicTacToeGame {
     constructor() {
+        console.log('TicTacToeGame constructor called');
         this.gameLogic = new GameLogic();
+        console.log('GameLogic created');
         this.uiManager = new UIManager(this.gameLogic);
+        console.log('UIManager created');
         this.multiplayerManager = new MultiplayerManager(this.gameLogic, this.uiManager);
+        console.log('MultiplayerManager created');
         
         // Override UI manager's cell click to handle multiplayer
         this.uiManager.handleCellClick = (row, col) => {
@@ -698,20 +704,30 @@ class TicTacToeGame {
                 this.uiManager.handleCellClick(row, col);
             }
         };
+        console.log('TicTacToeGame constructor completed');
     }
 }
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOMContentLoaded event fired');
+    
     // Clear any stale game data on fresh page load
     if (!localStorage.getItem('gameHosted')) {
         localStorage.removeItem('gameHosted');
     }
     
+    console.log('Creating TicTacToeGame instance...');
     window.game = new TicTacToeGame();
+    console.log('TicTacToeGame created:', window.game);
     
     // Always show main menu with all buttons visible
     if (window.game && window.game.uiManager) {
+        console.log('Calling showMainMenu...');
         window.game.uiManager.showMainMenu();
+    } else {
+        console.log('Error: game or uiManager not available');
+        console.log('window.game:', window.game);
+        console.log('window.game.uiManager:', window.game ? window.game.uiManager : 'undefined');
     }
 }); 
