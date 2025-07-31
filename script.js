@@ -487,10 +487,12 @@ class TicTacToe {
 
     syncBoard(board, scores, currentPlayer, symbolHistory) {
         console.log('Syncing board state - received currentPlayer:', currentPlayer, 'my symbol:', this.myPlayerSymbol);
+        console.log('Before sync - this.currentPlayer:', this.currentPlayer);
         this.board = board;
         this.scores = scores;
         this.currentPlayer = currentPlayer;
         this.symbolHistory = symbolHistory;
+        console.log('After sync - this.currentPlayer:', this.currentPlayer);
         
         // Update symbol counts
         this.symbolCounts = { O: 0, X: 0 };
@@ -717,6 +719,7 @@ class TicTacToe {
         console.log('Multiplayer:', this.isMultiplayer);
         console.log('Current player:', this.currentPlayer);
         console.log('My symbol:', this.myPlayerSymbol);
+        console.log('Is it my turn?', this.currentPlayer === this.myPlayerSymbol);
         
         if (!this.gameActive || this.board[row][col] !== '') {
             console.log('Game not active or cell not empty');
