@@ -157,6 +157,8 @@ class GameLogic {
             playerHistory[symbol.symbol].push(symbol);
         });
         
+        console.log('Player O symbols:', playerHistory.O.length, 'Player X symbols:', playerHistory.X.length);
+        
         // Remove oldest symbols for each player if they exceed persistence limit
         Object.keys(playerHistory).forEach(player => {
             while (playerHistory[player].length > this.persistence) {
@@ -169,6 +171,8 @@ class GameLogic {
         
         // Update symbolHistory to reflect the remaining symbols
         this.symbolHistory = [...playerHistory.O, ...playerHistory.X];
+        
+        console.log('After persistence management - O symbols:', playerHistory.O.length, 'X symbols:', playerHistory.X.length);
     }
 
     getGameState() {
