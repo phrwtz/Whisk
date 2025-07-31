@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test localStorage</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
+        <h1 class="text-2xl font-bold mb-4">localStorage Test</h1>
+        
+        <div class="space-y-4">
+            <div>
+                <h2 class="font-semibold">Current localStorage values:</h2>
+                <div id="currentValues" class="bg-gray-100 p-2 rounded text-sm font-mono"></div>
+            </div>
+            
+            <div class="space-y-2">
+                <button id="clearBtn" class="w-full bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700">
+                    Clear localStorage
+                </button>
+                <button id="setTestBtn" class="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                    Set Test Data
+                </button>
+                <button id="refreshBtn" class="w-full bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
+                    Refresh Values
+                </button>
+            </div>
+            
+            <div>
+                <a href="game-launcher.html" class="block w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 text-center">
+                    Go to Game Launcher
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateDisplay() {
+            const currentValues = document.getElementById('currentValues');
+            const activeGameId = localStorage.getItem('activeGameId');
+            const activeGameHost = localStorage.getItem('activeGameHost');
+            const gameCreatedTime = localStorage.getItem('gameCreatedTime');
+            
+            currentValues.innerHTML = `
+                activeGameId: ${activeGameId || 'null'}<br>
+                activeGameHost: ${activeGameHost || 'null'}<br>
+                gameCreatedTime: ${gameCreatedTime || 'null'}
+            `;
+        }
+        
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            localStorage.removeItem('activeGameId');
+            localStorage.removeItem('activeGameHost');
+            localStorage.removeItem('gameCreatedTime');
+            updateDisplay();
+        });
+        
+        document.getElementById('setTestBtn').addEventListener('click', () => {
+            localStorage.setItem('activeGameId', 'test-game-id');
+            localStorage.setItem('activeGameHost', 'http://localhost:8000/game-launcher.html');
+            localStorage.setItem('gameCreatedTime', Date.now().toString());
+            updateDisplay();
+        });
+        
+        document.getElementById('refreshBtn').addEventListener('click', updateDisplay);
+        
+        // Initial display
+        updateDisplay();
+    </script>
+</body>
+</html> 

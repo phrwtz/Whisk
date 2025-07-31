@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Multiplayer Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <style>
+        .test-status { padding: 8px; margin: 5px 0; border-radius: 4px; }
+        .status-success { background-color: #d4edda; color: #155724; }
+        .status-error { background-color: #f8d7da; color: #721c24; }
+        .status-info { background-color: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">🎮 Manual Multiplayer Test</h1>
+        
+        <div class="max-w-4xl mx-auto">
+            <!-- Test Instructions -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Test Instructions</h2>
+                <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                    <li>Open this page in <strong>two different browser windows</strong></li>
+                    <li>In the first window, click "Host Game" and copy the Game ID</li>
+                    <li>In the second window, click "Join Game" and paste the Game ID</li>
+                    <li>Both windows should show "Connected!" status</li>
+                    <li>Start a game and test making moves - they should sync between windows</li>
+                </ol>
+            </div>
+
+            <!-- Game Interface -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center">Multiplayer TicTacToe Test</h2>
+                
+                <!-- Multiplayer Setup -->
+                <div id="multiplayerSetup" class="mb-6">
+                    <div class="flex gap-4 justify-center mb-4">
+                        <button id="hostGame" class="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
+                            Host Game
+                        </button>
+                        <button id="joinGame" class="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                            Join Game
+                        </button>
+                        <button id="playLocal" class="bg-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-600 transition-colors">
+                            Play Local
+                        </button>
+                    </div>
+                    
+                    <!-- Host Interface -->
+                    <div id="hostInterface" class="hidden bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                        <h3 class="font-semibold text-green-800 mb-2">Your Game ID:</h3>
+                        <div class="flex items-center gap-2 mb-2">
+                            <input id="hostGameId" type="text" readonly class="flex-1 p-2 border border-green-300 rounded bg-white text-green-800 font-mono text-sm" />
+                            <button id="copyGameId" class="bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600">Copy</button>
+                        </div>
+                        <p class="text-green-600 text-sm">Share this ID with your friend to join the game</p>
+                        <div id="hostStatus" class="text-sm font-semibold mt-2"></div>
+                    </div>
+                    
+                    <!-- Join Interface -->
+                    <div id="joinInterface" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                        <h3 class="font-semibold text-blue-800 mb-2">Enter Game ID:</h3>
+                        <div class="flex items-center gap-2 mb-2">
+                            <input id="joinGameIdInput" type="text" placeholder="Enter game ID" class="flex-1 p-2 border border-blue-300 rounded text-blue-800" />
+                            <button id="connectToGame" class="bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600">Join</button>
+                        </div>
+                        <div id="joinStatus" class="text-sm font-semibold mt-2"></div>
+                    </div>
+                </div>
+
+                <!-- Game Setup -->
+                <div id="gameSetup" class="hidden mb-6">
+                    <h3 class="text-xl font-semibold mb-4">Game Setup</h3>
+                    <div class="flex gap-4 justify-center">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Board Size:</label>
+                            <select id="boardSize" class="p-2 border border-gray-300 rounded">
+                                <option value="3">3x3</option>
+                                <option value="4">4x4</option>
+                                <option value="5">5x5</option>
+                                <option value="6">6x6</option>
+                                <option value="7">7x7</option>
+                                <option value="8" selected>8x8</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Persistence:</label>
+                            <select id="persistence" class="p-2 border border-gray-300 rounded">
+                                <option value="3">3 symbols</option>
+                                <option value="4">4 symbols</option>
+                                <option value="5" selected>5 symbols</option>
+                                <option value="6">6 symbols</option>
+                                <option value="7">7 symbols</option>
+                                <option value="8">8 symbols</option>
+                                <option value="10">10 symbols</option>
+                                <option value="15">15 symbols</option>
+                                <option value="20">20 symbols</option>
+                                <option value="64">Unlimited</option>
+                            </select>
+                        </div>
+                        <button id="startGame" class="bg-purple-500 text-white px-6 py-2 rounded font-semibold hover:bg-purple-600 self-end">
+                            Start Game
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Game Interface -->
+                <div id="gameInterface" class="hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-lg font-semibold">
+                            Current Player: <span id="currentPlayer" class="bg-purple-500 text-white px-3 py-1 rounded">O</span>
+                        </div>
+                        <div id="multiplayerInfo" class="text-sm text-gray-600 hidden">
+                            <span id="playerRole"></span> • <span id="connectionInfo"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4 mb-4">
+                        <div class="bg-white px-4 py-2 rounded shadow">
+                            <span class="font-semibold">Player O:</span>
+                            <span id="scoreO" class="text-xl font-bold ml-2">0</span>
+                        </div>
+                        <div class="bg-white px-4 py-2 rounded shadow">
+                            <span class="font-semibold">Player X:</span>
+                            <span id="scoreX" class="text-xl font-bold ml-2">0</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-center mb-4">
+                        <div id="gameBoard" class="grid gap-1 bg-green-500 p-2 rounded-2xl shadow-2xl"></div>
+                    </div>
+                    
+                    <div id="gameStatus" class="text-center text-lg font-semibold mb-4 p-3 bg-gray-100 rounded"></div>
+                    
+                    <div class="flex gap-4 justify-center">
+                        <button id="newGame" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">New Game</button>
+                        <button id="backToMenu" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Back to Menu</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            let game = null;
+            
+            function initializeGame() {
+                if (game && game.peer) {
+                    game.peer.destroy();
+                }
+                
+                game = new TicTacToe();
+                
+                // Override methods to work with our test interface
+                game.showMultiplayerMenu = function() {
+                    document.getElementById('multiplayerSetup').classList.remove('hidden');
+                    document.getElementById('gameSetup').classList.add('hidden');
+                    document.getElementById('gameInterface').classList.add('hidden');
+                    document.getElementById('hostInterface').classList.add('hidden');
+                    document.getElementById('joinInterface').classList.add('hidden');
+                };
+                
+                game.showSetup = function() {
+                    document.getElementById('multiplayerSetup').classList.add('hidden');
+                    document.getElementById('gameSetup').classList.remove('hidden');
+                    document.getElementById('gameInterface').classList.add('hidden');
+                };
+                
+                const originalStartGame = game.startGame;
+                game.startGame = function() {
+                    originalStartGame.call(this);
+                    document.getElementById('gameSetup').classList.add('hidden');
+                    document.getElementById('gameInterface').classList.remove('hidden');
+                };
+                
+                game.updateGameDisplay = function() {
+                    const currentPlayerEl = document.getElementById('currentPlayer');
+                    const scoreOEl = document.getElementById('scoreO');
+                    const scoreXEl = document.getElementById('scoreX');
+                    const multiplayerInfoEl = document.getElementById('multiplayerInfo');
+                    const playerRoleEl = document.getElementById('playerRole');
+                    const connectionInfoEl = document.getElementById('connectionInfo');
+                    
+                    if (currentPlayerEl) currentPlayerEl.textContent = this.currentPlayer;
+                    if (scoreOEl) scoreOEl.textContent = this.scores.O;
+                    if (scoreXEl) scoreXEl.textContent = this.scores.X;
+                    
+                    if (this.isMultiplayer && multiplayerInfoEl && playerRoleEl && connectionInfoEl) {
+                        multiplayerInfoEl.classList.remove('hidden');
+                        playerRoleEl.textContent = this.isHost ? 'Host' : 'Guest';
+                        connectionInfoEl.textContent = 'Connected';
+                    } else if (multiplayerInfoEl) {
+                        multiplayerInfoEl.classList.add('hidden');
+                    }
+                };
+                
+                game.showScoringMessage = function(points, player) {
+                    const gameStatus = document.getElementById('gameStatus');
+                    if (gameStatus) {
+                        let message;
+                        let textColor = '#48bb78';
+                        
+                        if (this.scores[player] >= 50) {
+                            message = `${player} wins!`;
+                            textColor = '#e53e3e';
+                        } else {
+                            message = points === 1 ? `${player} scores 1 point!` : `${player} scores ${points} points!`;
+                        }
+                        
+                        gameStatus.textContent = message;
+                        gameStatus.style.color = textColor;
+                    }
+                };
+                
+                game.createBoard = function() {
+                    const gameBoard = document.getElementById('gameBoard');
+                    if (!gameBoard) return;
+                    
+                    gameBoard.innerHTML = '';
+                    gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize}, 1fr)`;
+                    
+                    for (let i = 0; i < this.boardSize; i++) {
+                        for (let j = 0; j < this.boardSize; j++) {
+                            const cell = document.createElement('button');
+                            cell.className = 'w-12 h-12 bg-white border-none rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105';
+                            cell.dataset.row = i;
+                            cell.dataset.col = j;
+                            cell.addEventListener('click', () => this.handleCellClick(i, j));
+                            gameBoard.appendChild(cell);
+                        }
+                    }
+                };
+                
+                game.updateCellDisplay = function(row, col) {
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    if (cell) {
+                        cell.textContent = this.board[row][col];
+                        cell.classList.remove('text-red-600', 'text-blue-600');
+                        if (this.board[row][col]) {
+                            if (this.board[row][col] === 'X') {
+                                cell.classList.add('text-red-600');
+                            } else if (this.board[row][col] === 'O') {
+                                cell.classList.add('text-blue-600');
+                            }
+                        }
+                    }
+                };
+                
+                game.showJoinInterface = function() {
+                    const joinInterface = document.getElementById('joinInterface');
+                    const hostInterface = document.getElementById('hostInterface');
+                    if (joinInterface) joinInterface.classList.remove('hidden');
+                    if (hostInterface) hostInterface.classList.add('hidden');
+                };
+                
+                game.copyGameId = function() {
+                    const gameIdInput = document.getElementById('hostGameId');
+                    const copyButton = document.getElementById('copyGameId');
+                    
+                    if (gameIdInput) {
+                        gameIdInput.select();
+                        document.execCommand('copy');
+                        
+                        if (copyButton) {
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'Copied!';
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                            }, 2000);
+                        }
+                    }
+                };
+                
+                game.joinGame = function() {
+                    const gameIdInput = document.getElementById('joinGameIdInput');
+                    const joinStatus = document.getElementById('joinStatus');
+                    
+                    if (!gameIdInput) return;
+                    
+                    const gameId = gameIdInput.value.trim();
+                    if (!gameId) {
+                        if (joinStatus) {
+                            joinStatus.textContent = 'Please enter a game ID';
+                            joinStatus.className = 'text-sm font-semibold mt-2 text-red-600';
+                        }
+                        return;
+                    }
+                    
+                    this.isHost = false;
+                    this.isMultiplayer = true;
+                    this.myPlayerSymbol = 'X';
+                    this.opponentPlayerSymbol = 'O';
+                    this.gameId = gameId;
+                    
+                    this.peer = new Peer();
+                    
+                    this.peer.on('open', (id) => {
+                        if (joinStatus) {
+                            joinStatus.textContent = 'Connecting to game...';
+                            joinStatus.className = 'text-sm font-semibold mt-2 text-blue-600';
+                        }
+                        
+                        this.connection = this.peer.connect(gameId);
+                        this.setupConnection();
+                    });
+                    
+                    this.peer.on('error', (err) => {
+                        if (joinStatus) {
+                            joinStatus.textContent = 'Connection error: ' + err.type;
+                            joinStatus.className = 'text-sm font-semibold mt-2 text-red-600';
+                        }
+                    });
+                };
+                
+                game.hostGame = function() {
+                    this.isHost = true;
+                    this.isMultiplayer = true;
+                    this.myPlayerSymbol = 'O';
+                    this.opponentPlayerSymbol = 'X';
+                    
+                    this.peer = new Peer();
+                    
+                    this.peer.on('open', (id) => {
+                        this.gameId = id;
+                        const hostGameId = document.getElementById('hostGameId');
+                        const hostInterface = document.getElementById('hostInterface');
+                        const hostStatus = document.getElementById('hostStatus');
+                        
+                        if (hostGameId) hostGameId.value = id;
+                        if (hostInterface) hostInterface.classList.remove('hidden');
+                        if (hostStatus) {
+                            hostStatus.textContent = 'Waiting for player to join...';
+                            hostStatus.className = 'text-sm font-semibold mt-2 text-blue-600';
+                        }
+                    });
+                    
+                    this.peer.on('connection', (conn) => {
+                        this.connection = conn;
+                        this.setupConnection();
+                        
+                        const hostStatus = document.getElementById('hostStatus');
+                        if (hostStatus) {
+                            hostStatus.textContent = 'Player connected! Starting game...';
+                            hostStatus.className = 'text-sm font-semibold mt-2 text-green-600';
+                        }
+                        
+                        setTimeout(() => {
+                            this.showSetup();
+                        }, 1000);
+                    });
+                    
+                    this.peer.on('error', (err) => {
+                        const hostStatus = document.getElementById('hostStatus');
+                        if (hostStatus) {
+                            hostStatus.textContent = 'Connection error: ' + err.type;
+                            hostStatus.className = 'text-sm font-semibold mt-2 text-red-600';
+                        }
+                    });
+                };
+                
+                game.showMultiplayerMenu();
+            }
+            
+            // Initialize the game
+            initializeGame();
+            
+            // Add event listeners
+            const hostGameBtn = document.getElementById('hostGame');
+            const joinGameBtn = document.getElementById('joinGame');
+            const playLocalBtn = document.getElementById('playLocal');
+            const copyGameIdBtn = document.getElementById('copyGameId');
+            const connectToGameBtn = document.getElementById('connectToGame');
+            const startGameBtn = document.getElementById('startGame');
+            const newGameBtn = document.getElementById('newGame');
+            const backToMenuBtn = document.getElementById('backToMenu');
+            
+            if (hostGameBtn) {
+                hostGameBtn.addEventListener('click', () => {
+                    if (game) game.hostGame();
+                });
+            }
+            
+            if (joinGameBtn) {
+                joinGameBtn.addEventListener('click', () => {
+                    if (game) game.showJoinInterface();
+                });
+            }
+            
+            if (playLocalBtn) {
+                playLocalBtn.addEventListener('click', () => {
+                    if (game) game.playLocal();
+                });
+            }
+            
+            if (copyGameIdBtn) {
+                copyGameIdBtn.addEventListener('click', () => {
+                    if (game) game.copyGameId();
+                });
+            }
+            
+            if (connectToGameBtn) {
+                connectToGameBtn.addEventListener('click', () => {
+                    if (game) game.joinGame();
+                });
+            }
+            
+            if (startGameBtn) {
+                startGameBtn.addEventListener('click', () => {
+                    if (game) game.startGame();
+                });
+            }
+            
+            if (newGameBtn) {
+                newGameBtn.addEventListener('click', () => {
+                    if (game) game.newGame();
+                });
+            }
+            
+            if (backToMenuBtn) {
+                backToMenuBtn.addEventListener('click', () => {
+                    if (game) game.showMultiplayerMenu();
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer TicTacToe Test</title>
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ccc;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        #log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Multiplayer TicTacToe Test</h1>
+    
+    <div class="test-section info">
+        <h3>Test Instructions</h3>
+        <p>This page tests the multiplayer functionality. Open this page in two different browser windows/tabs to test peer-to-peer connections.</p>
+    </div>
+
+    <div class="test-section">
+        <h3>PeerJS Connection Test</h3>
+        <button onclick="testPeerJS()">Test PeerJS Connection</button>
+        <div id="peerTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Host Game Test</h3>
+        <button onclick="testHostGame()">Test Host Game</button>
+        <div id="hostTestResult"></div>
+        <div id="hostGameId" style="display: none;">
+            <p><strong>Game ID:</strong> <span id="gameIdDisplay"></span></p>
+            <button onclick="copyGameId()">Copy Game ID</button>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h3>Join Game Test</h3>
+        <input type="text" id="joinGameIdInput" placeholder="Enter Game ID">
+        <button onclick="testJoinGame()">Test Join Game</button>
+        <div id="joinTestResult"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Connection Log</h3>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        let testPeer = null;
+        let testConnection = null;
+        let gameId = null;
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function testPeerJS() {
+            log('Testing PeerJS connection...');
+            const resultDiv = document.getElementById('peerTestResult');
+            
+            try {
+                testPeer = new Peer();
+                
+                testPeer.on('open', (id) => {
+                    log(`PeerJS connected successfully. ID: ${id}`);
+                    resultDiv.innerHTML = '<div class="success">✅ PeerJS connection successful</div>';
+                });
+                
+                testPeer.on('error', (err) => {
+                    log(`PeerJS error: ${err.type}`);
+                    resultDiv.innerHTML = '<div class="error">❌ PeerJS connection failed</div>';
+                });
+                
+            } catch (error) {
+                log(`PeerJS initialization error: ${error.message}`);
+                resultDiv.innerHTML = '<div class="error">❌ PeerJS initialization failed</div>';
+            }
+        }
+
+        function testHostGame() {
+            log('Testing host game functionality...');
+            const resultDiv = document.getElementById('hostTestResult');
+            
+            if (!testPeer) {
+                resultDiv.innerHTML = '<div class="error">❌ Please test PeerJS connection first</div>';
+                return;
+            }
+            
+            testPeer.on('connection', (conn) => {
+                log('Player connected to host game!');
+                testConnection = conn;
+                setupTestConnection();
+                resultDiv.innerHTML = '<div class="success">✅ Host game working - player connected</div>';
+            });
+            
+            testPeer.on('open', (id) => {
+                gameId = id;
+                document.getElementById('gameIdDisplay').textContent = id;
+                document.getElementById('hostGameId').style.display = 'block';
+                log(`Host game created with ID: ${id}`);
+                resultDiv.innerHTML = '<div class="success">✅ Host game created successfully</div>';
+            });
+        }
+
+        function testJoinGame() {
+            const gameIdInput = document.getElementById('joinGameIdInput').value.trim();
+            const resultDiv = document.getElementById('joinTestResult');
+            
+            if (!gameIdInput) {
+                resultDiv.innerHTML = '<div class="error">❌ Please enter a game ID</div>';
+                return;
+            }
+            
+            log(`Attempting to join game: ${gameIdInput}`);
+            
+            if (!testPeer) {
+                testPeer = new Peer();
+            }
+            
+            testPeer.on('open', (id) => {
+                log(`Connecting to game ${gameIdInput}...`);
+                testConnection = testPeer.connect(gameIdInput);
+                setupTestConnection();
+            });
+            
+            testPeer.on('error', (err) => {
+                log(`Join game error: ${err.type}`);
+                resultDiv.innerHTML = '<div class="error">❌ Failed to join game</div>';
+            });
+        }
+
+        function setupTestConnection() {
+            testConnection.on('open', () => {
+                log('Connection established successfully!');
+                document.getElementById('joinTestResult').innerHTML = '<div class="success">✅ Successfully joined game</div>';
+                
+                // Test sending a message
+                testConnection.send({
+                    type: 'test',
+                    message: 'Hello from test connection!'
+                });
+            });
+            
+            testConnection.on('data', (data) => {
+                log(`Received data: ${JSON.stringify(data)}`);
+            });
+            
+            testConnection.on('close', () => {
+                log('Connection closed');
+            });
+        }
+
+        function copyGameId() {
+            const gameIdText = document.getElementById('gameIdDisplay').textContent;
+            navigator.clipboard.writeText(gameIdText).then(() => {
+                log('Game ID copied to clipboard');
+            }).catch(() => {
+                log('Failed to copy game ID');
+            });
+        }
+
+        // Auto-test on page load
+        window.onload = function() {
+            log('Multiplayer test page loaded');
+            log('Open this page in two browser windows to test peer-to-peer connections');
+        };
+    </script>
+</body>
+</html> 

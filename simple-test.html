@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Multiplayer Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8">🎮 Simple Multiplayer Test</h1>
+        
+        <div class="max-w-2xl mx-auto">
+            <!-- Test Instructions -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+                <h2 class="text-xl font-semibold mb-4">Test Instructions</h2>
+                <ol class="list-decimal list-inside space-y-2 text-gray-700">
+                    <li>Open this page in <strong>two different browser windows</strong></li>
+                    <li>In the first window, click "Host Game" and copy the Game ID</li>
+                    <li>In the second window, click "Join Game" and paste the Game ID</li>
+                    <li>Both windows should show "Connected!" status</li>
+                    <li>Test the connection by sending messages</li>
+                </ol>
+            </div>
+
+            <!-- Test Interface -->
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <h2 class="text-2xl font-bold mb-6 text-center">PeerJS Connection Test</h2>
+                
+                <!-- Connection Controls -->
+                <div class="flex gap-4 justify-center mb-6">
+                    <button id="hostGame" class="bg-green-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-600 transition-colors">
+                        Host Game
+                    </button>
+                    <button id="joinGame" class="bg-blue-500 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-600 transition-colors">
+                        Join Game
+                    </button>
+                </div>
+                
+                <!-- Host Interface -->
+                <div id="hostInterface" class="hidden bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <h3 class="font-semibold text-green-800 mb-2">Your Game ID:</h3>
+                    <div class="flex items-center gap-2 mb-2">
+                        <input id="hostGameId" type="text" readonly class="flex-1 p-2 border border-green-300 rounded bg-white text-green-800 font-mono text-sm" />
+                        <button id="copyGameId" class="bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600">Copy</button>
+                    </div>
+                    <p class="text-green-600 text-sm">Share this ID with your friend to join the game</p>
+                    <div id="hostStatus" class="text-sm font-semibold mt-2"></div>
+                </div>
+                
+                <!-- Join Interface -->
+                <div id="joinInterface" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <h3 class="font-semibold text-blue-800 mb-2">Enter Game ID:</h3>
+                    <div class="flex items-center gap-2 mb-2">
+                        <input id="joinGameIdInput" type="text" placeholder="Enter game ID" class="flex-1 p-2 border border-blue-300 rounded text-blue-800" />
+                        <button id="connectToGame" class="bg-blue-500 text-white px-3 py-2 rounded text-sm hover:bg-blue-600">Join</button>
+                    </div>
+                    <div id="joinStatus" class="text-sm font-semibold mt-2"></div>
+                </div>
+                
+                <!-- Connection Status -->
+                <div id="connectionStatus" class="hidden bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                    <h3 class="font-semibold text-gray-800 mb-2">Connection Status:</h3>
+                    <div id="statusText" class="text-sm"></div>
+                </div>
+                
+                <!-- Message Test -->
+                <div id="messageTest" class="hidden bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <h3 class="font-semibold text-purple-800 mb-2">Message Test:</h3>
+                    <div class="flex gap-2 mb-2">
+                        <input id="messageInput" type="text" placeholder="Type a message" class="flex-1 p-2 border border-purple-300 rounded" />
+                        <button id="sendMessage" class="bg-purple-500 text-white px-3 py-2 rounded text-sm hover:bg-purple-600">Send</button>
+                    </div>
+                    <div id="messageLog" class="bg-white border border-purple-200 rounded p-2 h-32 overflow-y-auto text-sm font-mono"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Wait for DOM to be fully loaded before running any JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            let peer = null;
+            let connection = null;
+            let isHost = false;
+            let gameId = null;
+
+            function log(message, type = 'info') {
+                const messageLog = document.getElementById('messageLog');
+                if (messageLog) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'mb-1';
+                    logEntry.innerHTML = `<span class="text-gray-500">[${timestamp}]</span> <span class="text-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'}-600">${message}</span>`;
+                    messageLog.appendChild(logEntry);
+                    messageLog.scrollTop = messageLog.scrollHeight;
+                }
+            }
+
+            function updateStatus(message, type = 'info') {
+                const statusText = document.getElementById('statusText');
+                if (statusText) {
+                    statusText.textContent = message;
+                    statusText.className = `text-sm text-${type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue'}-600`;
+                }
+            }
+
+            function showConnectionStatus() {
+                const connectionStatus = document.getElementById('connectionStatus');
+                const messageTest = document.getElementById('messageTest');
+                if (connectionStatus) connectionStatus.classList.remove('hidden');
+                if (messageTest) messageTest.classList.remove('hidden');
+            }
+
+            // Host Game
+            const hostGameBtn = document.getElementById('hostGame');
+            if (hostGameBtn) {
+                hostGameBtn.addEventListener('click', () => {
+                    log('Starting host game...', 'info');
+                    
+                    isHost = true;
+                    peer = new Peer();
+                    
+                    peer.on('open', (id) => {
+                        gameId = id;
+                        const hostGameIdInput = document.getElementById('hostGameId');
+                        const hostInterface = document.getElementById('hostInterface');
+                        const hostStatus = document.getElementById('hostStatus');
+                        
+                        if (hostGameIdInput) hostGameIdInput.value = id;
+                        if (hostInterface) hostInterface.classList.remove('hidden');
+                        if (hostStatus) {
+                            hostStatus.textContent = 'Waiting for player to join...';
+                            hostStatus.className = 'text-sm font-semibold mt-2 text-blue-600';
+                        }
+                        
+                        log(`Host game created with ID: ${id}`, 'success');
+                        updateStatus(`Host game created with ID: ${id}`, 'success');
+                    });
+                    
+                    peer.on('connection', (conn) => {
+                        connection = conn;
+                        setupConnection();
+                        
+                        const hostStatus = document.getElementById('hostStatus');
+                        if (hostStatus) {
+                            hostStatus.textContent = 'Player connected!';
+                            hostStatus.className = 'text-sm font-semibold mt-2 text-green-600';
+                        }
+                        
+                        log('Player connected to host game!', 'success');
+                        updateStatus('Player connected!', 'success');
+                        showConnectionStatus();
+                    });
+                    
+                    peer.on('error', (err) => {
+                        log(`Host error: ${err.type}`, 'error');
+                        const hostStatus = document.getElementById('hostStatus');
+                        if (hostStatus) {
+                            hostStatus.textContent = 'Connection error: ' + err.type;
+                            hostStatus.className = 'text-sm font-semibold mt-2 text-red-600';
+                        }
+                        updateStatus(`Connection error: ${err.type}`, 'error');
+                    });
+                });
+            }
+
+            // Join Game
+            const joinGameBtn = document.getElementById('joinGame');
+            if (joinGameBtn) {
+                joinGameBtn.addEventListener('click', () => {
+                    const joinInterface = document.getElementById('joinInterface');
+                    const hostInterface = document.getElementById('hostInterface');
+                    if (joinInterface) joinInterface.classList.remove('hidden');
+                    if (hostInterface) hostInterface.classList.add('hidden');
+                });
+            }
+
+            // Connect to Game
+            const connectToGameBtn = document.getElementById('connectToGame');
+            if (connectToGameBtn) {
+                connectToGameBtn.addEventListener('click', () => {
+                    const gameIdInput = document.getElementById('joinGameIdInput');
+                    const joinStatus = document.getElementById('joinStatus');
+                    
+                    if (!gameIdInput) return;
+                    
+                    const gameIdValue = gameIdInput.value.trim();
+                    
+                    if (!gameIdValue) {
+                        if (joinStatus) {
+                            joinStatus.textContent = 'Please enter a game ID';
+                            joinStatus.className = 'text-sm font-semibold mt-2 text-red-600';
+                        }
+                        return;
+                    }
+                    
+                    log(`Attempting to join game: ${gameIdValue}`, 'info');
+                    
+                    isHost = false;
+                    peer = new Peer();
+                    
+                    peer.on('open', (id) => {
+                        if (joinStatus) {
+                            joinStatus.textContent = 'Connecting to game...';
+                            joinStatus.className = 'text-sm font-semibold mt-2 text-blue-600';
+                        }
+                        
+                        connection = peer.connect(gameIdValue);
+                        setupConnection();
+                    });
+                    
+                    peer.on('error', (err) => {
+                        log(`Join error: ${err.type}`, 'error');
+                        if (joinStatus) {
+                            joinStatus.textContent = 'Connection error: ' + err.type;
+                            joinStatus.className = 'text-sm font-semibold mt-2 text-red-600';
+                        }
+                        updateStatus(`Connection error: ${err.type}`, 'error');
+                    });
+                });
+            }
+
+            // Copy Game ID
+            const copyGameIdBtn = document.getElementById('copyGameId');
+            if (copyGameIdBtn) {
+                copyGameIdBtn.addEventListener('click', () => {
+                    const gameIdInput = document.getElementById('hostGameId');
+                    const copyButton = document.getElementById('copyGameId');
+                    
+                    if (gameIdInput) {
+                        gameIdInput.select();
+                        document.execCommand('copy');
+                        
+                        if (copyButton) {
+                            const originalText = copyButton.textContent;
+                            copyButton.textContent = 'Copied!';
+                            setTimeout(() => {
+                                copyButton.textContent = originalText;
+                            }, 2000);
+                        }
+                        
+                        log('Game ID copied to clipboard', 'success');
+                    }
+                });
+            }
+
+            // Send Message
+            const sendMessageBtn = document.getElementById('sendMessage');
+            if (sendMessageBtn) {
+                sendMessageBtn.addEventListener('click', () => {
+                    const messageInput = document.getElementById('messageInput');
+                    const message = messageInput ? messageInput.value.trim() : '';
+                    
+                    if (message && connection) {
+                        connection.send({
+                            type: 'message',
+                            text: message,
+                            sender: isHost ? 'Host' : 'Guest',
+                            timestamp: Date.now()
+                        });
+                        
+                        log(`Sent: ${message}`, 'info');
+                        if (messageInput) messageInput.value = '';
+                    }
+                });
+            }
+
+            // Enter key to send message
+            const messageInput = document.getElementById('messageInput');
+            if (messageInput) {
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        const sendMessageBtn = document.getElementById('sendMessage');
+                        if (sendMessageBtn) sendMessageBtn.click();
+                    }
+                });
+            }
+
+            function setupConnection() {
+                if (!connection) return;
+                
+                connection.on('open', () => {
+                    log('Connection established successfully!', 'success');
+                    const joinStatus = document.getElementById('joinStatus');
+                    if (joinStatus) {
+                        joinStatus.textContent = 'Connected!';
+                        joinStatus.className = 'text-sm font-semibold mt-2 text-green-600';
+                    }
+                    updateStatus('Connected!', 'success');
+                    showConnectionStatus();
+                });
+                
+                connection.on('data', (data) => {
+                    if (data.type === 'message') {
+                        const timestamp = new Date(data.timestamp).toLocaleTimeString();
+                        log(`Received from ${data.sender}: ${data.text}`, 'success');
+                    } else {
+                        log(`Received data: ${JSON.stringify(data)}`, 'info');
+                    }
+                });
+                
+                connection.on('close', () => {
+                    log('Connection closed', 'error');
+                    updateStatus('Connection closed', 'error');
+                });
+                
+                connection.on('error', (err) => {
+                    log(`Connection error: ${err.type}`, 'error');
+                    updateStatus(`Connection error: ${err.type}`, 'error');
+                });
+            }
+
+            // Initialize
+            log('Simple multiplayer test loaded', 'info');
+            log('Click "Host Game" to create a game or "Join Game" to connect', 'info');
+        });
+    </script>
+</body>
+</html> 
