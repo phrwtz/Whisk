@@ -477,7 +477,9 @@ class TicTacToe {
         
         // Don't switch players here - it's already been switched by the player who made the move
         console.log('Opponent move completed, current player is now:', this.currentPlayer);
-        this.updateGameDisplay();
+        
+        // Update score display but don't override scoring messages
+        this.updateScoreDisplay();
         
         // Only update turn message if there's no scoring message currently displayed
         const gameStatus = document.getElementById('gameStatus');
@@ -1176,11 +1178,11 @@ class TicTacToe {
             } else {
                 if (this.isMultiplayer && player === this.myPlayerSymbol) {
                     // Multiplayer scoring message for the player who scored
-                    message = `You scored ${points} point${points !== 1 ? 's' : ''}! Now it is your opponent's turn.`;
+                    message = `You scored ${points} point${points !== 1 ? 's' : ''}! It is your opponent's turn.`;
                     textColor = '#48bb78'; // Green
                 } else if (this.isMultiplayer && player === this.opponentPlayerSymbol) {
                     // Multiplayer scoring message for the player who didn't score
-                    message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! Now it is your turn.`;
+                    message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! It is your turn.`;
                     textColor = '#e53e3e'; // Red
                 } else {
                     // Local game or fallback
