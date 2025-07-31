@@ -25,10 +25,9 @@ class TicTacToe {
         
         this.initializeEventListeners();
         this.initializeMultiplayerEventListeners();
-        // Don't auto-start - show multiplayer menu first
-        console.log('About to call showMultiplayerMenu...');
-        this.showMultiplayerMenu();
-        console.log('showMultiplayerMenu called successfully');
+        
+        // Check for existing game on page load
+        this.checkForExistingGame();
     }
 
     initializeEventListeners() {
@@ -155,6 +154,11 @@ class TicTacToe {
                 connectionStatus.textContent = 'Game created! Share your Game ID with a friend to start playing.';
                 connectionStatus.className = 'text-sm font-semibold mb-4 text-green-600';
             }
+            
+            // Store game info when hosting
+            localStorage.setItem('activeGameId', id);
+            localStorage.setItem('activeGameHost', window.location.href);
+            localStorage.setItem('gameCreatedTime', Date.now().toString());
             
             // Re-enable host button
             if (hostGameBtn) {
@@ -1219,6 +1223,51 @@ class TicTacToe {
         if (game) game.classList.add('hidden');
         if (setup) setup.style.display = 'block';
         if (multiplayerSetup) multiplayerSetup.classList.add('hidden');
+    }
+
+    checkForExistingGame() {
+        // Check for existing game on page load
+        const urlParams = new URLSearchParams(window.location.search);
+        const gameId = urlParams.get('gameId');
+        const isJoining = urlParams.get('join') === 'true';
+        
+        // Check if there's an active game (stored in localStorage)
+        const activeGameId = localStorage.getItem('activeGameId');
+        const activeGameHost = localStorage.getItem('activeGameHost');
+        const gameCreatedTime = localStorage.getItem('gameCreatedTime');
+        
+        // Clear old game data (older than 1 hour)
+        if (gameCreatedTime && (Date.now() - parseInt(gameCreatedTime)) > 3600000) {
+            this.clearGameData();
+        }
+        
+        // Check if there's a valid active game
+        if (activeGameId && activeGameHost) {
+            // There's an active game, show join interface
+            this.showJoinInterface();
+            const joinGameId = document.getElementById('joinGameId');
+            if (joinGameId) {
+                joinGameId.value = activeGameId;
+            }
+        } else if (gameId && isJoining) {
+            // Auto-join existing game from URL params
+            this.showJoinInterface();
+            const joinGameId = document.getElementById('joinGameId');
+            if (joinGameId) {
+                joinGameId.value = gameId;
+            }
+            this.joinGame();
+        } else {
+            // No active game, clear any stale data and show main menu
+            this.clearGameData();
+            this.showMultiplayerMenu();
+        }
+    }
+
+    clearGameData() {
+        localStorage.removeItem('activeGameId');
+        localStorage.removeItem('activeGameHost');
+        localStorage.removeItem('gameCreatedTime');
     }
 }
 
