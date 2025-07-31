@@ -76,6 +76,17 @@ class TicTacToe {
         if (backToMultiplayerBtn) {
             backToMultiplayerBtn.addEventListener('click', () => this.showMultiplayerMenu());
         }
+        
+        // Add back to menu buttons
+        const backToMenuBtn = document.getElementById('backToMenu');
+        if (backToMenuBtn) {
+            backToMenuBtn.addEventListener('click', () => this.showMultiplayerMenu());
+        }
+        
+        const backToMenuFromJoinBtn = document.getElementById('backToMenuFromJoin');
+        if (backToMenuFromJoinBtn) {
+            backToMenuFromJoinBtn.addEventListener('click', () => this.showMultiplayerMenu());
+        }
     }
 
     showMultiplayerMenu() {

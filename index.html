@@ -69,6 +69,17 @@
         <!-- Multiplayer Setup -->
         <div id="multiplayerSetup" class="mb-8">
             <h2 class="text-gray-800 mb-5 text-2xl font-bold">Multiplayer Setup</h2>
+            
+            <!-- Instructions -->
+            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 mb-6">
+                <h3 class="text-yellow-800 font-bold mb-2">How to Play Multiplayer:</h3>
+                <div class="text-sm text-yellow-700 space-y-1">
+                    <p><strong>First Player (Host):</strong> Click "Host Game" to create a game and get a Game ID</p>
+                    <p><strong>Second Player (Guest):</strong> Click "Join Game" and enter the Game ID from the host</p>
+                    <p><strong>Local Play:</strong> Click "Play Local" to practice alone</p>
+                </div>
+            </div>
+            
             <div class="flex flex-col gap-4 items-center">
                 <div class="flex gap-4 flex-wrap justify-center">
                     <button id="hostGame" class="bg-gradient-to-r from-green-500 to-green-600 text-white border-none py-3 px-6 rounded-lg text-base font-semibold cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">Host Game</button>
@@ -91,6 +102,9 @@
                         <p>💡 Tip: Make sure both players have a stable internet connection</p>
                         <p>If connection fails, try refreshing the page and trying again</p>
                     </div>
+                    <div class="mt-4 text-center">
+                        <button id="backToMenu" class="bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600">Back to Menu</button>
+                    </div>
                 </div>
                 
                 <!-- Join Game Interface -->
@@ -106,6 +120,9 @@
                     <div class="text-xs text-gray-500 text-center">
                         <p>💡 Tip: Make sure both players have a stable internet connection</p>
                         <p>If connection fails, try refreshing the page and trying again</p>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <button id="backToMenuFromJoin" class="bg-gray-500 text-white px-4 py-2 rounded text-sm hover:bg-gray-600">Back to Menu</button>
                     </div>
                 </div>
             </div>
