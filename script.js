@@ -217,14 +217,24 @@ class UIManager {
         this.hideAllInterfaces();
         document.getElementById('mainMenu').style.display = 'block';
         
-        // Show all buttons - let players choose their role
+        // Check if someone is already hosting (for regular mode)
+        const isGameHosted = localStorage.getItem('gameHosted') === 'true';
+        
         const hostGameBtn = document.getElementById('hostGameBtn');
         const joinGameBtn = document.getElementById('joinGameBtn');
         const playLocalBtn = document.getElementById('playLocalBtn');
         
-        if (hostGameBtn) hostGameBtn.style.display = 'block';
-        if (joinGameBtn) joinGameBtn.style.display = 'block';
-        if (playLocalBtn) playLocalBtn.style.display = 'block';
+        if (isGameHosted) {
+            // Second player scenario - show only join button
+            if (hostGameBtn) hostGameBtn.style.display = 'none';
+            if (joinGameBtn) joinGameBtn.style.display = 'block';
+            if (playLocalBtn) playLocalBtn.style.display = 'none';
+        } else {
+            // First player scenario - show host and local buttons
+            if (hostGameBtn) hostGameBtn.style.display = 'block';
+            if (joinGameBtn) joinGameBtn.style.display = 'none';
+            if (playLocalBtn) playLocalBtn.style.display = 'block';
+        }
     }
 
     clearGameData() {
@@ -435,7 +445,7 @@ class MultiplayerManager {
 
     async hostGame() {
         try {
-            this.peer = new Peer({
+            this.peer = new Peer('whisk-game', {
                 debug: 2,
                 config: {
                     'iceServers': [
@@ -483,14 +493,9 @@ class MultiplayerManager {
     }
 
     async joinGame() {
-        const gameIdInput = document.getElementById('joinGameId');
-        const gameId = gameIdInput ? gameIdInput.value.trim() : '';
+        // For simplicity, we'll use a fixed game ID or try to detect the host
+        const gameId = 'whisk-game'; // Simple fixed ID for now
         
-        if (!gameId) {
-            alert('Please enter a game ID');
-            return;
-        }
-
         try {
             this.peer = new Peer({
                 debug: 2,
