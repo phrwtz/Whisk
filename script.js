@@ -391,7 +391,7 @@ class UIManager {
             for (let col = 0; col < this.boardSize; col++) {
                 const cell = document.createElement('button');
                 
-                cell.className = `bg-white rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
+                cell.className = `rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
                 cell.setAttribute('data-row', row);
                 cell.setAttribute('data-col', col);
                 
@@ -446,6 +446,11 @@ class UIManager {
                 console.log(`Applied fade-${fadeClass} and cell-bg-${fadeClass} to ${symbol} at (${row},${col}), age: ${symbolAge} (total ${symbolHistory.length} ${symbol}s)`);
                 console.log(`Full fadeHistory:`, this.gameLogic.fadeHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
                 console.log(`Symbol history for ${symbol}:`, symbolHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
+                console.log(`Cell classes after applying fade:`, cell.className);
+                console.log(`Cell computed styles:`, {
+                    opacity: window.getComputedStyle(cell).opacity,
+                    backgroundColor: window.getComputedStyle(cell).backgroundColor
+                });
             }
         }
     }
