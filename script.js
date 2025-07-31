@@ -4,6 +4,7 @@ class GameLogic {
     constructor(boardSize = 8, persistence = 5) {
         this.boardSize = boardSize;
         this.persistence = persistence;
+        console.log('GameLogic created with persistence:', this.persistence);
         this.reset();
     }
 
@@ -85,30 +86,29 @@ class GameLogic {
         let points = 0;
         let cells = [];
 
-        for (let i = 0; i < 5; i++) {
+        // Check for lines of 3 or more
+        for (let i = 0; i < this.boardSize; i++) {
             const row = startRow + i * deltaRow;
             const col = startCol + i * deltaCol;
             
             if (row < 0 || row >= this.boardSize || col < 0 || col >= this.boardSize) {
-                return { points: 0, cells: [] };
+                break;
             }
             
             if (this.board[row][col] !== player) {
-                return { points: 0, cells: [] };
+                break;
             }
             
             cells.push({ row, col });
         }
 
         // Calculate points based on line length
-        if (cells.length === 5) {
+        if (cells.length >= 3 && cells.length <= 4) {
             points = 1;
-        } else if (cells.length === 6) {
-            points = 2;
-        } else if (cells.length === 7) {
-            points = 3;
-        } else if (cells.length >= 8) {
+        } else if (cells.length >= 5 && cells.length <= 6) {
             points = 4;
+        } else if (cells.length >= 7) {
+            points = 7;
         }
 
         return { points, cells };
@@ -318,7 +318,7 @@ class UIManager {
             for (let col = 0; col < this.boardSize; col++) {
                 const cell = document.createElement('button');
                 
-                cell.className = `bg-white rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-2xl`;
+                cell.className = `bg-white rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
                 cell.setAttribute('data-row', row);
                 cell.setAttribute('data-col', col);
                 
