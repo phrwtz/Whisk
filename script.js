@@ -576,11 +576,14 @@ class UIManager {
     }
 
     startLocalGame() {
+        console.log('startLocalGame called');
         this.gameLogic.reset();
         this.gameLogic.gameActive = true;
         this.showGameInterface();
         this.createBoard();
+        console.log('About to call updateBoard');
         this.updateBoard();
+        console.log('updateBoard called, now calling updateScoreDisplay');
         this.updateScoreDisplay();
         this.updateTurnMessage();
     }
