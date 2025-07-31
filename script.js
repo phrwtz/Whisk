@@ -426,18 +426,24 @@ class UIManager {
             cell.classList.add('text-blue-600');
         }
         
-        // Apply fading based on symbol age
+        // Apply fading based on symbol age (separate for each player)
         if (symbol) {
             const row = parseInt(cell.getAttribute('data-row'));
             const col = parseInt(cell.getAttribute('data-col'));
+            
+            // Find this symbol in the fade history
             const symbolIndex = this.gameLogic.fadeHistory.findIndex(s => s.row === row && s.col === col && s.symbol === symbol);
             
             if (symbolIndex !== -1) {
-                const age = this.gameLogic.fadeHistory.length - symbolIndex - 1;
-                const fadeClass = Math.min(age, 10);
+                // Calculate age based on how many symbols of the same type came after this one
+                const symbolHistory = this.gameLogic.fadeHistory.filter(s => s.symbol === symbol);
+                const symbolInHistory = symbolHistory.find(s => s.row === row && s.col === col);
+                const symbolAge = symbolHistory.length - symbolHistory.indexOf(symbolInHistory) - 1;
+                
+                const fadeClass = Math.min(symbolAge, 10);
                 cell.classList.add(`fade-${fadeClass}`);
                 cell.classList.add(`cell-bg-${fadeClass}`);
-                console.log(`Applied fade-${fadeClass} and cell-bg-${fadeClass} to ${symbol} at (${row},${col}), age: ${age}`);
+                console.log(`Applied fade-${fadeClass} and cell-bg-${fadeClass} to ${symbol} at (${row},${col}), age: ${symbolAge} (total ${symbolHistory.length} ${symbol}s)`);
             }
         }
     }
