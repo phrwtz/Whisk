@@ -471,6 +471,11 @@ class TicTacToe {
         this.currentPlayer = this.myPlayerSymbol;
         console.log('Opponent move completed, switched to my turn:', this.currentPlayer);
         this.updateGameDisplay();
+        
+        // Update turn message
+        if (this.isMultiplayer) {
+            this.updateTurnMessages();
+        }
     }
 
     syncBoard(board, scores, currentPlayer, symbolHistory) {
@@ -496,6 +501,11 @@ class TicTacToe {
             for (let col = 0; col < this.boardSize; col++) {
                 this.updateCellDisplay(row, col);
             }
+        }
+        
+        // Update turn messages for multiplayer
+        if (this.isMultiplayer) {
+            this.updateTurnMessages();
         }
     }
 
@@ -1108,6 +1118,12 @@ class TicTacToe {
         if (playerSymbol) {
             playerSymbol.textContent = this.currentPlayer;
         }
+        
+        // Update turn messages for multiplayer
+        if (this.isMultiplayer) {
+            this.updateTurnMessages();
+        }
+        
         // Don't clear the scoring message here - let it stay until next move
         // Only update the score display, don't touch the gameStatus
         this.updateScoreDisplay();
@@ -1176,6 +1192,8 @@ class TicTacToe {
     }
 
     newGame() {
+        console.log('Starting new game - multiplayer:', this.isMultiplayer, 'isHost:', this.isHost);
+        
         this.initializeBoard();
         this.gameActive = true;
         this.currentPlayer = 'O';
@@ -1203,23 +1221,49 @@ class TicTacToe {
             gameStatus.textContent = '';
         }
         
-        // Send new game signal to opponent if in multiplayer mode
-        if (this.isMultiplayer && this.connection) {
+        // Update turn messages for multiplayer
+        if (this.isMultiplayer) {
+            this.updateTurnMessages();
+        }
+        
+        // Send new game signal to opponent if in multiplayer mode (only host sends it)
+        if (this.isMultiplayer && this.connection && this.isHost) {
+            console.log('Sending newGame signal to opponent');
             this.connection.send({
                 type: 'newGame'
-            });
-            
-            // Also send board sync to ensure both players are in sync
-            this.connection.send({
-                type: 'boardSync',
-                board: this.board,
-                scores: this.scores,
-                currentPlayer: this.currentPlayer,
-                symbolHistory: this.symbolHistory
             });
         }
         
         this.updateGameDisplay();
+    }
+
+    updateTurnMessages() {
+        const gameStatus = document.getElementById('gameStatus');
+        if (!gameStatus) return;
+        
+        if (this.isMultiplayer) {
+            if (this.currentPlayer === this.myPlayerSymbol) {
+                gameStatus.textContent = 'It is your turn';
+                gameStatus.style.color = '#48bb78'; // Green
+            } else {
+                gameStatus.textContent = "It is your opponent's turn";
+                gameStatus.style.color = '#e53e3e'; // Red
+            }
+        } else {
+            // Local game
+            gameStatus.textContent = `It is ${this.currentPlayer}'s turn`;
+            gameStatus.style.color = '#48bb78'; // Green
+        }
+        
+        // Style the message
+        gameStatus.style.backgroundColor = '#f0f0f0';
+        gameStatus.style.padding = '10px';
+        gameStatus.style.borderRadius = '5px';
+        gameStatus.style.fontSize = '1.2rem';
+        gameStatus.style.fontWeight = 'bold';
+        gameStatus.style.border = `2px solid ${gameStatus.style.color}`;
+        gameStatus.style.display = 'block';
+        gameStatus.style.visibility = 'visible';
     }
 
     showSetup() {
