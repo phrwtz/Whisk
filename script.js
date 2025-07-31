@@ -1204,7 +1204,7 @@ class TicTacToe {
         
         if (gameStatus) {
             let message;
-            let textColor = '#48bb78';
+            let textColor;
             
             // Check if this player has won (50+ points)
             if (this.scores[player] >= 50) {
@@ -1216,35 +1216,37 @@ class TicTacToe {
                     if (player === this.myPlayerSymbol) {
                         // I scored points
                         message = `You scored ${points} point${points !== 1 ? 's' : ''}! It is your opponent's turn.`;
-                        textColor = '#48bb78'; // Green
+                        textColor = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e'; // Blue for O, Red for X
                         console.log('Setting message for player who scored:', message);
                     } else if (player === this.opponentPlayerSymbol) {
                         // My opponent scored points
                         message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! It is your turn.`;
-                        textColor = '#e53e3e'; // Red
+                        textColor = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e'; // Blue for O, Red for X
                         console.log('Setting message for player who didn\'t score:', message);
                     } else {
                         // Fallback for unexpected player symbol
                         message = `${player} scored ${points} point${points !== 1 ? 's' : ''}!`;
+                        textColor = '#3182ce'; // Default blue
                         console.log('Setting fallback message:', message);
                     }
                 } else {
                     // Local game or fallback
                     message = points === 1 ? `${player} scores 1 point!` : `${player} scores ${points} points!`;
+                    textColor = '#3182ce'; // Default blue
                     console.log('Setting fallback message:', message);
                 }
             }
             
             gameStatus.textContent = message;
             gameStatus.style.color = textColor;
-            gameStatus.style.backgroundColor = '#f0f0f0'; // Add background to make it visible
+            gameStatus.style.backgroundColor = '#f0f0f0';
             gameStatus.style.padding = '10px';
             gameStatus.style.borderRadius = '5px';
             gameStatus.style.fontSize = '1.2rem';
             gameStatus.style.fontWeight = 'bold';
             gameStatus.style.border = `2px solid ${textColor}`;
-            gameStatus.style.display = 'block'; // Ensure it's visible
-            gameStatus.style.visibility = 'visible'; // Ensure it's visible
+            gameStatus.style.display = 'block';
+            gameStatus.style.visibility = 'visible';
             console.log('Set gameStatus text to:', message);
             console.log('gameStatus element after setting:', gameStatus);
             console.log('gameStatus parent element:', gameStatus.parentElement);
@@ -1324,33 +1326,35 @@ class TicTacToe {
             console.error('gameStatus element not found for turn messages');
             return;
         }
-        
         console.log('Updating turn messages - multiplayer:', this.isMultiplayer, 'currentPlayer:', this.currentPlayer, 'mySymbol:', this.myPlayerSymbol);
+        
+        let message;
+        let textColor;
         
         if (this.isMultiplayer) {
             if (this.currentPlayer === this.myPlayerSymbol) {
-                gameStatus.textContent = 'It is your turn';
-                gameStatus.style.color = '#48bb78'; // Green
-                console.log('Set turn message: It is your turn (green)');
+                message = 'It is your turn';
+                textColor = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e'; // Blue for O, Red for X
+                console.log('Set turn message: It is your turn');
             } else {
-                gameStatus.textContent = "It is your opponent's turn";
-                gameStatus.style.color = '#e53e3e'; // Red
-                console.log('Set turn message: It is your opponent\'s turn (red)');
+                message = "It is your opponent's turn";
+                textColor = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e'; // Blue for O, Red for X
+                console.log('Set turn message: It is your opponent\'s turn');
             }
         } else {
-            // Local game
-            gameStatus.textContent = `It is ${this.currentPlayer}'s turn`;
-            gameStatus.style.color = '#48bb78'; // Green
-            console.log('Set turn message for local game:', gameStatus.textContent);
+            message = `It is ${this.currentPlayer}'s turn`;
+            textColor = '#3182ce'; // Default blue for local games
+            console.log('Set turn message for local game:', message);
         }
         
-        // Style the message
+        gameStatus.textContent = message;
+        gameStatus.style.color = textColor;
         gameStatus.style.backgroundColor = '#f0f0f0';
         gameStatus.style.padding = '10px';
         gameStatus.style.borderRadius = '5px';
         gameStatus.style.fontSize = '1.2rem';
         gameStatus.style.fontWeight = 'bold';
-        gameStatus.style.border = `2px solid ${gameStatus.style.color}`;
+        gameStatus.style.border = `2px solid ${textColor}`;
         gameStatus.style.display = 'block';
         gameStatus.style.visibility = 'visible';
     }
