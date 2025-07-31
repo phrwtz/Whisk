@@ -1211,16 +1211,23 @@ class TicTacToe {
                 message = `${player} wins!`;
                 textColor = '#e53e3e'; // Red color for win message
             } else {
-                if (this.isMultiplayer && player === this.myPlayerSymbol) {
-                    // Multiplayer scoring message for the player who scored
-                    message = `You scored ${points} point${points !== 1 ? 's' : ''}! It is your opponent's turn.`;
-                    textColor = '#48bb78'; // Green
-                    console.log('Setting message for player who scored:', message);
-                } else if (this.isMultiplayer && player === this.opponentPlayerSymbol) {
-                    // Multiplayer scoring message for the player who didn't score
-                    message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! It is your turn.`;
-                    textColor = '#e53e3e'; // Red
-                    console.log('Setting message for player who didn\'t score:', message);
+                if (this.isMultiplayer) {
+                    // For multiplayer, check if the scoring player is the current player
+                    if (player === this.myPlayerSymbol) {
+                        // I scored points
+                        message = `You scored ${points} point${points !== 1 ? 's' : ''}! It is your opponent's turn.`;
+                        textColor = '#48bb78'; // Green
+                        console.log('Setting message for player who scored:', message);
+                    } else if (player === this.opponentPlayerSymbol) {
+                        // My opponent scored points
+                        message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! It is your turn.`;
+                        textColor = '#e53e3e'; // Red
+                        console.log('Setting message for player who didn\'t score:', message);
+                    } else {
+                        // Fallback for unexpected player symbol
+                        message = `${player} scored ${points} point${points !== 1 ? 's' : ''}!`;
+                        console.log('Setting fallback message:', message);
+                    }
                 } else {
                     // Local game or fallback
                     message = points === 1 ? `${player} scores 1 point!` : `${player} scores ${points} points!`;
