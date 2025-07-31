@@ -367,15 +367,14 @@ class UIManager {
     }
 
     updateCellStyle(cell, symbol) {
-        // Clear any existing fade classes
-        cell.classList.remove('fade-0', 'fade-1', 'fade-2', 'fade-3', 'fade-4', 'fade-5', 'fade-6', 'fade-7', 'fade-8', 'fade-9', 'fade-10');
+        // Clear any existing fade classes and color classes
+        cell.classList.remove('fade-0', 'fade-1', 'fade-2', 'fade-3', 'fade-4', 'fade-5', 'fade-6', 'fade-7', 'fade-8', 'fade-9', 'fade-10', 'text-red-600', 'text-blue-600');
+        cell.style.color = ''; // Clear inline color styles
         
         if (symbol === 'X') {
             cell.classList.add('text-red-600');
-            cell.style.color = '#dc2626';
         } else if (symbol === 'O') {
             cell.classList.add('text-blue-600');
-            cell.style.color = '#2563eb';
         }
         
         // Apply fading based on symbol age
