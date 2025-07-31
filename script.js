@@ -415,7 +415,12 @@ class TicTacToe {
                 this.handleOpponentMove(data.row, data.col);
                 break;
             case 'newGame':
+                console.log('Received newGame signal from opponent');
                 this.newGame();
+                // Ensure turn messages are updated for the guest
+                if (this.isMultiplayer) {
+                    this.updateTurnMessages();
+                }
                 break;
             case 'boardSync':
                 this.syncBoard(data.board, data.scores, data.currentPlayer, data.symbolHistory);
@@ -644,6 +649,9 @@ class TicTacToe {
                 userInfo.textContent = `You are ${this.isHost ? 'hosting' : 'joining'} as ${this.myPlayerSymbol}`;
             }
             console.log('Multiplayer game - Host:', this.isHost, 'My symbol:', this.myPlayerSymbol);
+            
+            // Set initial turn messages for multiplayer
+            this.updateTurnMessages();
         } else {
             const userInfo = document.getElementById('userInfo');
             if (userInfo) {
@@ -1239,20 +1247,28 @@ class TicTacToe {
 
     updateTurnMessages() {
         const gameStatus = document.getElementById('gameStatus');
-        if (!gameStatus) return;
+        if (!gameStatus) {
+            console.error('gameStatus element not found for turn messages');
+            return;
+        }
+        
+        console.log('Updating turn messages - multiplayer:', this.isMultiplayer, 'currentPlayer:', this.currentPlayer, 'mySymbol:', this.myPlayerSymbol);
         
         if (this.isMultiplayer) {
             if (this.currentPlayer === this.myPlayerSymbol) {
                 gameStatus.textContent = 'It is your turn';
                 gameStatus.style.color = '#48bb78'; // Green
+                console.log('Set turn message: It is your turn (green)');
             } else {
                 gameStatus.textContent = "It is your opponent's turn";
                 gameStatus.style.color = '#e53e3e'; // Red
+                console.log('Set turn message: It is your opponent\'s turn (red)');
             }
         } else {
             // Local game
             gameStatus.textContent = `It is ${this.currentPlayer}'s turn`;
             gameStatus.style.color = '#48bb78'; // Green
+            console.log('Set turn message for local game:', gameStatus.textContent);
         }
         
         // Style the message
