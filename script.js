@@ -217,24 +217,14 @@ class UIManager {
         this.hideAllInterfaces();
         document.getElementById('mainMenu').style.display = 'block';
         
-        // Check if someone is already hosting
-        const isGameHosted = localStorage.getItem('gameHosted') === 'true';
-        
+        // Show all buttons - let players choose their role
         const hostGameBtn = document.getElementById('hostGameBtn');
         const joinGameBtn = document.getElementById('joinGameBtn');
         const playLocalBtn = document.getElementById('playLocalBtn');
         
-        if (isGameHosted) {
-            // Second player scenario - show only join button
-            if (hostGameBtn) hostGameBtn.style.display = 'none';
-            if (joinGameBtn) joinGameBtn.style.display = 'block';
-            if (playLocalBtn) playLocalBtn.style.display = 'none';
-        } else {
-            // First player scenario - show host and local buttons
-            if (hostGameBtn) hostGameBtn.style.display = 'block';
-            if (joinGameBtn) joinGameBtn.style.display = 'none';
-            if (playLocalBtn) playLocalBtn.style.display = 'block';
-        }
+        if (hostGameBtn) hostGameBtn.style.display = 'block';
+        if (joinGameBtn) joinGameBtn.style.display = 'block';
+        if (playLocalBtn) playLocalBtn.style.display = 'block';
     }
 
     clearGameData() {
@@ -706,16 +696,8 @@ class TicTacToeGame {
 document.addEventListener('DOMContentLoaded', () => {
     window.game = new TicTacToeGame();
     
-    // Check if a game is already hosted and show appropriate interface
+    // Always show main menu with all buttons visible
     if (window.game && window.game.uiManager) {
-        const isGameHosted = localStorage.getItem('gameHosted') === 'true';
-        
-        if (isGameHosted) {
-            // Second player scenario - show join interface directly
-            window.game.uiManager.showJoinInterface();
-        } else {
-            // First player scenario - show main menu
-            window.game.uiManager.showMainMenu();
-        }
+        window.game.uiManager.showMainMenu();
     }
 }); 
