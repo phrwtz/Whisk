@@ -224,10 +224,7 @@ class UIManager {
         const menuButtons = {
             'hostGameBtn': () => this.showHostInterface(),
             'joinGameBtn': () => this.showJoinInterface(),
-            'playLocalBtn': () => {
-                console.log('playLocalBtn clicked');
-                this.startLocalGame();
-            },
+            'playLocalBtn': () => this.startLocalGame(),
             'backToMenu': async () => await this.showMainMenu(),
             'backToMenuFromJoin': async () => await this.showMainMenu(),
             'resetSetup': () => this.showSetup(),
@@ -238,9 +235,6 @@ class UIManager {
             const element = document.getElementById(id);
             if (element) {
                 element.addEventListener('click', handler);
-                console.log(`Added event listener for ${id}`);
-            } else {
-                console.log(`Element with id '${id}' not found`);
             }
         });
     }
@@ -408,23 +402,18 @@ class UIManager {
     }
 
     updateBoard() {
-        console.log('updateBoard called');
         const cells = document.querySelectorAll('[data-row]');
-        console.log(`Found ${cells.length} cells`);
         cells.forEach(cell => {
             const row = parseInt(cell.getAttribute('data-row'));
             const col = parseInt(cell.getAttribute('data-col'));
             const symbol = this.gameLogic.board[row][col];
             
-            console.log(`Cell (${row},${col}): symbol="${symbol}"`);
             cell.textContent = symbol;
             
             // Only call updateCellStyle for cells that actually have symbols
             if (symbol && symbol !== '') {
-                console.log(`Calling updateCellStyle for cell (${row},${col}) with symbol "${symbol}"`);
                 this.updateCellStyle(cell, symbol);
             } else {
-                console.log(`Clearing styles for empty cell (${row},${col})`);
                 // Clear any existing styles for empty cells
                 cell.classList.remove('fade-0', 'fade-1', 'fade-2', 'fade-3', 'fade-4', 'fade-5', 'fade-6', 'fade-7', 'fade-8', 'fade-9', 'fade-10', 'text-red-600', 'text-blue-600');
                 cell.classList.remove('cell-bg-0', 'cell-bg-1', 'cell-bg-2', 'cell-bg-3', 'cell-bg-4', 'cell-bg-5', 'cell-bg-6', 'cell-bg-7', 'cell-bg-8', 'cell-bg-9', 'cell-bg-10');
@@ -582,14 +571,11 @@ class UIManager {
     }
 
     startLocalGame() {
-        console.log('startLocalGame called');
         this.gameLogic.reset();
         this.gameLogic.gameActive = true;
         this.showGameInterface();
         this.createBoard();
-        console.log('About to call updateBoard');
         this.updateBoard();
-        console.log('updateBoard called, now calling updateScoreDisplay');
         this.updateScoreDisplay();
         this.updateTurnMessage();
     }
