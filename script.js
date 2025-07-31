@@ -381,7 +381,7 @@ class UIManager {
         if (!gameBoard) return;
 
         gameBoard.innerHTML = '';
-        gameBoard.className = 'grid gap-1 bg-white p-2 rounded-2xl shadow-2xl w-full';
+        gameBoard.className = 'grid gap-1 bg-yellow-100 p-2 rounded-2xl shadow-2xl w-full';
         gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize}, 1fr)`;
         gameBoard.style.gridTemplateRows = `repeat(${this.boardSize}, 1fr)`;
         gameBoard.style.aspectRatio = '1 / 1';
