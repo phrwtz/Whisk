@@ -728,7 +728,7 @@ class TicTacToe {
         gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize}, 1fr)`;
         
         // Add board size class for styling
-        gameBoard.className = 'grid gap-0.5 bg-green-500 p-2 rounded-2xl shadow-2xl';
+        gameBoard.className = 'grid gap-0 bg-green-500 p-2 rounded-2xl shadow-2xl';
         if (this.boardSize === 3) {
             gameBoard.classList.add('board-3x3');
         }
@@ -738,7 +738,7 @@ class TicTacToe {
                 const cell = document.createElement('button');
                 // Use responsive cell sizing based on board size
                 const cellSizeClass = `cell-${this.boardSize}x${this.boardSize}`;
-                cell.className = `${cellSizeClass} bg-white border-none rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
+                cell.className = `${cellSizeClass} bg-white border border-green-600 rounded-lg font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 opacity-100 hover:bg-gray-50 hover:scale-105`;
                 cell.dataset.row = i;
                 cell.dataset.col = j;
                 cell.addEventListener('click', () => this.handleCellClick(i, j));
