@@ -331,9 +331,12 @@ class UIManager {
                     console.log('Test peer opened, attempting connection to whisk-game...');
                     const testConnection = testPeer.connect('whisk-game');
                     
+                    let timeoutId;
+                    
                     testConnection.on('open', () => {
                         // Connection successful - game is available
                         console.log('Connection successful - game is available');
+                        clearTimeout(timeoutId); // Clear the timeout
                         testConnection.close();
                         testPeer.destroy();
                         resolve(true);
@@ -342,6 +345,7 @@ class UIManager {
                     testConnection.on('error', (error) => {
                         // Connection failed - no game available
                         console.log('Connection failed - no game available:', error);
+                        clearTimeout(timeoutId); // Clear the timeout
                         testPeer.destroy();
                         resolve(false);
                     });
@@ -349,12 +353,13 @@ class UIManager {
                     testConnection.on('close', () => {
                         // Connection closed - this is expected after successful connection
                         console.log('Test connection closed');
+                        clearTimeout(timeoutId); // Clear the timeout
                         testPeer.destroy();
                         resolve(true);
                     });
                     
                     // Timeout after 3 seconds (reduced from 5)
-                    setTimeout(() => {
+                    timeoutId = setTimeout(() => {
                         console.log('Connection timeout - no game available');
                         testPeer.destroy();
                         resolve(false);
