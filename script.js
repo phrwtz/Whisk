@@ -207,9 +207,10 @@ class GameLogic {
 
 // UI Manager - All rendering and display logic
 class UIManager {
-    constructor(gameLogic) {
+    constructor(gameLogic, multiplayerManager = null) {
         this.gameLogic = gameLogic;
         this.boardSize = gameLogic.boardSize;
+        this.multiplayerManager = multiplayerManager;
         this.initializeEventListeners();
     }
 
@@ -222,7 +223,13 @@ class UIManager {
 
         // Menu navigation
         const menuButtons = {
-            'hostGameBtn': () => this.showHostInterface(),
+            'hostGameBtn': () => {
+                if (this.multiplayerManager) {
+                    this.multiplayerManager.hostGame();
+                } else {
+                    console.error('MultiplayerManager not available');
+                }
+            },
             'joinGameBtn': () => this.showJoinInterface(),
             'playLocalBtn': () => this.startLocalGame(),
             'backToMenu': async () => await this.showMainMenu(),
@@ -900,10 +907,12 @@ class TicTacToeGame {
         console.log('TicTacToeGame constructor called');
         this.gameLogic = new GameLogic();
         console.log('GameLogic created');
-        this.uiManager = new UIManager(this.gameLogic);
-        console.log('UIManager created');
-        this.multiplayerManager = new MultiplayerManager(this.gameLogic, this.uiManager);
+        this.multiplayerManager = new MultiplayerManager(this.gameLogic, null); // Will update uiManager reference later
         console.log('MultiplayerManager created');
+        this.uiManager = new UIManager(this.gameLogic, this.multiplayerManager);
+        console.log('UIManager created');
+        // Update the multiplayerManager's uiManager reference
+        this.multiplayerManager.uiManager = this.uiManager;
         
         // Store the original handleCellClick method
         const originalHandleCellClick = this.uiManager.handleCellClick.bind(this.uiManager);
