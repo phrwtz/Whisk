@@ -367,9 +367,11 @@ class UIManager {
     }
 
     updateCellStyle(cell, symbol) {
-        // Clear any existing fade classes and color classes
+        // Clear any existing fade classes, color classes, and background classes
         cell.classList.remove('fade-0', 'fade-1', 'fade-2', 'fade-3', 'fade-4', 'fade-5', 'fade-6', 'fade-7', 'fade-8', 'fade-9', 'fade-10', 'text-red-600', 'text-blue-600');
+        cell.classList.remove('cell-bg-0', 'cell-bg-1', 'cell-bg-2', 'cell-bg-3', 'cell-bg-4', 'cell-bg-5', 'cell-bg-6', 'cell-bg-7', 'cell-bg-8', 'cell-bg-9', 'cell-bg-10');
         cell.style.color = ''; // Clear inline color styles
+        cell.style.backgroundColor = ''; // Clear inline background styles
         
         if (symbol === 'X') {
             cell.classList.add('text-red-600');
@@ -387,7 +389,8 @@ class UIManager {
                 const age = this.gameLogic.fadeHistory.length - symbolIndex - 1;
                 const fadeClass = Math.min(age, 10);
                 cell.classList.add(`fade-${fadeClass}`);
-                console.log(`Applied fade-${fadeClass} to ${symbol} at (${row},${col}), age: ${age}`);
+                cell.classList.add(`cell-bg-${fadeClass}`);
+                console.log(`Applied fade-${fadeClass} and cell-bg-${fadeClass} to ${symbol} at (${row},${col}), age: ${age}`);
             }
         }
     }
