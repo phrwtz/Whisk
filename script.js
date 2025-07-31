@@ -224,7 +224,10 @@ class UIManager {
         const menuButtons = {
             'hostGameBtn': () => this.showHostInterface(),
             'joinGameBtn': () => this.showJoinInterface(),
-            'playLocalBtn': () => this.startLocalGame(),
+            'playLocalBtn': () => {
+                console.log('playLocalBtn clicked');
+                this.startLocalGame();
+            },
             'backToMenu': async () => await this.showMainMenu(),
             'backToMenuFromJoin': async () => await this.showMainMenu(),
             'resetSetup': () => this.showSetup(),
@@ -235,6 +238,9 @@ class UIManager {
             const element = document.getElementById(id);
             if (element) {
                 element.addEventListener('click', handler);
+                console.log(`Added event listener for ${id}`);
+            } else {
+                console.log(`Element with id '${id}' not found`);
             }
         });
     }
