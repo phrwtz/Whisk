@@ -1230,10 +1230,13 @@ class TicTacToe {
                         console.log('Setting fallback message:', message);
                     }
                 } else {
-                    // Local game or fallback
-                    message = points === 1 ? `${player} scores 1 point!` : `${player} scores ${points} points!`;
-                    textColor = '#3182ce'; // Default blue
-                    console.log('Setting fallback message:', message);
+                    // Local game - include turn information
+                    const nextPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
+                    message = points === 1 ? 
+                        `${player} scores 1 point! Current player: ${nextPlayer}` : 
+                        `${player} scores ${points} points! Current player: ${nextPlayer}`;
+                    textColor = nextPlayer === 'O' ? '#3182ce' : '#e53e3e'; // Blue for O, Red for X
+                    console.log('Setting local game scoring message:', message);
                 }
             }
             
@@ -1327,6 +1330,19 @@ class TicTacToe {
             return;
         }
         console.log('Updating turn messages - multiplayer:', this.isMultiplayer, 'currentPlayer:', this.currentPlayer, 'mySymbol:', this.myPlayerSymbol);
+        console.log('gameStatus element before styling:', gameStatus);
+        console.log('gameStatus text before styling:', gameStatus.textContent);
+        console.log('gameStatus styles before styling:', {
+            color: gameStatus.style.color,
+            backgroundColor: gameStatus.style.backgroundColor,
+            padding: gameStatus.style.padding,
+            borderRadius: gameStatus.style.borderRadius,
+            fontSize: gameStatus.style.fontSize,
+            fontWeight: gameStatus.style.fontWeight,
+            border: gameStatus.style.border,
+            display: gameStatus.style.display,
+            visibility: gameStatus.style.visibility
+        });
         
         let message;
         let textColor;
@@ -1358,6 +1374,20 @@ class TicTacToe {
         gameStatus.style.border = `2px solid ${textColor}`;
         gameStatus.style.display = 'block';
         gameStatus.style.visibility = 'visible';
+        
+        console.log('gameStatus element after styling:', gameStatus);
+        console.log('gameStatus text after styling:', gameStatus.textContent);
+        console.log('gameStatus styles after styling:', {
+            color: gameStatus.style.color,
+            backgroundColor: gameStatus.style.backgroundColor,
+            padding: gameStatus.style.padding,
+            borderRadius: gameStatus.style.borderRadius,
+            fontSize: gameStatus.style.fontSize,
+            fontWeight: gameStatus.style.fontWeight,
+            border: gameStatus.style.border,
+            display: gameStatus.style.display,
+            visibility: gameStatus.style.visibility
+        });
     }
 
     showSetup() {
