@@ -414,14 +414,16 @@ class UIManager {
     }
 
     updateCellStyle(cell, symbol) {
-        console.log(`updateCellStyle called for symbol: ${symbol}`);
+        console.log(`updateCellStyle called for symbol: "${symbol}"`);
         
         // Clear any existing fade classes, color classes, and background classes
         cell.classList.remove('fade-0', 'fade-1', 'fade-2', 'fade-3', 'fade-4', 'fade-5', 'fade-6', 'fade-7', 'fade-8', 'fade-9', 'fade-10', 'text-red-600', 'text-blue-600');
         cell.classList.remove('cell-bg-0', 'cell-bg-1', 'cell-bg-2', 'cell-bg-3', 'cell-bg-4', 'cell-bg-5', 'cell-bg-6', 'cell-bg-7', 'cell-bg-8', 'cell-bg-9', 'cell-bg-10');
         cell.style.color = ''; // Clear inline color styles
         cell.style.backgroundColor = ''; // Clear inline background styles
+        cell.style.border = ''; // Clear any test borders
         
+        // Only apply styles if there's actually a symbol
         if (symbol === 'X') {
             cell.classList.add('text-red-600');
         } else if (symbol === 'O') {
@@ -429,7 +431,7 @@ class UIManager {
         }
         
         // Apply fading based on symbol age (separate for each player)
-        if (symbol) {
+        if (symbol && symbol !== '') {
             const row = parseInt(cell.getAttribute('data-row'));
             const col = parseInt(cell.getAttribute('data-col'));
             
