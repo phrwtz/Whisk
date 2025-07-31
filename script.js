@@ -225,10 +225,10 @@ class UIManager {
             'hostGameBtn': () => this.showHostInterface(),
             'joinGameBtn': () => this.showJoinInterface(),
             'playLocalBtn': () => this.startLocalGame(),
-            'backToMenu': () => this.showMainMenu(),
-            'backToMenuFromJoin': () => this.showMainMenu(),
+            'backToMenu': async () => await this.showMainMenu(),
+            'backToMenuFromJoin': async () => await this.showMainMenu(),
             'resetSetup': () => this.showSetup(),
-            'backToMultiplayer': () => this.showMainMenu()
+            'backToMultiplayer': async () => await this.showMainMenu()
         };
 
         Object.entries(menuButtons).forEach(([id, handler]) => {
@@ -239,7 +239,7 @@ class UIManager {
         });
     }
 
-    showMainMenu() {
+    async showMainMenu() {
         this.hideAllInterfaces();
         document.getElementById('mainMenu').style.display = 'block';
         
@@ -249,20 +249,78 @@ class UIManager {
             mainContainer.className = 'w-full bg-white rounded-2xl shadow-2xl p-8 max-w-md';
         }
         
-        // Always show all buttons - let users choose what they want to do
+        // Check if a game is available to join
+        const isGameAvailable = await this.checkIfGameAvailable();
+        console.log('showMainMenu - isGameAvailable:', isGameAvailable);
+        
         const hostGameBtn = document.getElementById('hostGameBtn');
         const joinGameBtn = document.getElementById('joinGameBtn');
         const playLocalBtn = document.getElementById('playLocalBtn');
         
-        if (hostGameBtn) hostGameBtn.style.display = 'block';
-        if (joinGameBtn) joinGameBtn.style.display = 'block';
-        if (playLocalBtn) playLocalBtn.style.display = 'block';
-        
-        console.log('Showing all menu options - Host Game, Join Game, and Play Local');
+        if (isGameAvailable) {
+            // Second player scenario - show only join button
+            console.log('Showing join interface (second player)');
+            if (hostGameBtn) hostGameBtn.style.display = 'none';
+            if (joinGameBtn) joinGameBtn.style.display = 'block';
+            if (playLocalBtn) playLocalBtn.style.display = 'none';
+        } else {
+            // First player scenario - show host and local buttons
+            console.log('Showing host interface (first player)');
+            if (hostGameBtn) hostGameBtn.style.display = 'block';
+            if (joinGameBtn) joinGameBtn.style.display = 'none';
+            if (playLocalBtn) playLocalBtn.style.display = 'block';
+        }
     }
 
 
 
+
+    async checkIfGameAvailable() {
+        return new Promise((resolve) => {
+            try {
+                // Try to connect to the fixed game ID to see if a game is hosted
+                const testPeer = new Peer({
+                    debug: 0,
+                    config: {
+                        'iceServers': [
+                            { urls: 'stun:stun.l.google.com:19302' }
+                        ]
+                    }
+                });
+
+                testPeer.on('open', () => {
+                    const testConnection = testPeer.connect('whisk-game');
+                    
+                    testConnection.on('open', () => {
+                        // Connection successful - game is available
+                        testConnection.close();
+                        testPeer.destroy();
+                        resolve(true);
+                    });
+                    
+                    testConnection.on('error', () => {
+                        // Connection failed - no game available
+                        testPeer.destroy();
+                        resolve(false);
+                    });
+                    
+                    // Timeout after 3 seconds
+                    setTimeout(() => {
+                        testPeer.destroy();
+                        resolve(false);
+                    }, 3000);
+                });
+
+                testPeer.on('error', () => {
+                    resolve(false);
+                });
+
+            } catch (error) {
+                console.log('Error checking game availability:', error);
+                resolve(false);
+            }
+        });
+    }
 
     clearGameData() {
         // No longer using localStorage for game hosting detection
@@ -728,7 +786,7 @@ class MultiplayerManager {
     handleDisconnection() {
         this.connected = false;
         alert('Connection lost. Returning to main menu.');
-        this.showMainMenu();
+        this.uiManager.showMainMenu();
     }
 
     copyGameId() {
@@ -738,8 +796,8 @@ class MultiplayerManager {
         }
     }
 
-    showMainMenu() {
-        this.uiManager.showMainMenu();
+    async showMainMenu() {
+        await this.uiManager.showMainMenu();
     }
 }
 
@@ -770,7 +828,7 @@ class TicTacToeGame {
 }
 
 // Initialize the game when the page loads
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log('DOMContentLoaded event fired');
     
     // Clear any stale game data on fresh page load
@@ -785,7 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Always show main menu with all buttons visible
     if (window.game && window.game.uiManager) {
         console.log('Calling showMainMenu...');
-        window.game.uiManager.showMainMenu();
+        await window.game.uiManager.showMainMenu();
     } else {
         console.log('Error: game or uiManager not available');
         console.log('window.game:', window.game);
