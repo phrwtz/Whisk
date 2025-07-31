@@ -475,9 +475,8 @@ class TicTacToe {
             this.updateTurnMessages();
         }
         
-        // Switch to my turn
-        this.currentPlayer = this.myPlayerSymbol;
-        console.log('Opponent move completed, switched to my turn:', this.currentPlayer);
+        // Don't switch players here - it's already been switched by the player who made the move
+        console.log('Opponent move completed, current player is now:', this.currentPlayer);
         this.updateGameDisplay();
         
         // Update turn message and clear any scoring messages
@@ -795,15 +794,15 @@ class TicTacToe {
 
         // Send move to opponent if in multiplayer mode
         if (this.isMultiplayer && this.connection) {
+            // Switch players BEFORE sending the move
+            this.currentPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
+            console.log('Switched to player:', this.currentPlayer);
+            
             this.connection.send({
                 type: 'move',
                 row: row,
                 col: col
             });
-            
-            // Switch players first, then send board sync with correct current player
-            this.currentPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
-            console.log('Switched to player:', this.currentPlayer);
             
             // Send full board sync with updated current player
             this.connection.send({
