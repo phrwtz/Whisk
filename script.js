@@ -706,8 +706,16 @@ class TicTacToeGame {
 document.addEventListener('DOMContentLoaded', () => {
     window.game = new TicTacToeGame();
     
-    // Ensure the main menu shows with correct button visibility
+    // Check if a game is already hosted and show appropriate interface
     if (window.game && window.game.uiManager) {
-        window.game.uiManager.showMainMenu();
+        const isGameHosted = localStorage.getItem('gameHosted') === 'true';
+        
+        if (isGameHosted) {
+            // Second player scenario - show join interface directly
+            window.game.uiManager.showJoinInterface();
+        } else {
+            // First player scenario - show main menu
+            window.game.uiManager.showMainMenu();
+        }
     }
 }); 
