@@ -1,3 +1,4 @@
+console.log("Whisk: script.js loaded and running (latest version)");
 // Core Game Logic - Pure game state and rules
 class GameLogic {
     constructor(boardSize = 8, persistence = 5) {
