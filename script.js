@@ -217,14 +217,28 @@ class UIManager {
         this.hideAllInterfaces();
         document.getElementById('mainMenu').style.display = 'block';
         
-        // Show all buttons by default (first player scenario)
+        // Check if someone is already hosting
+        const isGameHosted = localStorage.getItem('gameHosted') === 'true';
+        
         const hostGameBtn = document.getElementById('hostGameBtn');
         const joinGameBtn = document.getElementById('joinGameBtn');
         const playLocalBtn = document.getElementById('playLocalBtn');
         
-        if (hostGameBtn) hostGameBtn.style.display = 'block';
-        if (joinGameBtn) joinGameBtn.style.display = 'none';
-        if (playLocalBtn) playLocalBtn.style.display = 'block';
+        if (isGameHosted) {
+            // Second player scenario - show only join button
+            if (hostGameBtn) hostGameBtn.style.display = 'none';
+            if (joinGameBtn) joinGameBtn.style.display = 'block';
+            if (playLocalBtn) playLocalBtn.style.display = 'none';
+        } else {
+            // First player scenario - show host and local buttons
+            if (hostGameBtn) hostGameBtn.style.display = 'block';
+            if (joinGameBtn) joinGameBtn.style.display = 'none';
+            if (playLocalBtn) playLocalBtn.style.display = 'block';
+        }
+    }
+
+    clearGameData() {
+        localStorage.removeItem('gameHosted');
     }
 
     showHostInterface() {
@@ -449,6 +463,9 @@ class MultiplayerManager {
                 this.isHost = true;
                 this.myPlayerSymbol = 'O';
                 this.opponentPlayerSymbol = 'X';
+                
+                // Mark that a game is being hosted
+                localStorage.setItem('gameHosted', 'true');
                 
                 // Update the connection status message
                 const connectionStatus = document.getElementById('connectionStatus');
