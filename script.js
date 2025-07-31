@@ -1173,7 +1173,7 @@ class TicTacToe {
         
         // Only update turn messages if there's no scoring message currently displayed
         const gameStatus = document.getElementById('gameStatus');
-        if (gameStatus && !gameStatus.textContent.includes('scored')) {
+        if (gameStatus && !gameStatus.textContent.includes('scored') && !gameStatus.textContent.includes('scores')) {
             this.updateTurnMessages();
         }
         
@@ -1301,10 +1301,8 @@ class TicTacToe {
             gameStatus.textContent = '';
         }
         
-        // Update turn messages for multiplayer
-        if (this.isMultiplayer) {
-            this.updateTurnMessages();
-        }
+        // Update turn messages for both multiplayer and local play
+        this.updateTurnMessages();
         
         // Send new game signal to opponent if in multiplayer mode (only host sends it)
         if (this.isMultiplayer && this.connection && this.isHost) {
