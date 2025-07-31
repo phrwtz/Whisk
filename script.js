@@ -219,6 +219,7 @@ class UIManager {
         
         // Check if someone is already hosting (for regular mode)
         const isGameHosted = localStorage.getItem('gameHosted') === 'true';
+        console.log('showMainMenu - isGameHosted:', isGameHosted);
         
         const hostGameBtn = document.getElementById('hostGameBtn');
         const joinGameBtn = document.getElementById('joinGameBtn');
@@ -226,11 +227,13 @@ class UIManager {
         
         if (isGameHosted) {
             // Second player scenario - show only join button
+            console.log('Showing join interface (second player)');
             if (hostGameBtn) hostGameBtn.style.display = 'none';
             if (joinGameBtn) joinGameBtn.style.display = 'block';
             if (playLocalBtn) playLocalBtn.style.display = 'none';
         } else {
             // First player scenario - show host and local buttons
+            console.log('Showing host interface (first player)');
             if (hostGameBtn) hostGameBtn.style.display = 'block';
             if (joinGameBtn) joinGameBtn.style.display = 'none';
             if (playLocalBtn) playLocalBtn.style.display = 'block';
@@ -466,6 +469,7 @@ class MultiplayerManager {
                 
                 // Mark that a game is being hosted
                 localStorage.setItem('gameHosted', 'true');
+                console.log('Game hosted - localStorage set to true');
                 
                 // Update the connection status message
                 const connectionStatus = document.getElementById('connectionStatus');
@@ -699,6 +703,11 @@ class TicTacToeGame {
 
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', () => {
+    // Clear any stale game data on fresh page load
+    if (!localStorage.getItem('gameHosted')) {
+        localStorage.removeItem('gameHosted');
+    }
+    
     window.game = new TicTacToeGame();
     
     // Always show main menu with all buttons visible
