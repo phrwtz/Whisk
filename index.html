@@ -8,30 +8,30 @@
     <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
     <style>
         .hidden { display: none; }
-        .fade-0 { opacity: 1; }
-        .fade-1 { opacity: 0.9; }
-        .fade-2 { opacity: 0.8; }
-        .fade-3 { opacity: 0.7; }
-        .fade-4 { opacity: 0.6; }
-        .fade-5 { opacity: 0.5; }
-        .fade-6 { opacity: 0.4; }
-        .fade-7 { opacity: 0.3; }
-        .fade-8 { opacity: 0.2; }
-        .fade-9 { opacity: 0.1; }
-        .fade-10 { opacity: 0.05; }
+        .fade-0 { opacity: 1 !important; }
+        .fade-1 { opacity: 0.9 !important; }
+        .fade-2 { opacity: 0.8 !important; }
+        .fade-3 { opacity: 0.7 !important; }
+        .fade-4 { opacity: 0.6 !important; }
+        .fade-5 { opacity: 0.5 !important; }
+        .fade-6 { opacity: 0.4 !important; }
+        .fade-7 { opacity: 0.3 !important; }
+        .fade-8 { opacity: 0.2 !important; }
+        .fade-9 { opacity: 0.1 !important; }
+        .fade-10 { opacity: 0.05 !important; }
         
-        /* Cell background fading classes */
-        .cell-bg-0 { background-color: rgba(34, 197, 94, 0.8); } /* bg-green-500 with 80% opacity */
-        .cell-bg-1 { background-color: rgba(34, 197, 94, 0.7); }
-        .cell-bg-2 { background-color: rgba(34, 197, 94, 0.6); }
-        .cell-bg-3 { background-color: rgba(34, 197, 94, 0.5); }
-        .cell-bg-4 { background-color: rgba(34, 197, 94, 0.4); }
-        .cell-bg-5 { background-color: rgba(34, 197, 94, 0.3); }
-        .cell-bg-6 { background-color: rgba(34, 197, 94, 0.25); }
-        .cell-bg-7 { background-color: rgba(34, 197, 94, 0.2); }
-        .cell-bg-8 { background-color: rgba(34, 197, 94, 0.15); }
-        .cell-bg-9 { background-color: rgba(34, 197, 94, 0.1); }
-        .cell-bg-10 { background-color: rgba(34, 197, 94, 0.05); }
+        /* Cell background fading classes - using !important to override Tailwind */
+        .cell-bg-0 { background-color: rgba(34, 197, 94, 0.8) !important; } /* bg-green-500 with 80% opacity */
+        .cell-bg-1 { background-color: rgba(34, 197, 94, 0.7) !important; }
+        .cell-bg-2 { background-color: rgba(34, 197, 94, 0.6) !important; }
+        .cell-bg-3 { background-color: rgba(34, 197, 94, 0.5) !important; }
+        .cell-bg-4 { background-color: rgba(34, 197, 94, 0.4) !important; }
+        .cell-bg-5 { background-color: rgba(34, 197, 94, 0.3) !important; }
+        .cell-bg-6 { background-color: rgba(34, 197, 94, 0.25) !important; }
+        .cell-bg-7 { background-color: rgba(34, 197, 94, 0.2) !important; }
+        .cell-bg-8 { background-color: rgba(34, 197, 94, 0.15) !important; }
+        .cell-bg-9 { background-color: rgba(34, 197, 94, 0.1) !important; }
+        .cell-bg-10 { background-color: rgba(34, 197, 94, 0.05) !important; }
         
         .board-3x3 {
             grid-template-columns: repeat(3, 1fr);
