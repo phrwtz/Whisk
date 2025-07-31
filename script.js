@@ -854,11 +854,15 @@ class TicTacToe {
                 currentPlayer: this.currentPlayer,
                 symbolHistory: this.symbolHistory
             });
+            
+            // Update turn message for current player
+            this.updateTurnMessages();
         } else {
             // Switch players for local game
             this.currentPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
             console.log('Switched to player:', this.currentPlayer);
-            // Don't call updateTurnMessages for local play since scoring message includes turn info
+            // For local play, update turn messages (scoring messages handle their own turn info)
+            this.updateTurnMessages();
         }
         
         this.updateGameDisplay();
