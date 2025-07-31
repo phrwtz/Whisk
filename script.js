@@ -722,12 +722,15 @@ class TicTacToeGame {
         this.multiplayerManager = new MultiplayerManager(this.gameLogic, this.uiManager);
         console.log('MultiplayerManager created');
         
+        // Store the original handleCellClick method
+        const originalHandleCellClick = this.uiManager.handleCellClick.bind(this.uiManager);
+        
         // Override UI manager's cell click to handle multiplayer
         this.uiManager.handleCellClick = (row, col) => {
             if (this.multiplayerManager.connected) {
                 this.multiplayerManager.handleCellClick(row, col);
             } else {
-                this.uiManager.handleCellClick(row, col);
+                originalHandleCellClick(row, col);
             }
         };
         console.log('TicTacToeGame constructor completed');
