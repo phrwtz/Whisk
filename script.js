@@ -688,4 +688,9 @@ class TicTacToeGame {
 // Initialize the game when the page loads
 document.addEventListener('DOMContentLoaded', () => {
     window.game = new TicTacToeGame();
+    
+    // Ensure the main menu shows with correct button visibility
+    if (window.game && window.game.uiManager) {
+        window.game.uiManager.showMainMenu();
+    }
 }); 
