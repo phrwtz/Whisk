@@ -479,8 +479,9 @@ class TicTacToe {
         console.log('Opponent move completed, current player is now:', this.currentPlayer);
         this.updateGameDisplay();
         
-        // Update turn message and clear any scoring messages
-        if (this.isMultiplayer) {
+        // Only update turn message if there's no scoring message currently displayed
+        const gameStatus = document.getElementById('gameStatus');
+        if (this.isMultiplayer && gameStatus && !gameStatus.textContent.includes('scored')) {
             this.updateTurnMessages();
         }
     }
@@ -514,7 +515,10 @@ class TicTacToe {
         
         // Update turn messages for multiplayer
         if (this.isMultiplayer) {
-            this.updateTurnMessages();
+            const gameStatus = document.getElementById('gameStatus');
+            if (gameStatus && !gameStatus.textContent.includes('scored')) {
+                this.updateTurnMessages();
+            }
         }
     }
 
@@ -1137,8 +1141,9 @@ class TicTacToe {
             playerSymbol.textContent = this.currentPlayer;
         }
         
-        // Update turn messages for multiplayer
-        if (this.isMultiplayer) {
+        // Only update turn messages if there's no scoring message currently displayed
+        const gameStatus = document.getElementById('gameStatus');
+        if (this.isMultiplayer && gameStatus && !gameStatus.textContent.includes('scored')) {
             this.updateTurnMessages();
         }
         
