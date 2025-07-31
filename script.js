@@ -444,6 +444,8 @@ class UIManager {
                 cell.classList.add(`fade-${fadeClass}`);
                 cell.classList.add(`cell-bg-${fadeClass}`);
                 console.log(`Applied fade-${fadeClass} and cell-bg-${fadeClass} to ${symbol} at (${row},${col}), age: ${symbolAge} (total ${symbolHistory.length} ${symbol}s)`);
+                console.log(`Full fadeHistory:`, this.gameLogic.fadeHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
+                console.log(`Symbol history for ${symbol}:`, symbolHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
             }
         }
     }
@@ -806,6 +808,8 @@ class MultiplayerManager {
         await this.uiManager.showMainMenu();
     }
 }
+
+console.log('Whisk: script.js loaded and running (latest version) - Timestamp:', new Date().toISOString());
 
 // Main Game Controller - Orchestrates everything
 class TicTacToeGame {
