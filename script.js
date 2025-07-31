@@ -660,12 +660,6 @@ class TicTacToe {
         
         console.log('Game initialized - gameActive:', this.gameActive, 'currentPlayer:', this.currentPlayer);
         
-        // Clear the scoring textbox
-        const gameStatus = document.getElementById('gameStatus');
-        if (gameStatus) {
-            gameStatus.textContent = '';
-        }
-        
         // Show game interface
         const mainMenu = document.getElementById('mainMenu');
         const hostInterface = document.getElementById('hostInterface');
@@ -1231,7 +1225,7 @@ class TicTacToe {
                     }
                 } else {
                     // Local game - include turn information
-                    const nextPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
+                    const nextPlayer = player === 'O' ? 'X' : 'O';
                     message = points === 1 ? 
                         `${player} scores 1 point! Current player: ${nextPlayer}` : 
                         `${player} scores ${points} points! Current player: ${nextPlayer}`;
