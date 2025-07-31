@@ -247,6 +247,7 @@ class UIManager {
         gameBoard.innerHTML = '';
         const boardSizeClass = `board-${this.boardSize}x${this.boardSize}`;
         gameBoard.className = `grid gap-1 bg-green-500 p-2 rounded-2xl shadow-2xl ${boardSizeClass}`;
+        gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize}, 1fr)`;
 
         for (let row = 0; row < this.boardSize; row++) {
             for (let col = 0; col < this.boardSize; col++) {
