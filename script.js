@@ -694,19 +694,18 @@ class TicTacToe {
             }
             console.log('Multiplayer game - Host:', this.isHost, 'My symbol:', this.myPlayerSymbol);
             
-            // Set initial turn messages for multiplayer
-            this.updateTurnMessages();
         } else {
             const userInfo = document.getElementById('userInfo');
             if (userInfo) {
                 userInfo.textContent = 'Local Game';
             }
-            // Set initial turn message for local play
-            this.updateTurnMessages();
         }
         
         this.updateGameDisplay();
         this.createBoard();
+        
+        // Set initial turn message after game interface is fully set up
+        this.updateTurnMessages();
         
         // Send game start data to opponent if multiplayer (only host sends it)
         if (this.isMultiplayer && this.connection && this.isHost) {
