@@ -443,14 +443,28 @@ class UIManager {
                 const fadeClass = Math.min(symbolAge, 10);
                 cell.classList.add(`fade-${fadeClass}`);
                 cell.classList.add(`cell-bg-${fadeClass}`);
+                
+                // Force a style update by accessing computed styles
+                const computedOpacity = window.getComputedStyle(cell).opacity;
+                const computedBackground = window.getComputedStyle(cell).backgroundColor;
+                
                 console.log(`Applied fade-${fadeClass} and cell-bg-${fadeClass} to ${symbol} at (${row},${col}), age: ${symbolAge} (total ${symbolHistory.length} ${symbol}s)`);
                 console.log(`Full fadeHistory:`, this.gameLogic.fadeHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
                 console.log(`Symbol history for ${symbol}:`, symbolHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
                 console.log(`Cell classes after applying fade:`, cell.className);
                 console.log(`Cell computed styles:`, {
-                    opacity: window.getComputedStyle(cell).opacity,
-                    backgroundColor: window.getComputedStyle(cell).backgroundColor
+                    opacity: computedOpacity,
+                    backgroundColor: computedBackground
                 });
+                
+                // Force a repaint
+                cell.offsetHeight;
+                
+                // Test: Apply a very obvious style to verify CSS is working
+                if (fadeClass > 5) {
+                    cell.style.border = '3px solid red';
+                    console.log(`Applied red border to test CSS application`);
+                }
             }
         }
     }
