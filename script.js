@@ -442,39 +442,43 @@ class UIManager {
                 // Calculate age based on how many symbols of the same type came after this one
                 const symbolHistory = this.gameLogic.fadeHistory.filter(s => s.symbol === symbol);
                 const symbolInHistory = symbolHistory.find(s => s.row === row && s.col === col);
-                const symbolAge = symbolHistory.length - symbolHistory.indexOf(symbolInHistory) - 1;
                 
-                const fadeClass = Math.min(symbolAge, 10);
-                cell.classList.add(`fade-${fadeClass}`);
-                cell.classList.add(`cell-bg-${fadeClass}`);
+                // Only apply fading if we found this symbol in the history
+                if (symbolInHistory) {
+                    const symbolAge = symbolHistory.length - symbolHistory.indexOf(symbolInHistory) - 1;
                 
-                // Force a style update by accessing computed styles
-                const computedOpacity = window.getComputedStyle(cell).opacity;
-                const computedBackground = window.getComputedStyle(cell).backgroundColor;
-                
-                console.log(`Applied fade-${fadeClass} and cell-bg-${fadeClass} to ${symbol} at (${row},${col}), age: ${symbolAge} (total ${symbolHistory.length} ${symbol}s)`);
-                console.log(`Full fadeHistory:`, this.gameLogic.fadeHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
-                console.log(`Symbol history for ${symbol}:`, symbolHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
-                console.log(`Cell classes after applying fade:`, cell.className);
-                console.log(`Cell computed styles:`, {
-                    opacity: computedOpacity,
-                    backgroundColor: computedBackground
-                });
-                
-                // Force a repaint
-                cell.offsetHeight;
-                
-                // Test: Apply a very obvious style to verify CSS is working
-                if (fadeClass > 5) {
-                    cell.style.border = '3px solid red';
-                    console.log(`Applied red border to test CSS application`);
-                }
-                
-                // Direct test: Apply inline styles to see if they work
-                if (fadeClass > 3) {
-                    cell.style.opacity = '0.3';
-                    cell.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
-                    console.log(`Applied inline styles: opacity=0.3, background=red`);
+                    const fadeClass = Math.min(symbolAge, 10);
+                    cell.classList.add(`fade-${fadeClass}`);
+                    cell.classList.add(`cell-bg-${fadeClass}`);
+                    
+                    // Force a style update by accessing computed styles
+                    const computedOpacity = window.getComputedStyle(cell).opacity;
+                    const computedBackground = window.getComputedStyle(cell).backgroundColor;
+                    
+                    console.log(`Applied fade-${fadeClass} and cell-bg-${fadeClass} to ${symbol} at (${row},${col}), age: ${symbolAge} (total ${symbolHistory.length} ${symbol}s)`);
+                    console.log(`Full fadeHistory:`, this.gameLogic.fadeHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
+                    console.log(`Symbol history for ${symbol}:`, symbolHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
+                    console.log(`Cell classes after applying fade:`, cell.className);
+                    console.log(`Cell computed styles:`, {
+                        opacity: computedOpacity,
+                        backgroundColor: computedBackground
+                    });
+                    
+                    // Force a repaint
+                    cell.offsetHeight;
+                    
+                    // Test: Apply a very obvious style to verify CSS is working
+                    if (fadeClass > 5) {
+                        cell.style.border = '3px solid red';
+                        console.log(`Applied red border to test CSS application`);
+                    }
+                    
+                    // Direct test: Apply inline styles to see if they work
+                    if (fadeClass > 3) {
+                        cell.style.opacity = '0.3';
+                        cell.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
+                        console.log(`Applied inline styles: opacity=0.3, background=red`);
+                    }
                 }
             }
         }
