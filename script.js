@@ -237,6 +237,36 @@ class UIManager {
                 element.addEventListener('click', handler);
             }
         });
+
+        // Instructions modal events
+        const instructionsBtn = document.getElementById('instructionsBtn');
+        const closeInstructions = document.getElementById('closeInstructions');
+        const instructionsModal = document.getElementById('instructionsModal');
+
+        if (instructionsBtn) {
+            instructionsBtn.addEventListener('click', () => {
+                if (instructionsModal) {
+                    instructionsModal.classList.remove('hidden');
+                }
+            });
+        }
+
+        if (closeInstructions) {
+            closeInstructions.addEventListener('click', () => {
+                if (instructionsModal) {
+                    instructionsModal.classList.add('hidden');
+                }
+            });
+        }
+
+        // Close modal when clicking outside
+        if (instructionsModal) {
+            instructionsModal.addEventListener('click', (e) => {
+                if (e.target === instructionsModal) {
+                    instructionsModal.classList.add('hidden');
+                }
+            });
+        }
     }
 
     async showMainMenu() {
@@ -391,7 +421,7 @@ class UIManager {
             for (let col = 0; col < this.boardSize; col++) {
                 const cell = document.createElement('button');
                 
-                cell.className = `border border-gray-300 font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
+                cell.className = `border border-black font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
                 cell.setAttribute('data-row', row);
                 cell.setAttribute('data-col', col);
                 
