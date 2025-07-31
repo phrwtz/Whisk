@@ -4,6 +4,7 @@ class GameLogic {
     constructor(boardSize = 8, persistence = 5) {
         this.boardSize = boardSize;
         this.persistence = persistence;
+        this.fadeHistory = []; // Separate history for fading calculations
         console.log('GameLogic created with persistence:', this.persistence, 'boardSize:', this.boardSize);
         this.reset();
     }
@@ -14,6 +15,7 @@ class GameLogic {
         this.gameActive = false;
         this.winningCells = [];
         this.symbolHistory = [];
+        this.fadeHistory = []; // Reset fade history
         this.symbolCounts = { O: 0, X: 0 };
         this.scores = { O: 0, X: 0 };
     }
@@ -28,6 +30,14 @@ class GameLogic {
         
         // Add to history
         this.symbolHistory.push({
+            symbol: player,
+            row: row,
+            col: col,
+            timestamp: Date.now()
+        });
+        
+        // Add to fade history (always keep this for fading calculations)
+        this.fadeHistory.push({
             symbol: player,
             row: row,
             col: col,
@@ -372,12 +382,13 @@ class UIManager {
         if (symbol) {
             const row = parseInt(cell.getAttribute('data-row'));
             const col = parseInt(cell.getAttribute('data-col'));
-            const symbolIndex = this.gameLogic.symbolHistory.findIndex(s => s.row === row && s.col === col && s.symbol === symbol);
+            const symbolIndex = this.gameLogic.fadeHistory.findIndex(s => s.row === row && s.col === col && s.symbol === symbol);
             
             if (symbolIndex !== -1) {
-                const age = this.gameLogic.symbolHistory.length - symbolIndex - 1;
+                const age = this.gameLogic.fadeHistory.length - symbolIndex - 1;
                 const fadeClass = Math.min(age, 10);
                 cell.classList.add(`fade-${fadeClass}`);
+                console.log(`Applied fade-${fadeClass} to ${symbol} at (${row},${col}), age: ${age}`);
             }
         }
     }
