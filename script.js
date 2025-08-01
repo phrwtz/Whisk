@@ -788,10 +788,9 @@ class UIManager {
         if (!gameStatus) return;
 
         const nextPlayer = player === 'O' ? 'X' : 'O';
-        const cumulativeScore = this.gameLogic.scores[player];
-        const message = cumulativeScore === 1 ?
-            `${player} total score: 1 point! Current player: ${nextPlayer}` :
-            `${player} total score: ${cumulativeScore} points! Current player: ${nextPlayer}`;
+        const message = points === 1 ?
+            `${player} scored 1 point! Current player: ${nextPlayer}` :
+            `${player} scored ${points} points! Current player: ${nextPlayer}`;
         const color = nextPlayer === 'O' ? '#3182ce' : '#e53e3e';
 
         gameStatus.textContent = message;
@@ -1124,13 +1123,12 @@ class MultiplayerManager {
         if (!gameStatus) return;
 
         let message, color;
-        const cumulativeScore = this.gameLogic.scores[player];
         
         if (player === this.myPlayerSymbol) {
-            message = `Your total score: ${cumulativeScore} point${cumulativeScore !== 1 ? 's' : ''}! It is your opponent's turn.`;
+            message = `You scored ${points} point${points !== 1 ? 's' : ''}! It is your opponent's turn.`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         } else {
-            message = `Your opponent's total score: ${cumulativeScore} point${cumulativeScore !== 1 ? 's' : ''}! It is your turn.`;
+            message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! It is your turn.`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         }
 
