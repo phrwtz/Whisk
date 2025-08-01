@@ -120,7 +120,7 @@ class GameLogic {
         }
         
         // Calculate points based on total line length (including the placed symbol)
-        let totalLength = cells.length + 1; // +1 for the placed symbol
+        let totalLength = cells.length; // Already includes the placed symbol
         let points = 0;
         if (totalLength === 3) {
             points = 1;
@@ -160,7 +160,7 @@ class GameLogic {
         }
         
         // Calculate points based on total line length (including the placed symbol)
-        let totalLength = cells.length + 1; // +1 for the placed symbol
+        let totalLength = cells.length; // Already includes the placed symbol
         let points = 0;
         if (totalLength === 3) {
             points = 1;
@@ -221,7 +221,7 @@ class GameLogic {
         }
         
         // Calculate points based on total line length (including the placed symbol)
-        let totalLength = cells.length + 1; // +1 for the placed symbol
+        let totalLength = cells.length; // Already includes the placed symbol
         let points = 0;
         if (totalLength === 3) {
             points = 1;
