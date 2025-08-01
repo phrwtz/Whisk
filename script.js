@@ -84,6 +84,11 @@ class GameLogic {
         totalPoints += diagonalResults.points;
         scoringCells.push(...diagonalResults.cells);
 
+        // Add the newly placed symbol to highlighting if there's scoring
+        if (totalPoints > 0) {
+            scoringCells.push({ row: row, col: col });
+        }
+
         return { totalPoints, scoringCells };
     }
 
@@ -108,9 +113,6 @@ class GameLogic {
             }
         }
         
-        // Remove the newly placed symbol from the cells array for highlighting
-        cells = cells.filter(cell => !(cell.row === row && cell.col === col));
-        
         // Calculate points based on total line length (including the placed symbol)
         let totalLength = cells.length + 1; // +1 for the placed symbol
         let points = 0;
@@ -120,6 +122,11 @@ class GameLogic {
             points = 3;
         } else if (totalLength >= 5) {
             points = 5;
+        }
+        
+        // Only include cells in highlighting if there's actual scoring
+        if (totalLength < 3) {
+            cells = []; // No highlighting if no scoring
         }
         
         return { points, cells };
@@ -146,9 +153,6 @@ class GameLogic {
             }
         }
         
-        // Remove the newly placed symbol from the cells array for highlighting
-        cells = cells.filter(cell => !(cell.row === row && cell.col === col));
-        
         // Calculate points based on total line length (including the placed symbol)
         let totalLength = cells.length + 1; // +1 for the placed symbol
         let points = 0;
@@ -158,6 +162,11 @@ class GameLogic {
             points = 3;
         } else if (totalLength >= 5) {
             points = 5;
+        }
+        
+        // Only include cells in highlighting if there's actual scoring
+        if (totalLength < 3) {
+            cells = []; // No highlighting if no scoring
         }
         
         return { points, cells };
@@ -201,9 +210,6 @@ class GameLogic {
             }
         }
         
-        // Remove the newly placed symbol from the cells array for highlighting
-        cells = cells.filter(cell => !(cell.row === row && cell.col === col));
-        
         // Calculate points based on total line length (including the placed symbol)
         let totalLength = cells.length + 1; // +1 for the placed symbol
         let points = 0;
@@ -213,6 +219,11 @@ class GameLogic {
             points = 3;
         } else if (totalLength >= 5) {
             points = 5;
+        }
+        
+        // Only include cells in highlighting if there's actual scoring
+        if (totalLength < 3) {
+            cells = []; // No highlighting if no scoring
         }
         
         return { points, cells };
