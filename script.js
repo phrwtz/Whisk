@@ -382,12 +382,12 @@ class UIManager {
                     resolve(false);
                 });
 
-                // Timeout after 5 seconds
+                // Timeout after 10 seconds (increased for better reliability)
                 timeoutId = setTimeout(() => {
                     console.log('Connection timeout - no game available');
                     cleanup();
                     resolve(false);
-                }, 5000);
+                }, 10000);
 
             } catch (error) {
                 console.log('Error checking game availability:', error);
@@ -698,6 +698,7 @@ class MultiplayerManager {
         this.connected = false;
         
         this.initializeMultiplayerEventListeners();
+        this.initializePageRefreshHandling();
     }
 
     initializeMultiplayerEventListeners() {
@@ -712,6 +713,36 @@ class MultiplayerManager {
                 element.addEventListener('click', handler);
             }
         });
+    }
+
+    initializePageRefreshHandling() {
+        // Handle page refresh/close to clean up connections
+        window.addEventListener('beforeunload', () => {
+            if (this.connected || this.peer) {
+                console.log('Page refresh detected - cleaning up connections');
+                this.cleanupConnections();
+            }
+        });
+
+        // Also handle page visibility change (tab switching)
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && (this.connected || this.peer)) {
+                console.log('Page hidden - cleaning up connections');
+                this.cleanupConnections();
+            }
+        });
+    }
+
+    cleanupConnections() {
+        if (this.connection) {
+            this.connection.close();
+            this.connection = null;
+        }
+        if (this.peer) {
+            this.peer.destroy();
+            this.peer = null;
+        }
+        this.connected = false;
     }
 
     async hostGame() {
@@ -799,7 +830,16 @@ class MultiplayerManager {
     }
 
     setupHostConnection() {
+        // Add connection timeout
+        const connectionTimeout = setTimeout(() => {
+            if (!this.connected) {
+                console.log('Host: Connection timeout - no player joined');
+                this.handleDisconnection();
+            }
+        }, 30000); // 30 second timeout
+
         this.connection.on('open', () => {
+            clearTimeout(connectionTimeout);
             this.connected = true;
             // Host keeps isHost = true, myPlayerSymbol = 'O'
             console.log('Host: Connection established with joining player');
@@ -811,12 +851,22 @@ class MultiplayerManager {
         });
 
         this.connection.on('close', () => {
+            clearTimeout(connectionTimeout);
             this.handleDisconnection();
         });
     }
 
     setupConnection() {
+        // Add connection timeout
+        const connectionTimeout = setTimeout(() => {
+            if (!this.connected) {
+                console.log('Joining player: Connection timeout - host not responding');
+                this.handleDisconnection();
+            }
+        }, 30000); // 30 second timeout
+
         this.connection.on('open', () => {
+            clearTimeout(connectionTimeout);
             this.connected = true;
             this.isHost = false;
             this.myPlayerSymbol = 'X';
@@ -831,6 +881,7 @@ class MultiplayerManager {
         });
 
         this.connection.on('close', () => {
+            clearTimeout(connectionTimeout);
             this.handleDisconnection();
         });
     }
