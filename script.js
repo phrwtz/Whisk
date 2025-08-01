@@ -251,12 +251,23 @@ class GameLogic {
         
         console.log('Player O symbols:', playerHistory.O.length, 'Player X symbols:', playerHistory.X.length);
         
-        // Remove oldest symbols from board for each player if they exceed persistence limit
+        // Remove oldest symbols from board and history for each player if they exceed persistence limit
         Object.keys(playerHistory).forEach(player => {
             while (playerHistory[player].length > this.persistence) {
                 const oldestSymbol = playerHistory[player].shift();
                 this.board[oldestSymbol.row][oldestSymbol.col] = '';
-                console.log('Removed symbol from board:', oldestSymbol.symbol, 'at', oldestSymbol.row, oldestSymbol.col);
+                
+                // Also remove from symbolHistory to keep it in sync
+                const historyIndex = this.symbolHistory.findIndex(s => 
+                    s.symbol === oldestSymbol.symbol && 
+                    s.row === oldestSymbol.row && 
+                    s.col === oldestSymbol.col
+                );
+                if (historyIndex !== -1) {
+                    this.symbolHistory.splice(historyIndex, 1);
+                }
+                
+                console.log('Removed symbol from board and history:', oldestSymbol.symbol, 'at', oldestSymbol.row, oldestSymbol.col);
             }
         });
         
