@@ -680,6 +680,8 @@ class UIManager {
                 cell.classList.add('scoring-highlight');
                 console.log(`Applied scoring highlight to cell (${row},${col})`);
             }
+        } else {
+            console.log(`No scoring cells to highlight for cell (${row},${col})`);
         }
     }
 
@@ -689,6 +691,7 @@ class UIManager {
         // Clear any existing fade classes, color classes, and background classes
         cell.classList.remove('fade-0', 'fade-1', 'fade-2', 'fade-3', 'fade-4', 'fade-5', 'fade-6', 'fade-7', 'fade-8', 'fade-9', 'fade-10', 'text-red-600', 'text-blue-600');
         cell.classList.remove('cell-bg-0', 'cell-bg-1', 'cell-bg-2', 'cell-bg-3', 'cell-bg-4', 'cell-bg-5', 'cell-bg-6', 'cell-bg-7', 'cell-bg-8', 'cell-bg-9', 'cell-bg-10');
+        cell.classList.remove('scoring-highlight'); // Also clear scoring highlight
         cell.style.color = ''; // Clear inline color styles
         cell.style.backgroundColor = ''; // Clear inline background styles
         cell.style.border = ''; // Clear any test borders
