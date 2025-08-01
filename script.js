@@ -45,10 +45,12 @@ class GameLogic {
         const scoringResult = this.checkScoring(row, col);
         if (scoringResult.totalPoints > 0) {
             this.scores[player] += scoringResult.totalPoints;
+            // Store the scoring cells for highlighting only when there's scoring
+            this.currentScoringCells = scoringResult.scoringCells;
+        } else {
+            // Clear scoring cells when there's no scoring
+            this.currentScoringCells = [];
         }
-
-        // Store the scoring cells for highlighting
-        this.currentScoringCells = scoringResult.scoringCells;
 
         // Switch players
         this.currentPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
@@ -683,6 +685,7 @@ class UIManager {
         
         // Only apply highlighting if there are scoring cells and this cell is one of them
         if (this.gameLogic.currentScoringCells && this.gameLogic.currentScoringCells.length > 0) {
+            console.log(`Current scoring cells:`, this.gameLogic.currentScoringCells);
             const isScoringCell = this.gameLogic.currentScoringCells.some(sc => sc.row === row && sc.col === col);
             if (isScoringCell) {
                 cell.classList.add('scoring-highlight');
