@@ -306,11 +306,25 @@ class UIManager {
             console.log('showMainMenu - isGameAvailable:', isGameAvailable);
             
             if (isGameAvailable) {
-                // Second player scenario - show only join button
-                console.log('Showing join interface (second player)');
+                // Second player scenario - show only join button in main menu
+                console.log('Showing join button in main menu (second player)');
                 if (hostGameBtn) hostGameBtn.style.display = 'none';
                 if (joinGameBtn) joinGameBtn.style.display = 'block';
                 if (playLocalBtn) playLocalBtn.style.display = 'none';
+                
+                // Set up the join button event listener
+                if (joinGameBtn && this.multiplayerManager) {
+                    console.log('Setting up join button event listener in main menu');
+                    // Remove any existing listeners by cloning
+                    const newButton = joinGameBtn.cloneNode(true);
+                    joinGameBtn.parentNode.replaceChild(newButton, joinGameBtn);
+                    
+                    // Add the event listener to the new button
+                    newButton.addEventListener('click', () => {
+                        console.log('Join Game button clicked - calling joinGame()');
+                        this.multiplayerManager.joinGame();
+                    });
+                }
             } else {
                 // First player scenario - show host and local buttons
                 console.log('Showing host interface (first player)');
