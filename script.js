@@ -286,9 +286,17 @@ class UIManager {
             mainContainer.className = 'w-full bg-white rounded-2xl shadow-2xl p-8 max-w-md';
         }
         
-        // Check if a game is available to join
-        const isGameAvailable = await this.checkIfGameAvailable();
-        console.log('showMainMenu - isGameAvailable:', isGameAvailable);
+        // Check if we're already hosting a game
+        const isAlreadyHosting = this.multiplayerManager && this.multiplayerManager.isHost;
+        
+        let isGameAvailable = false;
+        if (!isAlreadyHosting) {
+            // Only check for available games if we're not already hosting
+            isGameAvailable = await this.checkIfGameAvailable();
+            console.log('showMainMenu - isGameAvailable:', isGameAvailable);
+        } else {
+            console.log('showMainMenu - already hosting, skipping availability check');
+        }
         
         const hostGameBtn = document.getElementById('hostGameBtn');
         const joinGameBtn = document.getElementById('joinGameBtn');
