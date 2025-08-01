@@ -789,8 +789,8 @@ class UIManager {
 
         const nextPlayer = player === 'O' ? 'X' : 'O';
         const message = points === 1 ?
-            `${player} scored 1 point! Current player: ${nextPlayer}` :
-            `${player} scored ${points} points! Current player: ${nextPlayer}`;
+            `${player} scored 1 point. It is your opponent's turn` :
+            `${player} scored ${points} points. It is your opponent's turn`;
         const color = nextPlayer === 'O' ? '#3182ce' : '#e53e3e';
 
         gameStatus.textContent = message;
@@ -1125,10 +1125,10 @@ class MultiplayerManager {
         let message, color;
         
         if (player === this.myPlayerSymbol) {
-            message = `You scored ${points} point${points !== 1 ? 's' : ''}! It is your opponent's turn.`;
+            message = `You scored ${points} point${points !== 1 ? 's' : ''}. It is your opponent's turn`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         } else {
-            message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! It is your turn.`;
+            message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}. It is your turn`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         }
 
