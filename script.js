@@ -377,13 +377,16 @@ class UIManager {
                         try {
                             const testConnection = testPeer.connect('whisk-game');
                             
-                            testConnection.on('open', () => {
-                                // Connection successful - game is available
-                                console.log('Connection successful - game is available');
-                                cleanup();
+                                                    testConnection.on('open', () => {
+                            // Connection successful - game is available
+                            console.log('Connection successful - game is available');
+                            cleanup();
+                            // Close the test connection immediately to avoid interference
+                            setTimeout(() => {
                                 testConnection.close();
-                                resolve(true);
-                            });
+                            }, 100);
+                            resolve(true);
+                        });
                             
                             testConnection.on('error', (error) => {
                                 // Connection failed - try again if we have retries left
@@ -938,7 +941,10 @@ class MultiplayerManager {
             // Host keeps isHost = true, myPlayerSymbol = 'O'
             console.log('Host: Connection established with joining player');
             console.log('Host: Starting multiplayer game...');
-            this.startMultiplayerGame();
+            // Add a small delay to ensure connection is stable
+            setTimeout(() => {
+                this.startMultiplayerGame();
+            }, 500);
         });
 
         this.connection.on('data', (data) => {
@@ -948,6 +954,7 @@ class MultiplayerManager {
         this.connection.on('close', () => {
             clearTimeout(connectionTimeout);
             console.log('Host: Connection closed by peer');
+            console.log('Host: Connection state before disconnection:', this.connected);
             this.handleDisconnection();
         });
     }
@@ -970,7 +977,10 @@ class MultiplayerManager {
             
             console.log('Joining player: Connection established with host');
             console.log('Joining player: Starting multiplayer game...');
-            this.startMultiplayerGame();
+            // Add a small delay to ensure connection is stable
+            setTimeout(() => {
+                this.startMultiplayerGame();
+            }, 500);
         });
 
         this.connection.on('data', (data) => {
@@ -980,6 +990,7 @@ class MultiplayerManager {
         this.connection.on('close', () => {
             clearTimeout(connectionTimeout);
             console.log('Joining player: Connection closed by peer');
+            console.log('Joining player: Connection state before disconnection:', this.connected);
             this.handleDisconnection();
         });
     }
