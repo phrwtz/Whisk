@@ -324,7 +324,7 @@ class UIManager {
         const menuButtons = {
             'hostGameBtn': () => {
                 if (this.multiplayerManager) {
-                    this.multiplayerManager.hostGame();
+                    this.showHostInterface();
                 } else {
                     console.error('MultiplayerManager not available');
                 }
@@ -595,35 +595,6 @@ class UIManager {
         if (mainContainer) {
             mainContainer.className = 'w-full bg-white rounded-2xl shadow-2xl p-8 max-w-md';
         }
-        
-        // Show join button, hide host and local buttons (second player scenario)
-        const hostGameBtn = document.getElementById('hostGameBtn');
-        const joinGameBtn = document.getElementById('joinGameBtn');
-        const playLocalBtn = document.getElementById('playLocalBtn');
-        
-        if (hostGameBtn) hostGameBtn.style.display = 'none';
-        if (joinGameBtn) joinGameBtn.style.display = 'block';
-        if (playLocalBtn) playLocalBtn.style.display = 'none';
-        
-        // Set up the join button event listener
-        const joinGameButton = document.getElementById('joinGame');
-        if (joinGameButton && this.multiplayerManager) {
-            console.log('Setting up join button event listener');
-            // Remove any existing listeners by cloning
-            const newButton = joinGameButton.cloneNode(true);
-            joinGameButton.parentNode.replaceChild(newButton, joinGameButton);
-            
-            // Add the event listener to the new button
-            newButton.addEventListener('click', () => {
-                console.log('Join Game button clicked - calling joinGame()');
-                this.multiplayerManager.joinGame();
-            });
-        } else {
-            console.log('Join button or multiplayerManager not found:', {
-                joinGameButton: !!joinGameButton,
-                multiplayerManager: !!this.multiplayerManager
-            });
-        }
     }
 
     showGameInterface() {
@@ -856,6 +827,8 @@ class MultiplayerManager {
         this.opponentPlayerSymbol = 'X';
         this.gameId = null;
         this.connected = false;
+        this.myPlayerName = '';
+        this.opponentPlayerName = '';
         
         this.initializeMultiplayerEventListeners();
         this.initializePageRefreshHandling();
@@ -864,7 +837,9 @@ class MultiplayerManager {
     initializeMultiplayerEventListeners() {
         const multiplayerButtons = {
             'joinGame': () => this.joinGame(),
-            'copyGameId': () => this.copyGameId()
+            'copyGameId': () => this.copyGameId(),
+            'submitHostName': () => this.handleHostNameSubmit(),
+            'submitJoinName': () => this.handleJoinNameSubmit()
         };
 
         Object.entries(multiplayerButtons).forEach(([id, handler]) => {
@@ -910,9 +885,6 @@ class MultiplayerManager {
         try {
             console.log('Creating host game with ID: whisk-game', new Date().toISOString());
             
-            // Show the host interface first
-            this.uiManager.showHostInterface();
-            
             this.peer = new Peer('whisk-game', {
                 debug: 3,
                 config: {
@@ -934,12 +906,6 @@ class MultiplayerManager {
                 
                 console.log('Host peer opened with ID:', id, new Date().toISOString());
                 console.log('Host is now ready for connections');
-                
-                // Update the connection status message
-                const connectionStatus = document.getElementById('connectionStatus');
-                if (connectionStatus) {
-                    connectionStatus.textContent = 'Waiting for player to join...';
-                }
                 
                 console.log('Host game created and ready for connections');
             });
@@ -1226,6 +1192,61 @@ class MultiplayerManager {
 
     async showMainMenu() {
         await this.uiManager.showMainMenu();
+    }
+
+    handleHostNameSubmit() {
+        const hostNameInput = document.getElementById('hostName');
+        const hostName = hostNameInput.value.trim();
+        
+        if (hostName === '') {
+            alert('Please enter your name.');
+            return;
+        }
+        
+        this.myPlayerName = hostName;
+        
+        // Hide the name input and show the waiting message
+        document.getElementById('hostNameInput').style.display = 'none';
+        document.getElementById('hostWaiting').classList.remove('hidden');
+        
+        // Start hosting the game
+        this.hostGame();
+    }
+
+    handleJoinNameSubmit() {
+        const joinNameInput = document.getElementById('joinName');
+        const joinName = joinNameInput.value.trim();
+        
+        if (joinName === '') {
+            alert('Please enter your name.');
+            return;
+        }
+        
+        this.myPlayerName = joinName;
+        
+        // Hide the name input and show the join game section
+        document.getElementById('joinNameInput').style.display = 'none';
+        document.getElementById('joinGameSection').classList.remove('hidden');
+        
+        // Set up the join button event listener
+        const joinGameButton = document.getElementById('joinGame');
+        if (joinGameButton && this.multiplayerManager) {
+            console.log('Setting up join button event listener');
+            // Remove any existing listeners by cloning
+            const newButton = joinGameButton.cloneNode(true);
+            joinGameButton.parentNode.replaceChild(newButton, joinGameButton);
+            
+            // Add the event listener to the new button
+            newButton.addEventListener('click', () => {
+                console.log('Join Game button clicked - calling joinGame()');
+                this.multiplayerManager.joinGame();
+            });
+        } else {
+            console.log('Join button or multiplayerManager not found:', {
+                joinGameButton: !!joinGameButton,
+                multiplayerManager: !!this.multiplayerManager
+            });
+        }
     }
 }
 
