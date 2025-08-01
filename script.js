@@ -411,6 +411,18 @@ class UIManager {
         if (hostGameBtn) hostGameBtn.style.display = 'none';
         if (joinGameBtn) joinGameBtn.style.display = 'block';
         if (playLocalBtn) playLocalBtn.style.display = 'none';
+        
+        // Set up the join button event listener
+        const joinGameButton = document.getElementById('joinGame');
+        if (joinGameButton && this.multiplayerManager) {
+            // Remove any existing listeners to prevent duplicates
+            joinGameButton.replaceWith(joinGameButton.cloneNode(true));
+            const newJoinGameButton = document.getElementById('joinGame');
+            newJoinGameButton.addEventListener('click', () => {
+                console.log('Join Game button clicked');
+                this.multiplayerManager.joinGame();
+            });
+        }
     }
 
     showGameInterface() {
@@ -918,8 +930,11 @@ class MultiplayerManager {
 
     handleDisconnection() {
         this.connected = false;
-        alert('Connection lost. Returning to main menu.');
-        this.uiManager.showMainMenu();
+        console.log('Connection lost. Returning to main menu.');
+        // Use a timeout to prevent potential loops
+        setTimeout(() => {
+            this.uiManager.showMainMenu();
+        }, 100);
     }
 
     copyGameId() {
