@@ -1223,29 +1223,20 @@ class MultiplayerManager {
         
         this.myPlayerName = joinName;
         
-        // Hide the name input and show the join game section
+        // Hide the name input and show connecting message
         document.getElementById('joinNameInput').style.display = 'none';
         document.getElementById('joinGameSection').classList.remove('hidden');
         
-        // Set up the join button event listener
-        const joinGameButton = document.getElementById('joinGame');
-        if (joinGameButton && this.multiplayerManager) {
-            console.log('Setting up join button event listener');
-            // Remove any existing listeners by cloning
-            const newButton = joinGameButton.cloneNode(true);
-            joinGameButton.parentNode.replaceChild(newButton, joinGameButton);
-            
-            // Add the event listener to the new button
-            newButton.addEventListener('click', () => {
-                console.log('Join Game button clicked - calling joinGame()');
-                this.multiplayerManager.joinGame();
-            });
-        } else {
-            console.log('Join button or multiplayerManager not found:', {
-                joinGameButton: !!joinGameButton,
-                multiplayerManager: !!this.multiplayerManager
-            });
+        // Update the join status to show connecting
+        const joinStatus = document.getElementById('joinStatus');
+        if (joinStatus) {
+            joinStatus.textContent = 'Connecting to game...';
+            joinStatus.style.color = '#059669'; // Green color
         }
+        
+        // Connect directly after name submission
+        console.log('Name submitted, connecting to game...');
+        this.joinGame();
     }
 }
 
