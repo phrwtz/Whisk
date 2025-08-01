@@ -648,6 +648,7 @@ class UIManager {
             const col = parseInt(cell.getAttribute('data-col'));
             const symbol = this.gameLogic.board[row][col];
             
+            console.log(`updateBoard: cell (${row},${col}) has symbol "${symbol}"`);
             cell.textContent = symbol;
             
             // Clear all existing styles first
@@ -683,7 +684,7 @@ class UIManager {
     }
 
     updateCellStyle(cell, symbol) {
-        console.log(`updateCellStyle called for symbol: "${symbol}" from:`, new Error().stack.split('\n')[2]);
+        console.log(`updateCellStyle called for symbol: "${symbol}" at cell (${cell.getAttribute('data-row')},${cell.getAttribute('data-col')})`);
         
         // Clear any existing fade classes, color classes, and background classes
         cell.classList.remove('fade-0', 'fade-1', 'fade-2', 'fade-3', 'fade-4', 'fade-5', 'fade-6', 'fade-7', 'fade-8', 'fade-9', 'fade-10', 'text-red-600', 'text-blue-600');
@@ -695,8 +696,10 @@ class UIManager {
         // Only apply styles if there's actually a symbol
         if (symbol === 'X') {
             cell.classList.add('text-red-600');
+            console.log(`Applied text-red-600 to X at (${cell.getAttribute('data-row')},${cell.getAttribute('data-col')})`);
         } else if (symbol === 'O') {
             cell.classList.add('text-blue-600');
+            console.log(`Applied text-blue-600 to O at (${cell.getAttribute('data-row')},${cell.getAttribute('data-col')})`);
         }
         
         // Apply fading based on symbol age (separate for each player)
