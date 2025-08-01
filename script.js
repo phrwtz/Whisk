@@ -329,7 +329,6 @@ class UIManager {
                     console.error('MultiplayerManager not available');
                 }
             },
-            'joinGameBtn': () => this.showJoinInterface(),
             'playLocalBtn': () => this.startLocalGame(),
             'backToMenu': async () => await this.showMainMenu(),
             'backToMenuFromJoin': async () => await this.showMainMenu(),
