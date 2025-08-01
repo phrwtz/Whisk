@@ -182,31 +182,53 @@ class GameLogic {
     managePersistence() {
         if (this.persistence === 64) return; // No persistence in unlimited mode
 
-        console.log('Managing persistence - current length:', this.symbolHistory.length, 'persistence:', this.persistence);
+        console.log('Managing persistence - current length:', this.fadeHistory.length, 'persistence:', this.persistence);
         
-        // Manage persistence per player
-        const playerHistory = { O: [], X: [] };
+        // Update the board to match the visible state
+        this.updateBoardToMatchVisibleState();
         
-        // Separate history by player
-        this.symbolHistory.forEach(symbol => {
-            playerHistory[symbol.symbol].push(symbol);
-        });
+        // Update symbol counts based on visible symbols
+        this.updateSymbolCounts();
         
-        console.log('Player O symbols:', playerHistory.O.length, 'Player X symbols:', playerHistory.X.length);
+        console.log('After persistence management - board updated to match visible state');
+    }
+
+    updateBoardToMatchVisibleState() {
+        // Clear the board
+        for (let row = 0; row < this.boardSize; row++) {
+            for (let col = 0; col < this.boardSize; col++) {
+                this.board[row][col] = '';
+            }
+        }
         
-        // Remove oldest symbols from board for each player if they exceed persistence limit
-        Object.keys(playerHistory).forEach(player => {
-            while (playerHistory[player].length > this.persistence) {
-                const oldestSymbol = playerHistory[player].shift();
-                this.board[oldestSymbol.row][oldestSymbol.col] = '';
-                this.symbolCounts[oldestSymbol.symbol]--;
-                console.log('Removed symbol from board:', oldestSymbol.symbol, 'at', oldestSymbol.row, oldestSymbol.col);
+        // Add only visible symbols to the board
+        this.fadeHistory.forEach(symbol => {
+            const symbolHistory = this.fadeHistory.filter(s => s.symbol === symbol.symbol);
+            const symbolInHistory = symbolHistory.find(s => s.row === symbol.row && s.col === symbol.col);
+            
+            if (symbolInHistory) {
+                const symbolAge = symbolHistory.length - symbolHistory.indexOf(symbolInHistory) - 1;
+                // If symbol age is less than persistence, it's still visible
+                if (symbolAge < this.persistence) {
+                    this.board[symbol.row][symbol.col] = symbol.symbol;
+                }
             }
         });
+    }
+
+    updateSymbolCounts() {
+        // Reset counts
+        this.symbolCounts = { O: 0, X: 0 };
         
-        // Don't modify symbolHistory - keep it for fading calculations
-        
-        console.log('After persistence management - O symbols:', playerHistory.O.length, 'X symbols:', playerHistory.X.length);
+        // Count only visible symbols
+        for (let row = 0; row < this.boardSize; row++) {
+            for (let col = 0; col < this.boardSize; col++) {
+                const symbol = this.board[row][col];
+                if (symbol === 'O' || symbol === 'X') {
+                    this.symbolCounts[symbol]++;
+                }
+            }
+        }
     }
 
     getGameState() {
