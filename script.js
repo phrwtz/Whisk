@@ -92,7 +92,7 @@ class GameLogic {
         let points = 0;
         let cells = [];
 
-        // Check for lines of 3 or more
+        // Check for lines of 3 or more using symbolHistory instead of board
         for (let i = 0; i < this.boardSize; i++) {
             const row = startRow + i * deltaRow;
             const col = startCol + i * deltaCol;
@@ -101,7 +101,12 @@ class GameLogic {
                 break;
             }
             
-            if (this.board[row][col] !== player) {
+            // Check if this position has the player's symbol in symbolHistory
+            const hasSymbol = this.symbolHistory.some(symbol => 
+                symbol.row === row && symbol.col === col && symbol.symbol === player
+            );
+            
+            if (!hasSymbol) {
                 break;
             }
             
