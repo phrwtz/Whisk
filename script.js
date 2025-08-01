@@ -4,7 +4,6 @@ class GameLogic {
     constructor(boardSize = 8, persistence = 5) {
         this.boardSize = boardSize;
         this.persistence = persistence;
-        this.fadeHistory = []; // Separate history for fading calculations
         console.log('GameLogic created with persistence:', this.persistence, 'boardSize:', this.boardSize);
         this.reset();
     }
@@ -15,7 +14,6 @@ class GameLogic {
         this.gameActive = false;
         this.winningCells = [];
         this.symbolHistory = [];
-        this.fadeHistory = []; // Reset fade history
         this.symbolCounts = { O: 0, X: 0 };
         this.scores = { O: 0, X: 0 };
     }
@@ -25,26 +23,21 @@ class GameLogic {
             return { success: false, message: 'Invalid move' };
         }
 
+        // Add the move to the board
         this.board[row][col] = player;
-        this.symbolCounts[player]++;
         
-        // Add to history
+        // Add to history for persistence management
         this.symbolHistory.push({
             symbol: player,
             row: row,
             col: col,
             timestamp: Date.now()
         });
-        
-        // Add to fade history (always keep this for fading calculations)
-        this.fadeHistory.push({
-            symbol: player,
-            row: row,
-            col: col,
-            timestamp: Date.now()
-        });
 
-        // Check for scoring
+        // Manage persistence BEFORE scoring (so scoring uses correct board state)
+        this.managePersistence();
+
+        // Check for scoring using the updated board state
         const scoringResult = this.checkScoring(row, col);
         if (scoringResult.totalPoints > 0) {
             this.scores[player] += scoringResult.totalPoints;
@@ -52,9 +45,6 @@ class GameLogic {
 
         // Switch players
         this.currentPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
-
-        // Manage persistence
-        this.managePersistence();
 
         return {
             success: true,
@@ -88,35 +78,11 @@ class GameLogic {
         return { totalPoints, scoringCells };
     }
 
-    // Get the current visible board state (symbols that haven't faded completely)
-    getVisibleBoardState() {
-        const visibleBoard = Array(this.boardSize).fill().map(() => Array(this.boardSize).fill(''));
-        
-        // For each symbol in fadeHistory, check if it's still visible
-        this.fadeHistory.forEach(symbol => {
-            const symbolHistory = this.fadeHistory.filter(s => s.symbol === symbol.symbol);
-            const symbolInHistory = symbolHistory.find(s => s.row === symbol.row && s.col === symbol.col);
-            
-            if (symbolInHistory) {
-                const symbolAge = symbolHistory.length - symbolHistory.indexOf(symbolInHistory) - 1;
-                // If symbol age is less than persistence, it's still visible
-                if (symbolAge < this.persistence) {
-                    visibleBoard[symbol.row][symbol.col] = symbol.symbol;
-                }
-            }
-        });
-        
-        return visibleBoard;
-    }
-
     checkLineForScoring(startRow, startCol, deltaRow, deltaCol, player) {
         let points = 0;
         let cells = [];
 
-        // Get the current visible board state
-        const visibleBoard = this.getVisibleBoardState();
-
-        // Check for lines of 3 or more using visible board state
+        // Check for lines of 3 or more using the board directly
         for (let i = 0; i < this.boardSize; i++) {
             const row = startRow + i * deltaRow;
             const col = startCol + i * deltaCol;
@@ -125,8 +91,8 @@ class GameLogic {
                 break;
             }
             
-            // Check if this position has the player's symbol in the visible board
-            if (visibleBoard[row][col] !== player) {
+            // Check if this position has the player's symbol
+            if (this.board[row][col] !== player) {
                 break;
             }
             
@@ -182,45 +148,38 @@ class GameLogic {
     managePersistence() {
         if (this.persistence === 64) return; // No persistence in unlimited mode
 
-        console.log('Managing persistence - current length:', this.fadeHistory.length, 'persistence:', this.persistence);
+        console.log('Managing persistence - current length:', this.symbolHistory.length, 'persistence:', this.persistence);
         
-        // Update the board to match the visible state
-        this.updateBoardToMatchVisibleState();
+        // Manage persistence per player
+        const playerHistory = { O: [], X: [] };
         
-        // Update symbol counts based on visible symbols
-        this.updateSymbolCounts();
+        // Separate history by player
+        this.symbolHistory.forEach(symbol => {
+            playerHistory[symbol.symbol].push(symbol);
+        });
         
-        console.log('After persistence management - board updated to match visible state');
-    }
-
-    updateBoardToMatchVisibleState() {
-        // Clear the board
-        for (let row = 0; row < this.boardSize; row++) {
-            for (let col = 0; col < this.boardSize; col++) {
-                this.board[row][col] = '';
-            }
-        }
+        console.log('Player O symbols:', playerHistory.O.length, 'Player X symbols:', playerHistory.X.length);
         
-        // Add only visible symbols to the board
-        this.fadeHistory.forEach(symbol => {
-            const symbolHistory = this.fadeHistory.filter(s => s.symbol === symbol.symbol);
-            const symbolInHistory = symbolHistory.find(s => s.row === symbol.row && s.col === symbol.col);
-            
-            if (symbolInHistory) {
-                const symbolAge = symbolHistory.length - symbolHistory.indexOf(symbolInHistory) - 1;
-                // If symbol age is less than persistence, it's still visible
-                if (symbolAge < this.persistence) {
-                    this.board[symbol.row][symbol.col] = symbol.symbol;
-                }
+        // Remove oldest symbols from board for each player if they exceed persistence limit
+        Object.keys(playerHistory).forEach(player => {
+            while (playerHistory[player].length > this.persistence) {
+                const oldestSymbol = playerHistory[player].shift();
+                this.board[oldestSymbol.row][oldestSymbol.col] = '';
+                console.log('Removed symbol from board:', oldestSymbol.symbol, 'at', oldestSymbol.row, oldestSymbol.col);
             }
         });
+        
+        // Update symbol counts based on current board state
+        this.updateSymbolCounts();
+        
+        console.log('After persistence management - O symbols:', playerHistory.O.length, 'X symbols:', playerHistory.X.length);
     }
 
     updateSymbolCounts() {
         // Reset counts
         this.symbolCounts = { O: 0, X: 0 };
         
-        // Count only visible symbols
+        // Count symbols on the board
         for (let row = 0; row < this.boardSize; row++) {
             for (let col = 0; col < this.boardSize; col++) {
                 const symbol = this.board[row][col];
@@ -664,51 +623,18 @@ class UIManager {
             const row = parseInt(cell.getAttribute('data-row'));
             const col = parseInt(cell.getAttribute('data-col'));
             
-            // Find this symbol in the fade history
-            const symbolIndex = this.gameLogic.fadeHistory.findIndex(s => s.row === row && s.col === col && s.symbol === symbol);
+            // Calculate age based on symbol history for this player
+            const symbolHistory = this.gameLogic.symbolHistory.filter(s => s.symbol === symbol);
+            const symbolInHistory = symbolHistory.find(s => s.row === row && s.col === col);
             
-            if (symbolIndex !== -1) {
-                // Calculate age based on how many symbols of the same type came after this one
-                const symbolHistory = this.gameLogic.fadeHistory.filter(s => s.symbol === symbol);
-                const symbolInHistory = symbolHistory.find(s => s.row === row && s.col === col);
+            if (symbolInHistory) {
+                const symbolAge = symbolHistory.length - symbolHistory.indexOf(symbolInHistory) - 1;
+                const fadeClass = Math.min(symbolAge, 10);
                 
-                // Only apply fading if we found this symbol in the history
-                if (symbolInHistory) {
-                    const symbolAge = symbolHistory.length - symbolHistory.indexOf(symbolInHistory) - 1;
+                cell.classList.add(`fade-${fadeClass}`);
+                cell.classList.add(`cell-bg-${fadeClass}`);
                 
-                    const fadeClass = Math.min(symbolAge, 10);
-                    cell.classList.add(`fade-${fadeClass}`);
-                    cell.classList.add(`cell-bg-${fadeClass}`);
-                    
-                    // Force a style update by accessing computed styles
-                    const computedOpacity = window.getComputedStyle(cell).opacity;
-                    const computedBackground = window.getComputedStyle(cell).backgroundColor;
-                    
-                    console.log(`Applied fade-${fadeClass} and cell-bg-${fadeClass} to ${symbol} at (${row},${col}), age: ${symbolAge} (total ${symbolHistory.length} ${symbol}s)`);
-                    console.log(`Full fadeHistory:`, this.gameLogic.fadeHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
-                    console.log(`Symbol history for ${symbol}:`, symbolHistory.map(s => `${s.symbol}@(${s.row},${s.col})`));
-                    console.log(`Cell classes after applying fade:`, cell.className);
-                    console.log(`Cell computed styles:`, {
-                        opacity: computedOpacity,
-                        backgroundColor: computedBackground
-                    });
-                    
-                    // Force a repaint
-                    cell.offsetHeight;
-                    
-                    // Test: Apply a very obvious style to verify CSS is working
-                    if (fadeClass > 5) {
-                        cell.style.border = '3px solid red';
-                        console.log(`Applied red border to test CSS application`);
-                    }
-                    
-                    // Direct test: Apply inline styles to see if they work
-                    if (fadeClass > 3) {
-                        cell.style.opacity = '0.3';
-                        cell.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
-                        console.log(`Applied inline styles: opacity=0.3, background=red`);
-                    }
-                }
+                console.log(`Applied fade-${fadeClass} and cell-bg-${fadeClass} to ${symbol} at (${row},${col}), age: ${symbolAge} (total ${symbolHistory.length} ${symbol}s)`);
             }
         }
     }
