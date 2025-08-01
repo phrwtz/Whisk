@@ -877,6 +877,14 @@ class MultiplayerManager {
                 }
             });
 
+            this.peer.on('disconnected', () => {
+                console.log('Host peer disconnected:', new Date().toISOString());
+            });
+
+            this.peer.on('close', () => {
+                console.log('Host peer closed:', new Date().toISOString());
+            });
+
         } catch (error) {
             console.error('Failed to create host game:', error);
         }
