@@ -322,54 +322,72 @@ class UIManager {
                     debug: 0,
                     config: {
                         'iceServers': [
-                            { urls: 'stun:stun.l.google.com:19302' }
+                            { urls: 'stun:stun.l.google.com:19302' },
+                            { urls: 'stun:stun1.l.google.com:19302' },
+                            { urls: 'stun:stun2.l.google.com:19302' }
                         ]
                     }
                 });
 
+                let timeoutId;
+                let resolved = false;
+
+                const cleanup = () => {
+                    if (!resolved) {
+                        resolved = true;
+                        clearTimeout(timeoutId);
+                        if (testPeer) {
+                            testPeer.destroy();
+                        }
+                    }
+                };
+
                 testPeer.on('open', () => {
                     console.log('Test peer opened, attempting connection to whisk-game...');
-                    const testConnection = testPeer.connect('whisk-game');
-                    
-                    let timeoutId;
-                    
-                    testConnection.on('open', () => {
-                        // Connection successful - game is available
-                        console.log('Connection successful - game is available');
-                        clearTimeout(timeoutId); // Clear the timeout
-                        testConnection.close();
-                        testPeer.destroy();
-                        resolve(true);
-                    });
-                    
-                    testConnection.on('error', (error) => {
-                        // Connection failed - no game available
-                        console.log('Connection failed - no game available:', error);
-                        clearTimeout(timeoutId); // Clear the timeout
-                        testPeer.destroy();
+                    try {
+                        const testConnection = testPeer.connect('whisk-game');
+                        
+                        testConnection.on('open', () => {
+                            // Connection successful - game is available
+                            console.log('Connection successful - game is available');
+                            cleanup();
+                            testConnection.close();
+                            resolve(true);
+                        });
+                        
+                        testConnection.on('error', (error) => {
+                            // Connection failed - no game available
+                            console.log('Connection failed - no game available:', error);
+                            cleanup();
+                            resolve(false);
+                        });
+                        
+                        testConnection.on('close', () => {
+                            // Connection closed - this is expected after successful connection
+                            console.log('Test connection closed');
+                            cleanup();
+                            resolve(true);
+                        });
+                        
+                    } catch (connectionError) {
+                        console.log('Error creating test connection:', connectionError);
+                        cleanup();
                         resolve(false);
-                    });
-                    
-                    testConnection.on('close', () => {
-                        // Connection closed - this is expected after successful connection
-                        console.log('Test connection closed');
-                        clearTimeout(timeoutId); // Clear the timeout
-                        testPeer.destroy();
-                        resolve(true);
-                    });
-                    
-                    // Timeout after 3 seconds (reduced from 5)
-                    timeoutId = setTimeout(() => {
-                        console.log('Connection timeout - no game available');
-                        testPeer.destroy();
-                        resolve(false);
-                    }, 3000);
+                    }
                 });
 
                 testPeer.on('error', (error) => {
                     console.log('Test peer error:', error);
+                    cleanup();
                     resolve(false);
                 });
+
+                // Timeout after 5 seconds
+                timeoutId = setTimeout(() => {
+                    console.log('Connection timeout - no game available');
+                    cleanup();
+                    resolve(false);
+                }, 5000);
 
             } catch (error) {
                 console.log('Error checking game availability:', error);
