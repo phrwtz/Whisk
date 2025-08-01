@@ -185,12 +185,16 @@ class GameLogic {
         // Check diagonal: up-right and down-left
         const diagonal1 = this.checkDiagonalDirection(row, col, player, -1, 1, 1, -1);
         totalPoints += diagonal1.points;
-        totalCells.push(...diagonal1.cells);
+        if (diagonal1.points > 0) {
+            totalCells.push(...diagonal1.cells);
+        }
         
         // Check diagonal: up-left and down-right
         const diagonal2 = this.checkDiagonalDirection(row, col, player, -1, -1, 1, 1);
         totalPoints += diagonal2.points;
-        totalCells.push(...diagonal2.cells);
+        if (diagonal2.points > 0) {
+            totalCells.push(...diagonal2.cells);
+        }
         
         return { points: totalPoints, cells: totalCells };
     }
