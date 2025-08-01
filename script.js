@@ -680,16 +680,16 @@ class UIManager {
             
             cell.textContent = symbol;
             
+            // Clear all existing styles first
+            cell.classList.remove('fade-0', 'fade-1', 'fade-2', 'fade-3', 'fade-4', 'fade-5', 'fade-6', 'fade-7', 'fade-8', 'fade-9', 'fade-10', 'text-red-600', 'text-blue-600');
+            cell.classList.remove('cell-bg-0', 'cell-bg-1', 'cell-bg-2', 'cell-bg-3', 'cell-bg-4', 'cell-bg-5', 'cell-bg-6', 'cell-bg-7', 'cell-bg-8', 'cell-bg-9', 'cell-bg-10');
+            cell.style.color = '';
+            cell.style.backgroundColor = '';
+            cell.style.border = '';
+            
             // Only call updateCellStyle for cells that actually have symbols
             if (symbol && symbol !== '') {
                 this.updateCellStyle(cell, symbol);
-            } else {
-                // Clear any existing styles for empty cells
-                cell.classList.remove('fade-0', 'fade-1', 'fade-2', 'fade-3', 'fade-4', 'fade-5', 'fade-6', 'fade-7', 'fade-8', 'fade-9', 'fade-10', 'text-red-600', 'text-blue-600');
-                cell.classList.remove('cell-bg-0', 'cell-bg-1', 'cell-bg-2', 'cell-bg-3', 'cell-bg-4', 'cell-bg-5', 'cell-bg-6', 'cell-bg-7', 'cell-bg-8', 'cell-bg-9', 'cell-bg-10');
-                cell.style.color = '';
-                cell.style.backgroundColor = '';
-                cell.style.border = '';
             }
             
             // Apply scoring highlight if this cell is in the current scoring cells
@@ -788,9 +788,10 @@ class UIManager {
         if (!gameStatus) return;
 
         const nextPlayer = player === 'O' ? 'X' : 'O';
-        const message = points === 1 ?
-            `${player} scores 1 point! Current player: ${nextPlayer}` :
-            `${player} scores ${points} points! Current player: ${nextPlayer}`;
+        const cumulativeScore = this.gameLogic.scores[player];
+        const message = cumulativeScore === 1 ?
+            `${player} total score: 1 point! Current player: ${nextPlayer}` :
+            `${player} total score: ${cumulativeScore} points! Current player: ${nextPlayer}`;
         const color = nextPlayer === 'O' ? '#3182ce' : '#e53e3e';
 
         gameStatus.textContent = message;
@@ -1123,12 +1124,13 @@ class MultiplayerManager {
         if (!gameStatus) return;
 
         let message, color;
+        const cumulativeScore = this.gameLogic.scores[player];
         
         if (player === this.myPlayerSymbol) {
-            message = `You scored ${points} point${points !== 1 ? 's' : ''}! It is your opponent's turn.`;
+            message = `Your total score: ${cumulativeScore} point${cumulativeScore !== 1 ? 's' : ''}! It is your opponent's turn.`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         } else {
-            message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}! It is your turn.`;
+            message = `Your opponent's total score: ${cumulativeScore} point${cumulativeScore !== 1 ? 's' : ''}! It is your turn.`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         }
 
