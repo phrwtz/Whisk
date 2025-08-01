@@ -1,4 +1,4 @@
-console.log("Whisk: script.js loaded and running (latest version)");
+console.log("Whisk: script.js loaded and running (latest version) -", new Date().toISOString());
 // Core Game Logic - Pure game state and rules
 class GameLogic {
     constructor(boardSize = 8, persistence = 5) {
@@ -327,7 +327,7 @@ class UIManager {
     async checkIfGameAvailable() {
         return new Promise((resolve) => {
             try {
-                console.log('Checking if game is available...');
+                console.log('Checking if game is available...', new Date().toISOString());
                 
                 // Try to connect to the fixed game ID to see if a game is hosted
                 const testPeer = new Peer({
@@ -759,7 +759,7 @@ class MultiplayerManager {
 
     async hostGame() {
         try {
-            console.log('Creating host game with ID: whisk-game');
+            console.log('Creating host game with ID: whisk-game', new Date().toISOString());
             
             // Show the host interface first
             this.uiManager.showHostInterface();
