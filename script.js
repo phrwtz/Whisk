@@ -802,11 +802,10 @@ class MultiplayerManager {
         });
 
         // Also handle page visibility change (tab switching)
-        // Only cleanup if we're not hosting a game
+        // Disabled for now to prevent connection cleanup during game
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden && (this.connected || this.peer) && !this.isHost) {
-                console.log('Page hidden - cleaning up connections (not hosting)');
-                this.cleanupConnections();
+            if (document.hidden && (this.connected || this.peer)) {
+                console.log('Page hidden - but keeping connection active (disabled cleanup)');
             }
         });
     }
