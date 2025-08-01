@@ -16,12 +16,16 @@ class GameLogic {
         this.symbolHistory = [];
         this.symbolCounts = { O: 0, X: 0 };
         this.scores = { O: 0, X: 0 };
+        this.currentScoringCells = []; // Track cells involved in current scoring
     }
 
     makeMove(row, col, player) {
         if (!this.gameActive || this.board[row][col] !== '') {
             return { success: false, message: 'Invalid move' };
         }
+
+        // Reset score for the active player to zero
+        this.scores[player] = 0;
 
         // Add the move to the board
         this.board[row][col] = player;
@@ -43,6 +47,9 @@ class GameLogic {
             this.scores[player] += scoringResult.totalPoints;
         }
 
+        // Store the scoring cells for highlighting
+        this.currentScoringCells = scoringResult.scoringCells;
+
         // Switch players
         this.currentPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
 
@@ -60,46 +67,47 @@ class GameLogic {
         let totalPoints = 0;
         let scoringCells = [];
 
-        // Check horizontal lines
-        const horizontalResult = this.checkLineForScoring(row, 0, 0, 1, player);
-        totalPoints += horizontalResult.points;
-        scoringCells.push(...horizontalResult.cells);
-
-        // Check vertical lines
-        const verticalResult = this.checkLineForScoring(0, col, 1, 0, player);
+        // Check vertical line (up and down from placed symbol)
+        const verticalResult = this.checkVerticalLine(row, col, player);
         totalPoints += verticalResult.points;
         scoringCells.push(...verticalResult.cells);
 
-        // Check diagonals
-        const diagonalResults = this.checkDiagonalThroughCell(row, col, player);
+        // Check horizontal line (left and right from placed symbol)
+        const horizontalResult = this.checkHorizontalLine(row, col, player);
+        totalPoints += horizontalResult.points;
+        scoringCells.push(...horizontalResult.cells);
+
+        // Check diagonal lines (up-right and down-left, up-left and down-right)
+        const diagonalResults = this.checkDiagonalLines(row, col, player);
         totalPoints += diagonalResults.points;
         scoringCells.push(...diagonalResults.cells);
 
         return { totalPoints, scoringCells };
     }
 
-    checkLineForScoring(startRow, startCol, deltaRow, deltaCol, player) {
-        let points = 0;
+    checkVerticalLine(row, col, player) {
         let cells = [];
-
-        // Check for lines of 3 or more using the board directly
-        for (let i = 0; i < this.boardSize; i++) {
-            const row = startRow + i * deltaRow;
-            const col = startCol + i * deltaCol;
-            
-            if (row < 0 || row >= this.boardSize || col < 0 || col >= this.boardSize) {
+        
+        // Count upward from placed symbol
+        for (let r = row; r >= 0; r--) {
+            if (this.board[r][col] === player) {
+                cells.push({ row: r, col: col });
+            } else {
                 break;
             }
-            
-            // Check if this position has the player's symbol
-            if (this.board[row][col] !== player) {
-                break;
-            }
-            
-            cells.push({ row, col });
         }
-
-        // Calculate points based on line length
+        
+        // Count downward from placed symbol (excluding the placed symbol itself)
+        for (let r = row + 1; r < this.boardSize; r++) {
+            if (this.board[r][col] === player) {
+                cells.push({ row: r, col: col });
+            } else {
+                break;
+            }
+        }
+        
+        // Calculate points based on total line length
+        let points = 0;
         if (cells.length === 3) {
             points = 1;
         } else if (cells.length === 4) {
@@ -107,42 +115,93 @@ class GameLogic {
         } else if (cells.length >= 5) {
             points = 5;
         }
-
+        
         return { points, cells };
     }
 
-    checkDiagonalThroughCell(row, col, player) {
+    checkHorizontalLine(row, col, player) {
+        let cells = [];
+        
+        // Count leftward from placed symbol
+        for (let c = col; c >= 0; c--) {
+            if (this.board[row][c] === player) {
+                cells.push({ row: row, col: c });
+            } else {
+                break;
+            }
+        }
+        
+        // Count rightward from placed symbol (excluding the placed symbol itself)
+        for (let c = col + 1; c < this.boardSize; c++) {
+            if (this.board[row][c] === player) {
+                cells.push({ row: row, col: c });
+            } else {
+                break;
+            }
+        }
+        
+        // Calculate points based on total line length
+        let points = 0;
+        if (cells.length === 3) {
+            points = 1;
+        } else if (cells.length === 4) {
+            points = 3;
+        } else if (cells.length >= 5) {
+            points = 5;
+        }
+        
+        return { points, cells };
+    }
+
+    checkDiagonalLines(row, col, player) {
         let totalPoints = 0;
         let totalCells = [];
-
-        // Check all possible diagonal directions
-        const directions = [
-            { deltaRow: -1, deltaCol: -1 }, // Top-left to bottom-right
-            { deltaRow: -1, deltaCol: 1 },  // Top-right to bottom-left
-            { deltaRow: 1, deltaCol: -1 },  // Bottom-left to top-right
-            { deltaRow: 1, deltaCol: 1 }    // Bottom-right to top-left
-        ];
-
-        directions.forEach(({ deltaRow, deltaCol }) => {
-            // Find the start of the diagonal line
-            let startRow = row;
-            let startCol = col;
-            
-            // Go backwards to find the start
-            while (startRow - deltaRow >= 0 && startRow - deltaRow < this.boardSize &&
-                   startCol - deltaCol >= 0 && startCol - deltaCol < this.boardSize &&
-                   this.board[startRow - deltaRow][startCol - deltaCol] === player) {
-                startRow -= deltaRow;
-                startCol -= deltaCol;
-            }
-
-            // Check the line from start
-            const result = this.checkLineForScoring(startRow, startCol, deltaRow, deltaCol, player);
-            totalPoints += result.points;
-            totalCells.push(...result.cells);
-        });
-
+        
+        // Check diagonal: up-right and down-left
+        const diagonal1 = this.checkDiagonalDirection(row, col, player, -1, 1, 1, -1);
+        totalPoints += diagonal1.points;
+        totalCells.push(...diagonal1.cells);
+        
+        // Check diagonal: up-left and down-right
+        const diagonal2 = this.checkDiagonalDirection(row, col, player, -1, -1, 1, 1);
+        totalPoints += diagonal2.points;
+        totalCells.push(...diagonal2.cells);
+        
         return { points: totalPoints, cells: totalCells };
+    }
+
+    checkDiagonalDirection(row, col, player, upRowDelta, upColDelta, downRowDelta, downColDelta) {
+        let cells = [];
+        
+        // Count in the up direction
+        for (let r = row, c = col; r >= 0 && c >= 0 && r < this.boardSize && c < this.boardSize; r += upRowDelta, c += upColDelta) {
+            if (this.board[r][c] === player) {
+                cells.push({ row: r, col: c });
+            } else {
+                break;
+            }
+        }
+        
+        // Count in the down direction (excluding the placed symbol itself)
+        for (let r = row + downRowDelta, c = col + downColDelta; r >= 0 && c >= 0 && r < this.boardSize && c < this.boardSize; r += downRowDelta, c += downColDelta) {
+            if (this.board[r][c] === player) {
+                cells.push({ row: r, col: c });
+            } else {
+                break;
+            }
+        }
+        
+        // Calculate points based on total line length
+        let points = 0;
+        if (cells.length === 3) {
+            points = 1;
+        } else if (cells.length === 4) {
+            points = 3;
+        } else if (cells.length >= 5) {
+            points = 5;
+        }
+        
+        return { points, cells };
     }
 
     managePersistence() {
@@ -197,6 +256,7 @@ class GameLogic {
             scores: this.scores,
             symbolHistory: this.symbolHistory,
             symbolCounts: this.symbolCounts,
+            currentScoringCells: this.currentScoringCells,
             gameActive: this.gameActive
         };
     }
@@ -207,6 +267,7 @@ class GameLogic {
         this.scores = state.scores;
         this.symbolHistory = state.symbolHistory;
         this.symbolCounts = state.symbolCounts;
+        this.currentScoringCells = state.currentScoringCells || [];
         this.gameActive = state.gameActive;
     }
 }
@@ -598,7 +659,21 @@ class UIManager {
                 cell.style.backgroundColor = '';
                 cell.style.border = '';
             }
+            
+            // Apply scoring highlight if this cell is in the current scoring cells
+            this.applyScoringHighlight(cell, row, col);
         });
+    }
+
+    applyScoringHighlight(cell, row, col) {
+        // Clear any existing scoring highlight
+        cell.classList.remove('scoring-highlight');
+        
+        // Check if this cell is in the current scoring cells
+        const isScoringCell = this.gameLogic.currentScoringCells.some(sc => sc.row === row && sc.col === col);
+        if (isScoringCell) {
+            cell.classList.add('scoring-highlight');
+        }
     }
 
     updateCellStyle(cell, symbol) {
@@ -1074,6 +1149,10 @@ class MultiplayerManager {
 
     handleOpponentMove(row, col, gameState) {
         this.gameLogic.setGameState(gameState);
+        
+        // Clear scoring highlighting when opponent makes a move
+        this.gameLogic.currentScoringCells = [];
+        
         this.uiManager.updateBoard();
         this.uiManager.updateScoreDisplay();
         
