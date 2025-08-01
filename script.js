@@ -754,6 +754,8 @@ class UIManager {
         const scoreXLabel = document.getElementById('scoreXLabel');
         if (scoreOLabel) scoreOLabel.textContent = `${playerOName}:`;
         if (scoreXLabel) scoreXLabel.textContent = `${playerXName}:`;
+        
+        console.log('updateScoreDisplay - playerOName:', playerOName, 'playerXName:', playerXName);
 
         // Update the score values
         const scoreElements = {
@@ -781,6 +783,7 @@ class UIManager {
             displayName = this.multiplayerManager.myPlayerName;
         }
 
+        console.log('updateUserNameDisplay called - displayName:', displayName, 'myPlayerName:', this.multiplayerManager?.myPlayerName);
         userNameElement.textContent = displayName;
     }
 
@@ -1245,6 +1248,7 @@ class MultiplayerManager {
             case 'playerName':
                 this.opponentPlayerName = data.playerName;
                 console.log('Received opponent name:', data.playerName);
+                console.log('Current myPlayerName:', this.myPlayerName, 'opponentPlayerName:', this.opponentPlayerName);
                 // Update the UI with the new player names
                 this.uiManager.updateScoreDisplay();
                 break;
@@ -1306,6 +1310,7 @@ class MultiplayerManager {
         }
         
         this.myPlayerName = hostName;
+        console.log('Host name set to:', this.myPlayerName);
         
         // Hide the name input and show the waiting message
         document.getElementById('hostNameInput').style.display = 'none';
@@ -1325,6 +1330,7 @@ class MultiplayerManager {
         }
         
         this.myPlayerName = joinName;
+        console.log('Join name set to:', this.myPlayerName);
         
         // Hide the name input and show connecting message
         document.getElementById('joinNameInput').style.display = 'none';
