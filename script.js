@@ -437,17 +437,18 @@ class UIManager {
         if (!gameBoard) return;
 
         gameBoard.innerHTML = '';
-        gameBoard.className = 'grid gap-1 bg-yellow-100 p-2 rounded-2xl shadow-2xl w-full';
+        gameBoard.className = 'grid bg-yellow-100 p-4 rounded-2xl shadow-2xl w-full border-4 border-black';
         gameBoard.style.gridTemplateColumns = `repeat(${this.boardSize}, 1fr)`;
         gameBoard.style.gridTemplateRows = `repeat(${this.boardSize}, 1fr)`;
         gameBoard.style.aspectRatio = '1 / 1';
         gameBoard.style.maxHeight = '80vh';
+        gameBoard.style.gap = '0px';
 
         for (let row = 0; row < this.boardSize; row++) {
             for (let col = 0; col < this.boardSize; col++) {
                 const cell = document.createElement('button');
                 
-                cell.className = `border-2 border-black font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
+                cell.className = `grid-cell font-bold cursor-pointer transition-all duration-300 flex items-center justify-center text-gray-700 hover:bg-gray-50 hover:scale-105 min-w-[30px] min-h-[30px] text-4xl`;
                 cell.setAttribute('data-row', row);
                 cell.setAttribute('data-col', col);
                 

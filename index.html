@@ -58,6 +58,20 @@
         .cell-6x6 { width: 50px; height: 50px; font-size: 1.3rem; }
         .cell-7x7 { width: 45px; height: 45px; font-size: 1.1rem; }
         .cell-8x8 { width: 40px; height: 40px; font-size: 1rem; }
+        
+        /* Grid lines for tic-tac-toe board */
+        .grid-cell {
+            border-right: 2px solid black;
+            border-bottom: 2px solid black;
+        }
+        
+        .grid-cell:last-child {
+            border-right: none;
+        }
+        
+        .grid-row:last-child .grid-cell {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-br from-green-400 to-blue-500 min-h-screen flex items-center justify-center p-4">
@@ -181,6 +195,6 @@
         </div>
     </div>
 
-            <script src="script.js?v=1753989574"></script>
+            <script src="script.js?v=1753989575"></script>
 </body>
 </html> 
