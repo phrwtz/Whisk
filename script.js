@@ -797,7 +797,8 @@ class MultiplayerManager {
                 this.myPlayerSymbol = 'O';
                 this.opponentPlayerSymbol = 'X';
                 
-                console.log('Host peer opened with ID:', id);
+                console.log('Host peer opened with ID:', id, new Date().toISOString());
+                console.log('Host is now ready for connections');
                 
                 // Update the connection status message
                 const connectionStatus = document.getElementById('connectionStatus');
@@ -808,7 +809,12 @@ class MultiplayerManager {
                 console.log('Host game created and ready for connections');
             });
 
+            this.peer.on('error', (error) => {
+                console.error('Host peer error:', error, new Date().toISOString());
+            });
+
             this.peer.on('connection', (conn) => {
+                console.log('Host received connection from player:', new Date().toISOString());
                 this.connection = conn;
                 this.setupHostConnection();
                 
