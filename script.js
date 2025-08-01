@@ -411,7 +411,7 @@ class UIManager {
                 if (joinGameBtn) joinGameBtn.style.display = 'block';
                 if (playLocalBtn) playLocalBtn.style.display = 'none';
                 
-                // Set up the join button event listener
+                // Set up the join button event listener to show join interface
                 if (joinGameBtn && this.multiplayerManager) {
                     console.log('Setting up join button event listener in main menu');
                     // Remove any existing listeners by cloning
@@ -420,8 +420,8 @@ class UIManager {
                     
                     // Add the event listener to the new button
                     newButton.addEventListener('click', () => {
-                        console.log('Join Game button clicked - calling joinGame()');
-                        this.multiplayerManager.joinGame();
+                        console.log('Join Game button clicked - showing join interface');
+                        this.showJoinInterface();
                     });
                 }
             } else {
