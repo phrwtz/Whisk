@@ -663,8 +663,10 @@ class UIManager {
                 this.updateCellStyle(cell, symbol);
             }
             
-            // Apply scoring highlight if this cell is in the current scoring cells
-            this.applyScoringHighlight(cell, row, col);
+            // Only apply scoring highlight if there are scoring cells and this cell is one of them
+            if (this.gameLogic.currentScoringCells && this.gameLogic.currentScoringCells.length > 0) {
+                this.applyScoringHighlight(cell, row, col);
+            }
         });
     }
 
@@ -672,16 +674,11 @@ class UIManager {
         // Clear any existing scoring highlight
         cell.classList.remove('scoring-highlight');
         
-        // Only apply highlighting if there are scoring cells and this cell is one of them
-        if (this.gameLogic.currentScoringCells && this.gameLogic.currentScoringCells.length > 0) {
-            console.log(`Current scoring cells:`, this.gameLogic.currentScoringCells);
-            const isScoringCell = this.gameLogic.currentScoringCells.some(sc => sc.row === row && sc.col === col);
-            if (isScoringCell) {
-                cell.classList.add('scoring-highlight');
-                console.log(`Applied scoring highlight to cell (${row},${col})`);
-            }
-        } else {
-            console.log(`No scoring cells to highlight for cell (${row},${col})`);
+        // Check if this cell is in the current scoring cells
+        const isScoringCell = this.gameLogic.currentScoringCells.some(sc => sc.row === row && sc.col === col);
+        if (isScoringCell) {
+            cell.classList.add('scoring-highlight');
+            console.log(`Applied scoring highlight to cell (${row},${col})`);
         }
     }
 
