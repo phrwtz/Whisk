@@ -289,31 +289,35 @@ class UIManager {
         // Check if we're already hosting a game
         const isAlreadyHosting = this.multiplayerManager && this.multiplayerManager.isHost;
         
-        let isGameAvailable = false;
-        if (!isAlreadyHosting) {
-            // Only check for available games if we're not already hosting
-            isGameAvailable = await this.checkIfGameAvailable();
-            console.log('showMainMenu - isGameAvailable:', isGameAvailable);
-        } else {
-            console.log('showMainMenu - already hosting, skipping availability check');
-        }
-        
         const hostGameBtn = document.getElementById('hostGameBtn');
         const joinGameBtn = document.getElementById('joinGameBtn');
         const playLocalBtn = document.getElementById('playLocalBtn');
         
-        if (isGameAvailable) {
-            // Second player scenario - show only join button
-            console.log('Showing join interface (second player)');
-            if (hostGameBtn) hostGameBtn.style.display = 'none';
-            if (joinGameBtn) joinGameBtn.style.display = 'block';
-            if (playLocalBtn) playLocalBtn.style.display = 'none';
-        } else {
-            // First player scenario - show host and local buttons
-            console.log('Showing host interface (first player)');
+        if (isAlreadyHosting) {
+            // If we're already hosting, show host and local buttons immediately
+            console.log('Already hosting - showing host and local buttons');
             if (hostGameBtn) hostGameBtn.style.display = 'block';
             if (joinGameBtn) joinGameBtn.style.display = 'none';
             if (playLocalBtn) playLocalBtn.style.display = 'block';
+        } else {
+            // If we're not hosting, check for available games
+            console.log('Not hosting - checking for available games...');
+            const isGameAvailable = await this.checkIfGameAvailable();
+            console.log('showMainMenu - isGameAvailable:', isGameAvailable);
+            
+            if (isGameAvailable) {
+                // Second player scenario - show only join button
+                console.log('Showing join interface (second player)');
+                if (hostGameBtn) hostGameBtn.style.display = 'none';
+                if (joinGameBtn) joinGameBtn.style.display = 'block';
+                if (playLocalBtn) playLocalBtn.style.display = 'none';
+            } else {
+                // First player scenario - show host and local buttons
+                console.log('Showing host interface (first player)');
+                if (hostGameBtn) hostGameBtn.style.display = 'block';
+                if (joinGameBtn) joinGameBtn.style.display = 'none';
+                if (playLocalBtn) playLocalBtn.style.display = 'block';
+            }
         }
     }
 
