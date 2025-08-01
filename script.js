@@ -106,13 +106,17 @@ class GameLogic {
             }
         }
         
-        // Calculate points based on total line length
+        // Remove the newly placed symbol from the cells array for highlighting
+        cells = cells.filter(cell => !(cell.row === row && cell.col === col));
+        
+        // Calculate points based on total line length (including the placed symbol)
+        let totalLength = cells.length + 1; // +1 for the placed symbol
         let points = 0;
-        if (cells.length === 3) {
+        if (totalLength === 3) {
             points = 1;
-        } else if (cells.length === 4) {
+        } else if (totalLength === 4) {
             points = 3;
-        } else if (cells.length >= 5) {
+        } else if (totalLength >= 5) {
             points = 5;
         }
         
@@ -140,13 +144,17 @@ class GameLogic {
             }
         }
         
-        // Calculate points based on total line length
+        // Remove the newly placed symbol from the cells array for highlighting
+        cells = cells.filter(cell => !(cell.row === row && cell.col === col));
+        
+        // Calculate points based on total line length (including the placed symbol)
+        let totalLength = cells.length + 1; // +1 for the placed symbol
         let points = 0;
-        if (cells.length === 3) {
+        if (totalLength === 3) {
             points = 1;
-        } else if (cells.length === 4) {
+        } else if (totalLength === 4) {
             points = 3;
-        } else if (cells.length >= 5) {
+        } else if (totalLength >= 5) {
             points = 5;
         }
         
@@ -191,13 +199,17 @@ class GameLogic {
             }
         }
         
-        // Calculate points based on total line length
+        // Remove the newly placed symbol from the cells array for highlighting
+        cells = cells.filter(cell => !(cell.row === row && cell.col === col));
+        
+        // Calculate points based on total line length (including the placed symbol)
+        let totalLength = cells.length + 1; // +1 for the placed symbol
         let points = 0;
-        if (cells.length === 3) {
+        if (totalLength === 3) {
             points = 1;
-        } else if (cells.length === 4) {
+        } else if (totalLength === 4) {
             points = 3;
-        } else if (cells.length >= 5) {
+        } else if (totalLength >= 5) {
             points = 5;
         }
         
@@ -669,10 +681,13 @@ class UIManager {
         // Clear any existing scoring highlight
         cell.classList.remove('scoring-highlight');
         
-        // Check if this cell is in the current scoring cells
-        const isScoringCell = this.gameLogic.currentScoringCells.some(sc => sc.row === row && sc.col === col);
-        if (isScoringCell) {
-            cell.classList.add('scoring-highlight');
+        // Only apply highlighting if there are scoring cells and this cell is one of them
+        if (this.gameLogic.currentScoringCells && this.gameLogic.currentScoringCells.length > 0) {
+            const isScoringCell = this.gameLogic.currentScoringCells.some(sc => sc.row === row && sc.col === col);
+            if (isScoringCell) {
+                cell.classList.add('scoring-highlight');
+                console.log(`Applied scoring highlight to cell (${row},${col})`);
+            }
         }
     }
 
