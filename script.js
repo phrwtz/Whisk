@@ -714,7 +714,7 @@ class MultiplayerManager {
 
             this.peer.on('connection', (conn) => {
                 this.connection = conn;
-                this.setupConnection();
+                this.setupHostConnection();
                 
                 // Update status when someone joins
                 const connectionStatus = document.getElementById('connectionStatus');
@@ -756,6 +756,23 @@ class MultiplayerManager {
         }
     }
 
+    setupHostConnection() {
+        this.connection.on('open', () => {
+            this.connected = true;
+            // Host keeps isHost = true, myPlayerSymbol = 'O'
+            console.log('Host: Connection established with joining player');
+            this.startMultiplayerGame();
+        });
+
+        this.connection.on('data', (data) => {
+            this.handleMultiplayerData(data);
+        });
+
+        this.connection.on('close', () => {
+            this.handleDisconnection();
+        });
+    }
+
     setupConnection() {
         this.connection.on('open', () => {
             this.connected = true;
@@ -763,6 +780,7 @@ class MultiplayerManager {
             this.myPlayerSymbol = 'X';
             this.opponentPlayerSymbol = 'O';
             
+            console.log('Joining player: Connection established with host');
             this.startMultiplayerGame();
         });
 
