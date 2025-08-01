@@ -72,17 +72,23 @@ class GameLogic {
         // Check vertical line (up and down from placed symbol)
         const verticalResult = this.checkVerticalLine(row, col, player);
         totalPoints += verticalResult.points;
-        scoringCells.push(...verticalResult.cells);
+        if (verticalResult.points > 0) {
+            scoringCells.push(...verticalResult.cells);
+        }
 
         // Check horizontal line (left and right from placed symbol)
         const horizontalResult = this.checkHorizontalLine(row, col, player);
         totalPoints += horizontalResult.points;
-        scoringCells.push(...horizontalResult.cells);
+        if (horizontalResult.points > 0) {
+            scoringCells.push(...horizontalResult.cells);
+        }
 
         // Check diagonal lines (up-right and down-left, up-left and down-right)
         const diagonalResults = this.checkDiagonalLines(row, col, player);
         totalPoints += diagonalResults.points;
-        scoringCells.push(...diagonalResults.cells);
+        if (diagonalResults.points > 0) {
+            scoringCells.push(...diagonalResults.cells);
+        }
 
         // Add the newly placed symbol to highlighting if there's scoring
         if (totalPoints > 0) {
