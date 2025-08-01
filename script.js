@@ -1192,9 +1192,7 @@ class MultiplayerManager {
             message = `You scored ${points} point${points !== 1 ? 's' : ''}. It is ${opponentName}'s turn`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         } else {
-            const myName = this.myPlayerName || 'you';
-            message = `${this.opponentPlayerName || 'Your opponent'} scored ${points} point${points !== 1 ? 's' : ''}. It is ${myName}'s turn`;
-            console.log('Scoring message for opponent:', message, 'myName:', myName);
+            message = `${this.opponentPlayerName || 'Your opponent'} scored ${points} point${points !== 1 ? 's' : ''}. Now it's your turn.`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         }
 
