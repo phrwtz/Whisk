@@ -88,11 +88,35 @@ class GameLogic {
         return { totalPoints, scoringCells };
     }
 
+    // Get the current visible board state (symbols that haven't faded completely)
+    getVisibleBoardState() {
+        const visibleBoard = Array(this.boardSize).fill().map(() => Array(this.boardSize).fill(''));
+        
+        // For each symbol in fadeHistory, check if it's still visible
+        this.fadeHistory.forEach(symbol => {
+            const symbolHistory = this.fadeHistory.filter(s => s.symbol === symbol.symbol);
+            const symbolInHistory = symbolHistory.find(s => s.row === symbol.row && s.col === symbol.col);
+            
+            if (symbolInHistory) {
+                const symbolAge = symbolHistory.length - symbolHistory.indexOf(symbolInHistory) - 1;
+                // If symbol age is less than persistence, it's still visible
+                if (symbolAge < this.persistence) {
+                    visibleBoard[symbol.row][symbol.col] = symbol.symbol;
+                }
+            }
+        });
+        
+        return visibleBoard;
+    }
+
     checkLineForScoring(startRow, startCol, deltaRow, deltaCol, player) {
         let points = 0;
         let cells = [];
 
-        // Check for lines of 3 or more using symbolHistory instead of board
+        // Get the current visible board state
+        const visibleBoard = this.getVisibleBoardState();
+
+        // Check for lines of 3 or more using visible board state
         for (let i = 0; i < this.boardSize; i++) {
             const row = startRow + i * deltaRow;
             const col = startCol + i * deltaCol;
@@ -101,12 +125,8 @@ class GameLogic {
                 break;
             }
             
-            // Check if this position has the player's symbol in symbolHistory
-            const hasSymbol = this.symbolHistory.some(symbol => 
-                symbol.row === row && symbol.col === col && symbol.symbol === player
-            );
-            
-            if (!hasSymbol) {
+            // Check if this position has the player's symbol in the visible board
+            if (visibleBoard[row][col] !== player) {
                 break;
             }
             
