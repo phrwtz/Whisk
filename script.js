@@ -122,9 +122,9 @@ class GameLogic {
         if (totalLength === 3) {
             points = 1;
         } else if (totalLength === 4) {
-            points = 3;
+            points = 4;
         } else if (totalLength >= 5) {
-            points = 5;
+            points = 9;
         }
         
         // Only include cells in highlighting if there's actual scoring
@@ -162,9 +162,9 @@ class GameLogic {
         if (totalLength === 3) {
             points = 1;
         } else if (totalLength === 4) {
-            points = 3;
+            points = 4;
         } else if (totalLength >= 5) {
-            points = 5;
+            points = 9;
         }
         
         // Only include cells in highlighting if there's actual scoring
@@ -223,9 +223,9 @@ class GameLogic {
         if (totalLength === 3) {
             points = 1;
         } else if (totalLength === 4) {
-            points = 3;
+            points = 4;
         } else if (totalLength >= 5) {
-            points = 5;
+            points = 9;
         }
         
         // Only include cells in highlighting if there's actual scoring
