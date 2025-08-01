@@ -790,17 +790,19 @@ class MultiplayerManager {
 
     initializePageRefreshHandling() {
         // Handle page refresh/close to clean up connections
+        // Only cleanup if we're not hosting a game
         window.addEventListener('beforeunload', () => {
-            if (this.connected || this.peer) {
-                console.log('Page refresh detected - cleaning up connections');
+            if (this.connected || this.peer && !this.isHost) {
+                console.log('Page refresh detected - cleaning up connections (not hosting)');
                 this.cleanupConnections();
             }
         });
 
         // Also handle page visibility change (tab switching)
+        // Only cleanup if we're not hosting a game
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden && (this.connected || this.peer)) {
-                console.log('Page hidden - cleaning up connections');
+            if (document.hidden && (this.connected || this.peer) && !this.isHost) {
+                console.log('Page hidden - cleaning up connections (not hosting)');
                 this.cleanupConnections();
             }
         });
