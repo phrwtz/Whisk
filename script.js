@@ -735,6 +735,27 @@ class UIManager {
     }
 
     updateScoreDisplay() {
+        // Get player names from multiplayer manager if available
+        let playerOName = 'Player O';
+        let playerXName = 'Player X';
+        
+        if (this.multiplayerManager && this.multiplayerManager.myPlayerName) {
+            if (this.multiplayerManager.myPlayerSymbol === 'O') {
+                playerOName = this.multiplayerManager.myPlayerName;
+                playerXName = this.multiplayerManager.opponentPlayerName || 'Player X';
+            } else {
+                playerXName = this.multiplayerManager.myPlayerName;
+                playerOName = this.multiplayerManager.opponentPlayerName || 'Player O';
+            }
+        }
+
+        // Update the score labels to show player names
+        const scoreOLabel = document.getElementById('scoreOLabel');
+        const scoreXLabel = document.getElementById('scoreXLabel');
+        if (scoreOLabel) scoreOLabel.textContent = `${playerOName}:`;
+        if (scoreXLabel) scoreXLabel.textContent = `${playerXName}:`;
+
+        // Update the score values
         const scoreElements = {
             'scoreO': this.gameLogic.scores.O,
             'scoreX': this.gameLogic.scores.X
@@ -746,13 +767,38 @@ class UIManager {
                 element.textContent = score;
             }
         });
+
+        // Update the user name display
+        this.updateUserNameDisplay();
+    }
+
+    updateUserNameDisplay() {
+        const userNameElement = document.getElementById('userName');
+        if (!userNameElement) return;
+
+        let displayName = 'Player O';
+        if (this.multiplayerManager && this.multiplayerManager.myPlayerName) {
+            displayName = this.multiplayerManager.myPlayerName;
+        }
+
+        userNameElement.textContent = displayName;
     }
 
     updateTurnMessage() {
         const gameStatus = document.getElementById('gameStatus');
         if (!gameStatus) return;
 
-        const message = `Current player: ${this.gameLogic.currentPlayer}`;
+        // Get player names from multiplayer manager if available
+        let currentPlayerName = this.gameLogic.currentPlayer;
+        if (this.multiplayerManager && this.multiplayerManager.myPlayerName) {
+            if (this.gameLogic.currentPlayer === this.multiplayerManager.myPlayerSymbol) {
+                currentPlayerName = this.multiplayerManager.myPlayerName;
+            } else if (this.multiplayerManager.opponentPlayerName) {
+                currentPlayerName = this.multiplayerManager.opponentPlayerName;
+            }
+        }
+
+        const message = `Current player: ${currentPlayerName}`;
         const color = this.gameLogic.currentPlayer === 'O' ? '#3182ce' : '#e53e3e';
         
         gameStatus.textContent = message;
@@ -772,9 +818,24 @@ class UIManager {
         if (!gameStatus) return;
 
         const nextPlayer = player === 'O' ? 'X' : 'O';
+        
+        // Get player names from multiplayer manager if available
+        let playerName = player;
+        let opponentName = 'your opponent';
+        
+        if (this.multiplayerManager && this.multiplayerManager.myPlayerName) {
+            if (player === this.multiplayerManager.myPlayerSymbol) {
+                playerName = this.multiplayerManager.myPlayerName;
+                opponentName = this.multiplayerManager.opponentPlayerName || 'your opponent';
+            } else {
+                playerName = this.multiplayerManager.opponentPlayerName || player;
+                opponentName = this.multiplayerManager.myPlayerName;
+            }
+        }
+
         const message = points === 1 ?
-            `${player} scored 1 point. It is your opponent's turn` :
-            `${player} scored ${points} points. It is your opponent's turn`;
+            `${playerName} scored 1 point. It is ${opponentName}'s turn` :
+            `${playerName} scored ${points} points. It is ${opponentName}'s turn`;
         const color = nextPlayer === 'O' ? '#3182ce' : '#e53e3e';
 
         gameStatus.textContent = message;
@@ -1007,6 +1068,13 @@ class MultiplayerManager {
             this.connected = true;
             // Host keeps isHost = true, myPlayerSymbol = 'O'
             console.log('Host: Connection established with joining player');
+            
+            // Send player name to opponent
+            this.connection.send({
+                type: 'playerName',
+                playerName: this.myPlayerName
+            });
+            
             console.log('Host: Starting multiplayer game...');
             // Add a small delay to ensure connection is stable
             setTimeout(() => {
@@ -1043,6 +1111,13 @@ class MultiplayerManager {
             this.opponentPlayerSymbol = 'O';
             
             console.log('Joining player: Connection established with host');
+            
+            // Send player name to opponent
+            this.connection.send({
+                type: 'playerName',
+                playerName: this.myPlayerName
+            });
+            
             console.log('Joining player: Starting multiplayer game...');
             // Add a small delay to ensure connection is stable
             setTimeout(() => {
@@ -1086,7 +1161,8 @@ class MultiplayerManager {
             message = 'It is your turn';
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         } else {
-            message = "It is your opponent's turn";
+            const opponentName = this.opponentPlayerName || 'your opponent';
+            message = `It is ${opponentName}'s turn`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         }
 
@@ -1109,10 +1185,12 @@ class MultiplayerManager {
         let message, color;
         
         if (player === this.myPlayerSymbol) {
-            message = `You scored ${points} point${points !== 1 ? 's' : ''}. It is your opponent's turn`;
+            const opponentName = this.opponentPlayerName || 'your opponent';
+            message = `You scored ${points} point${points !== 1 ? 's' : ''}. It is ${opponentName}'s turn`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         } else {
-            message = `Your opponent scored ${points} point${points !== 1 ? 's' : ''}. It is your turn`;
+            const myName = this.myPlayerName || 'you';
+            message = `${this.opponentPlayerName || 'Your opponent'} scored ${points} point${points !== 1 ? 's' : ''}. It is ${myName}'s turn`;
             color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
         }
 
@@ -1163,6 +1241,12 @@ class MultiplayerManager {
                 break;
             case 'newGame':
                 this.handleNewGameFromOpponent();
+                break;
+            case 'playerName':
+                this.opponentPlayerName = data.playerName;
+                console.log('Received opponent name:', data.playerName);
+                // Update the UI with the new player names
+                this.uiManager.updateScoreDisplay();
                 break;
         }
     }
