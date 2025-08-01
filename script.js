@@ -24,9 +24,6 @@ class GameLogic {
             return { success: false, message: 'Invalid move' };
         }
 
-        // Reset score for the active player to zero
-        this.scores[player] = 0;
-
         // Add the move to the board
         this.board[row][col] = player;
         
