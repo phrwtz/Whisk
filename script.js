@@ -782,8 +782,13 @@ class UIManager {
     }
 
     handleCellClick(row, col) {
+        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+        const cellTextContent = cell ? cell.textContent : 'cell not found';
+        console.log(`handleCellClick called for cell (${row},${col}), board value: "${this.gameLogic.board[row][col]}", cell textContent: "${cellTextContent}", gameActive: ${this.gameLogic.gameActive}, currentPlayer: ${this.gameLogic.currentPlayer}`);
+        
         if (!this.gameLogic.gameActive || this.gameLogic.board[row][col] !== '' || 
             this.gameLogic.currentPlayer !== this.gameLogic.currentPlayer) { // This line seems to be a bug, should be this.gameLogic.currentPlayer
+            console.log(`handleCellClick returning early - gameActive: ${this.gameLogic.gameActive}, board empty: ${this.gameLogic.board[row][col] === ''}, currentPlayer check: ${this.gameLogic.currentPlayer !== this.gameLogic.currentPlayer}`);
             return;
         }
 
