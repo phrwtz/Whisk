@@ -340,85 +340,132 @@ class UIManager {
 
     async checkIfGameAvailable() {
         return new Promise((resolve) => {
-            try {
-                console.log('Checking if game is available...', new Date().toISOString());
-                
-                // Try to connect to the fixed game ID to see if a game is hosted
-                const testPeer = new Peer({
-                    debug: 0,
-                    config: {
-                        'iceServers': [
-                            { urls: 'stun:stun.l.google.com:19302' },
-                            { urls: 'stun:stun1.l.google.com:19302' },
-                            { urls: 'stun:stun2.l.google.com:19302' }
-                        ]
-                    }
-                });
-
-                let timeoutId;
-                let resolved = false;
-
-                const cleanup = () => {
-                    if (!resolved) {
-                        resolved = true;
-                        clearTimeout(timeoutId);
-                        if (testPeer) {
-                            testPeer.destroy();
+            const maxRetries = 3;
+            let retryCount = 0;
+            
+            const attemptConnection = () => {
+                try {
+                    console.log(`Checking if game is available... (attempt ${retryCount + 1}/${maxRetries})`, new Date().toISOString());
+                    
+                    // Try to connect to the fixed game ID to see if a game is hosted
+                    const testPeer = new Peer({
+                        debug: 0,
+                        config: {
+                            'iceServers': [
+                                { urls: 'stun:stun.l.google.com:19302' },
+                                { urls: 'stun:stun1.l.google.com:19302' },
+                                { urls: 'stun:stun2.l.google.com:19302' }
+                            ]
                         }
-                    }
-                };
+                    });
 
-                testPeer.on('open', () => {
-                    console.log('Test peer opened, attempting connection to whisk-game...');
-                    try {
-                        const testConnection = testPeer.connect('whisk-game');
-                        
-                        testConnection.on('open', () => {
-                            // Connection successful - game is available
-                            console.log('Connection successful - game is available');
+                    let timeoutId;
+                    let resolved = false;
+
+                    const cleanup = () => {
+                        if (!resolved) {
+                            resolved = true;
+                            clearTimeout(timeoutId);
+                            if (testPeer) {
+                                testPeer.destroy();
+                            }
+                        }
+                    };
+
+                    testPeer.on('open', () => {
+                        console.log('Test peer opened, attempting connection to whisk-game...');
+                        try {
+                            const testConnection = testPeer.connect('whisk-game');
+                            
+                            testConnection.on('open', () => {
+                                // Connection successful - game is available
+                                console.log('Connection successful - game is available');
+                                cleanup();
+                                testConnection.close();
+                                resolve(true);
+                            });
+                            
+                            testConnection.on('error', (error) => {
+                                // Connection failed - try again if we have retries left
+                                console.log('Connection failed - no game available:', error);
+                                cleanup();
+                                
+                                if (retryCount < maxRetries - 1) {
+                                    retryCount++;
+                                    console.log(`Retrying connection in 2 seconds... (${retryCount}/${maxRetries})`);
+                                    setTimeout(attemptConnection, 2000);
+                                } else {
+                                    console.log('All retries exhausted - no game available');
+                                    resolve(false);
+                                }
+                            });
+                            
+                            testConnection.on('close', () => {
+                                // Connection closed - this is expected after successful connection
+                                console.log('Test connection closed');
+                                cleanup();
+                                resolve(true);
+                            });
+                            
+                        } catch (connectionError) {
+                            console.log('Error creating test connection:', connectionError);
                             cleanup();
-                            testConnection.close();
-                            resolve(true);
-                        });
-                        
-                        testConnection.on('error', (error) => {
-                            // Connection failed - no game available
-                            console.log('Connection failed - no game available:', error);
-                            cleanup();
-                            resolve(false);
-                        });
-                        
-                        testConnection.on('close', () => {
-                            // Connection closed - this is expected after successful connection
-                            console.log('Test connection closed');
-                            cleanup();
-                            resolve(true);
-                        });
-                        
-                    } catch (connectionError) {
-                        console.log('Error creating test connection:', connectionError);
+                            
+                            if (retryCount < maxRetries - 1) {
+                                retryCount++;
+                                console.log(`Retrying connection in 2 seconds... (${retryCount}/${maxRetries})`);
+                                setTimeout(attemptConnection, 2000);
+                            } else {
+                                console.log('All retries exhausted - no game available');
+                                resolve(false);
+                            }
+                        }
+                    });
+
+                    testPeer.on('error', (error) => {
+                        console.log('Test peer error:', error);
                         cleanup();
+                        
+                        if (retryCount < maxRetries - 1) {
+                            retryCount++;
+                            console.log(`Retrying connection in 2 seconds... (${retryCount}/${maxRetries})`);
+                            setTimeout(attemptConnection, 2000);
+                        } else {
+                            console.log('All retries exhausted - no game available');
+                            resolve(false);
+                        }
+                    });
+
+                    // Timeout after 8 seconds per attempt
+                    timeoutId = setTimeout(() => {
+                        console.log('Connection timeout - no game available');
+                        cleanup();
+                        
+                        if (retryCount < maxRetries - 1) {
+                            retryCount++;
+                            console.log(`Retrying connection in 2 seconds... (${retryCount}/${maxRetries})`);
+                            setTimeout(attemptConnection, 2000);
+                        } else {
+                            console.log('All retries exhausted - no game available');
+                            resolve(false);
+                        }
+                    }, 8000);
+
+                } catch (error) {
+                    console.log('Error checking game availability:', error);
+                    
+                    if (retryCount < maxRetries - 1) {
+                        retryCount++;
+                        console.log(`Retrying connection in 2 seconds... (${retryCount}/${maxRetries})`);
+                        setTimeout(attemptConnection, 2000);
+                    } else {
+                        console.log('All retries exhausted - no game available');
                         resolve(false);
                     }
-                });
-
-                testPeer.on('error', (error) => {
-                    console.log('Test peer error:', error);
-                    cleanup();
-                    resolve(false);
-                });
-
-                // Timeout after 10 seconds (increased for better reliability)
-                timeoutId = setTimeout(() => {
-                    console.log('Connection timeout - no game available');
-                    cleanup();
-                    resolve(false);
-                }, 10000);
-
-            } catch (error) {
-                console.log('Error checking game availability:', error);
-                resolve(false);
-            }
+                }
+            };
+            
+            attemptConnection();
         });
     }
 
