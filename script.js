@@ -433,12 +433,20 @@ class UIManager {
         // Set up the join button event listener
         const joinGameButton = document.getElementById('joinGame');
         if (joinGameButton && this.multiplayerManager) {
-            // Remove any existing listeners to prevent duplicates
-            joinGameButton.replaceWith(joinGameButton.cloneNode(true));
-            const newJoinGameButton = document.getElementById('joinGame');
-            newJoinGameButton.addEventListener('click', () => {
-                console.log('Join Game button clicked');
+            console.log('Setting up join button event listener');
+            // Remove any existing listeners by cloning
+            const newButton = joinGameButton.cloneNode(true);
+            joinGameButton.parentNode.replaceChild(newButton, joinGameButton);
+            
+            // Add the event listener to the new button
+            newButton.addEventListener('click', () => {
+                console.log('Join Game button clicked - calling joinGame()');
                 this.multiplayerManager.joinGame();
+            });
+        } else {
+            console.log('Join button or multiplayerManager not found:', {
+                joinGameButton: !!joinGameButton,
+                multiplayerManager: !!this.multiplayerManager
             });
         }
     }
@@ -760,10 +768,12 @@ class MultiplayerManager {
     }
 
     async joinGame() {
+        console.log('joinGame() method called');
         // For simplicity, we'll use a fixed game ID or try to detect the host
         const gameId = 'whisk-game'; // Simple fixed ID for now
         
         try {
+            console.log('Creating peer for joining game...');
             this.peer = new Peer({
                 debug: 2,
                 config: {
@@ -778,6 +788,7 @@ class MultiplayerManager {
             });
 
             this.peer.on('open', () => {
+                console.log('Joining peer opened, connecting to host...');
                 this.connection = this.peer.connect(gameId);
                 this.setupConnection();
             });
