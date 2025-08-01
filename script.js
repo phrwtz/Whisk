@@ -937,6 +937,7 @@ class MultiplayerManager {
             this.connected = true;
             // Host keeps isHost = true, myPlayerSymbol = 'O'
             console.log('Host: Connection established with joining player');
+            console.log('Host: Starting multiplayer game...');
             this.startMultiplayerGame();
         });
 
@@ -946,6 +947,7 @@ class MultiplayerManager {
 
         this.connection.on('close', () => {
             clearTimeout(connectionTimeout);
+            console.log('Host: Connection closed by peer');
             this.handleDisconnection();
         });
     }
@@ -967,6 +969,7 @@ class MultiplayerManager {
             this.opponentPlayerSymbol = 'O';
             
             console.log('Joining player: Connection established with host');
+            console.log('Joining player: Starting multiplayer game...');
             this.startMultiplayerGame();
         });
 
@@ -976,18 +979,23 @@ class MultiplayerManager {
 
         this.connection.on('close', () => {
             clearTimeout(connectionTimeout);
+            console.log('Joining player: Connection closed by peer');
             this.handleDisconnection();
         });
     }
 
     startMultiplayerGame() {
+        console.log('startMultiplayerGame() called');
         this.gameLogic.reset();
         this.gameLogic.gameActive = true;
+        console.log('Game logic reset and activated');
         this.uiManager.showGameInterface();
+        console.log('Game interface shown');
         this.uiManager.createBoard();
         this.uiManager.updateBoard();
         this.uiManager.updateScoreDisplay();
         this.updateTurnMessage();
+        console.log('Multiplayer game started successfully');
     }
 
     updateTurnMessage() {
