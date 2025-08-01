@@ -61,16 +61,18 @@
         
         /* Grid lines for tic-tac-toe board */
         .grid-cell {
-            border-right: 2px solid black;
-            border-bottom: 2px solid black;
+            border: 1px solid black;
         }
         
-        .grid-cell:last-child {
-            border-right: none;
+        /* Remove double borders by using negative margins */
+        .grid-cell {
+            margin-right: -1px;
+            margin-bottom: -1px;
         }
         
-        .grid-row:last-child .grid-cell {
-            border-bottom: none;
+        /* Ensure the grid container has proper borders */
+        .game-board-grid {
+            border: 2px solid black;
         }
     </style>
 </head>
@@ -195,6 +197,6 @@
         </div>
     </div>
 
-            <script src="script.js?v=1753989575"></script>
+            <script src="script.js?v=1753989576"></script>
 </body>
 </html> 
