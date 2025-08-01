@@ -349,7 +349,10 @@ class UIManager {
                     
                     // Try to connect to the fixed game ID to see if a game is hosted
                     const testPeer = new Peer({
-                        debug: 0,
+                        debug: 3,
+                        host: 'peerjs-server.herokuapp.com',
+                        port: 443,
+                        secure: true,
                         config: {
                             'iceServers': [
                                 { urls: 'stun:stun.l.google.com:19302' },
@@ -826,7 +829,10 @@ class MultiplayerManager {
             this.uiManager.showHostInterface();
             
             this.peer = new Peer('whisk-game', {
-                debug: 2,
+                debug: 3,
+                host: 'peerjs-server.herokuapp.com',
+                port: 443,
+                secure: true,
                 config: {
                     'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
@@ -858,6 +864,11 @@ class MultiplayerManager {
 
             this.peer.on('error', (error) => {
                 console.error('Host peer error:', error, new Date().toISOString());
+                // Try to recreate the peer if there's an error
+                if (this.peer) {
+                    this.peer.destroy();
+                    this.peer = null;
+                }
             });
 
             this.peer.on('connection', (conn) => {
@@ -885,7 +896,10 @@ class MultiplayerManager {
         try {
             console.log('Creating peer for joining game...');
             this.peer = new Peer({
-                debug: 2,
+                debug: 3,
+                host: 'peerjs-server.herokuapp.com',
+                port: 443,
+                secure: true,
                 config: {
                     'iceServers': [
                         { urls: 'stun:stun.l.google.com:19302' },
