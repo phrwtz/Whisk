@@ -72,9 +72,9 @@ class GameLogic {
     }
 
     checkWinningCondition() {
-        if (this.scores.O >= 50) {
+        if (this.scores.O >= 10) {
             return 'O';
-        } else if (this.scores.X >= 50) {
+        } else if (this.scores.X >= 10) {
             return 'X';
         }
         return null;
@@ -1362,7 +1362,9 @@ class MultiplayerManager {
         
         // Check for winning condition first
         const winner = this.gameLogic.checkWinningCondition();
+        console.log('Opponent move - scores:', this.gameLogic.scores, 'winner:', winner);
         if (winner) {
+            this.gameLogic.gameActive = false; // Stop the game
             this.showMultiplayerWinningMessage(winner);
         } else {
             const scoringResult = this.gameLogic.checkScoring(row, col);
@@ -1383,6 +1385,8 @@ class MultiplayerManager {
         
         // Show winning message for the opponent
         this.showMultiplayerWinningMessage(winner);
+        
+        console.log('Game won by opponent:', winner, 'Final scores:', this.gameLogic.scores);
     }
 
     handleNewGameFromOpponent() {
