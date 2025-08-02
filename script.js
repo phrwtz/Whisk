@@ -49,6 +49,18 @@ class GameLogic {
             this.currentScoringCells = [];
         }
 
+        // Check for winning condition (50 points)
+        const winner = this.checkWinningCondition();
+        if (winner) {
+            this.gameActive = false;
+            return {
+                success: true,
+                scoringResult,
+                currentPlayer: this.currentPlayer,
+                winner: winner
+            };
+        }
+
         // Switch players
         this.currentPlayer = this.currentPlayer === 'O' ? 'X' : 'O';
 
@@ -57,6 +69,15 @@ class GameLogic {
             scoringResult,
             currentPlayer: this.currentPlayer
         };
+    }
+
+    checkWinningCondition() {
+        if (this.scores.O >= 50) {
+            return 'O';
+        } else if (this.scores.X >= 50) {
+            return 'X';
+        }
+        return null;
     }
 
     checkScoring(row, col) {
@@ -853,6 +874,37 @@ class UIManager {
         gameStatus.style.visibility = 'visible';
     }
 
+    showWinningMessage(winner) {
+        const gameStatus = document.getElementById('gameStatus');
+        if (!gameStatus) return;
+
+        // Get player names from multiplayer manager if available
+        let winnerName = winner;
+        
+        if (this.multiplayerManager && this.multiplayerManager.myPlayerName) {
+            if (winner === this.multiplayerManager.myPlayerSymbol) {
+                winnerName = this.multiplayerManager.myPlayerName;
+            } else {
+                winnerName = this.multiplayerManager.opponentPlayerName || winner;
+            }
+        }
+
+        const message = `🎉 ${winnerName} wins with ${this.gameLogic.scores[winner]} points! 🎉`;
+        const color = winner === 'O' ? '#3182ce' : '#e53e3e';
+
+        gameStatus.textContent = message;
+        gameStatus.style.color = 'white';
+        gameStatus.style.backgroundColor = color;
+        gameStatus.style.padding = '15px';
+        gameStatus.style.borderRadius = '8px';
+        gameStatus.style.fontSize = '1.4rem';
+        gameStatus.style.fontWeight = 'bold';
+        gameStatus.style.border = `3px solid ${color}`;
+        gameStatus.style.display = 'block';
+        gameStatus.style.visibility = 'visible';
+        gameStatus.style.textAlign = 'center';
+    }
+
     handleCellClick(row, col) {
         const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
         const cellTextContent = cell ? cell.textContent : 'cell not found';
@@ -870,7 +922,10 @@ class UIManager {
             this.updateBoard();
             this.updateScoreDisplay();
             
-            if (result.scoringResult.totalPoints > 0) {
+            // Check for winner first
+            if (result.winner) {
+                this.showWinningMessage(result.winner);
+            } else if (result.scoringResult.totalPoints > 0) {
                 this.showScoringMessage(result.scoringResult.totalPoints, this.gameLogic.currentPlayer === 'O' ? 'X' : 'O');
             } else {
                 this.updateTurnMessage();
@@ -1208,6 +1263,34 @@ class MultiplayerManager {
         gameStatus.style.visibility = 'visible';
     }
 
+    showMultiplayerWinningMessage(winner) {
+        const gameStatus = document.getElementById('gameStatus');
+        if (!gameStatus) return;
+
+        let message, color;
+        
+        if (winner === this.myPlayerSymbol) {
+            message = `🎉 You win with ${this.gameLogic.scores[winner]} points! 🎉`;
+            color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
+        } else {
+            const winnerName = this.opponentPlayerName || 'Your opponent';
+            message = `🎉 ${winnerName} wins with ${this.gameLogic.scores[winner]} points! 🎉`;
+            color = this.myPlayerSymbol === 'O' ? '#3182ce' : '#e53e3e';
+        }
+
+        gameStatus.textContent = message;
+        gameStatus.style.color = 'white';
+        gameStatus.style.backgroundColor = color;
+        gameStatus.style.padding = '15px';
+        gameStatus.style.borderRadius = '8px';
+        gameStatus.style.fontSize = '1.4rem';
+        gameStatus.style.fontWeight = 'bold';
+        gameStatus.style.border = `3px solid ${color}`;
+        gameStatus.style.display = 'block';
+        gameStatus.style.visibility = 'visible';
+        gameStatus.style.textAlign = 'center';
+    }
+
     handleCellClick(row, col) {
         if (!this.gameLogic.gameActive || this.gameLogic.board[row][col] !== '' || 
             this.gameLogic.currentPlayer !== this.myPlayerSymbol) {
@@ -1228,7 +1311,10 @@ class MultiplayerManager {
                 gameState: this.gameLogic.getGameState()
             });
 
-            if (result.scoringResult.totalPoints > 0) {
+            // Check for winner first
+            if (result.winner) {
+                this.showMultiplayerWinningMessage(result.winner);
+            } else if (result.scoringResult.totalPoints > 0) {
                 this.showMultiplayerScoringMessage(result.scoringResult.totalPoints, this.myPlayerSymbol);
             } else {
                 this.updateTurnMessage();
@@ -1263,11 +1349,17 @@ class MultiplayerManager {
         this.uiManager.updateBoard();
         this.uiManager.updateScoreDisplay();
         
-        const scoringResult = this.gameLogic.checkScoring(row, col);
-        if (scoringResult.totalPoints > 0) {
-            this.showMultiplayerScoringMessage(scoringResult.totalPoints, this.opponentPlayerSymbol);
+        // Check for winning condition first
+        const winner = this.gameLogic.checkWinningCondition();
+        if (winner) {
+            this.showMultiplayerWinningMessage(winner);
         } else {
-            this.updateTurnMessage();
+            const scoringResult = this.gameLogic.checkScoring(row, col);
+            if (scoringResult.totalPoints > 0) {
+                this.showMultiplayerScoringMessage(scoringResult.totalPoints, this.opponentPlayerSymbol);
+            } else {
+                this.updateTurnMessage();
+            }
         }
     }
 
