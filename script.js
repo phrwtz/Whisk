@@ -1305,13 +1305,19 @@ class MultiplayerManager {
             
             // Check for winner first
             if (result.winner) {
+                console.log('I won! Sending gameWon message to opponent. Winner:', result.winner, 'Scores:', this.gameLogic.scores);
                 this.showMultiplayerWinningMessage(result.winner);
                 // Send winning message to opponent
-                this.connection.send({
-                    type: 'gameWon',
-                    winner: result.winner,
-                    gameState: this.gameLogic.getGameState()
-                });
+                try {
+                    this.connection.send({
+                        type: 'gameWon',
+                        winner: result.winner,
+                        gameState: this.gameLogic.getGameState()
+                    });
+                    console.log('gameWon message sent successfully');
+                } catch (error) {
+                    console.error('Failed to send gameWon message:', error);
+                }
             } else {
                 // Send move to opponent
                 this.connection.send({
@@ -1331,6 +1337,7 @@ class MultiplayerManager {
     }
 
     handleMultiplayerData(data) {
+        console.log('Received multiplayer data:', data.type, data);
         switch (data.type) {
             case 'move':
                 this.handleOpponentMove(data.row, data.col, data.gameState);
@@ -1377,6 +1384,7 @@ class MultiplayerManager {
     }
 
     handleGameWonByOpponent(winner, gameState) {
+        console.log('Received gameWon message from opponent. Winner:', winner, 'GameState:', gameState);
         this.gameLogic.setGameState(gameState);
         this.gameLogic.gameActive = false; // Stop the game
         
