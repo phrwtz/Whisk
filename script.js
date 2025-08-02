@@ -72,9 +72,9 @@ class GameLogic {
     }
 
     checkWinningCondition() {
-        if (this.scores.O >= 10) {
+        if (this.scores.O >= 50) {
             return 'O';
-        } else if (this.scores.X >= 10) {
+        } else if (this.scores.X >= 50) {
             return 'X';
         }
         return null;
