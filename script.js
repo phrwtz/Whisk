@@ -1303,21 +1303,29 @@ class MultiplayerManager {
             this.uiManager.updateBoard();
             this.uiManager.updateScoreDisplay();
             
-            // Send move to opponent
-            this.connection.send({
-                type: 'move',
-                row: row,
-                col: col,
-                gameState: this.gameLogic.getGameState()
-            });
-
             // Check for winner first
             if (result.winner) {
                 this.showMultiplayerWinningMessage(result.winner);
-            } else if (result.scoringResult.totalPoints > 0) {
-                this.showMultiplayerScoringMessage(result.scoringResult.totalPoints, this.myPlayerSymbol);
+                // Send winning message to opponent
+                this.connection.send({
+                    type: 'gameWon',
+                    winner: result.winner,
+                    gameState: this.gameLogic.getGameState()
+                });
             } else {
-                this.updateTurnMessage();
+                // Send move to opponent
+                this.connection.send({
+                    type: 'move',
+                    row: row,
+                    col: col,
+                    gameState: this.gameLogic.getGameState()
+                });
+
+                if (result.scoringResult.totalPoints > 0) {
+                    this.showMultiplayerScoringMessage(result.scoringResult.totalPoints, this.myPlayerSymbol);
+                } else {
+                    this.updateTurnMessage();
+                }
             }
         }
     }
@@ -1326,6 +1334,9 @@ class MultiplayerManager {
         switch (data.type) {
             case 'move':
                 this.handleOpponentMove(data.row, data.col, data.gameState);
+                break;
+            case 'gameWon':
+                this.handleGameWonByOpponent(data.winner, data.gameState);
                 break;
             case 'newGame':
                 this.handleNewGameFromOpponent();
@@ -1361,6 +1372,17 @@ class MultiplayerManager {
                 this.updateTurnMessage();
             }
         }
+    }
+
+    handleGameWonByOpponent(winner, gameState) {
+        this.gameLogic.setGameState(gameState);
+        this.gameLogic.gameActive = false; // Stop the game
+        
+        this.uiManager.updateBoard();
+        this.uiManager.updateScoreDisplay();
+        
+        // Show winning message for the opponent
+        this.showMultiplayerWinningMessage(winner);
     }
 
     handleNewGameFromOpponent() {
