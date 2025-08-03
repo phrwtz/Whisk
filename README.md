@@ -1,6 +1,13 @@
-# Multiplayer TicTacToe with Persistence Mechanics
+# No First Move - TicTacToe with Persistence Mechanics
 
-A modern, customizable TicTacToe game with **free multiplayer support** using WebRTC peer-to-peer connections. Players can host games, join via game IDs, or play locally - all without any server costs!
+A fork of the original Whisk game with a unique twist: **No first move advantage**. This modern, customizable TicTacToe game features **free multiplayer support** using WebRTC peer-to-peer connections. Players can host games, join via game IDs, or play locally - all without any server costs!
+
+## 🎮 What's Different in This Fork
+
+### "No First Move" Concept
+- **Balanced Gameplay**: Special rules to eliminate first-move advantage
+- **Enhanced Strategy**: Players must think more carefully about their initial moves
+- **Fair Competition**: Both players have equal opportunities regardless of who goes first
 
 ## 🎮 Features
 
